@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+npm-debug.log
+
+# Git
+.git/
+.gitignore
+
+# Build outputs
+.svelte-kit/
+build/
+dist/
+coverage/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.vitest/
+vitest.config.ts
+
+# Documentation (build only)
+docs/
+*.md
+!README.md
+
+# Drizzle migrations (needed for production)
+# Keep drizzle/ for migrations

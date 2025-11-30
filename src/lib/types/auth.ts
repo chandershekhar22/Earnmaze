@@ -1,0 +1,28 @@
+export interface User {
+	id: string;
+	email: string;
+	name?: string;
+	userType: string;
+	status: 'active' | 'suspended' | 'pending';
+	tier?: string;
+	createdAt: Date;
+}
+
+export interface AuthState {
+	user: User | null;
+	isLoading: boolean;
+	error: string | null;
+}
+
+export interface LoginCredentials {
+	email: string;
+	password: string;
+	turnstileToken?: string;
+}
+
+export interface RegisterData {
+	email: string;
+	password: string;
+	name?: string;
+	turnstileToken?: string;
+}
