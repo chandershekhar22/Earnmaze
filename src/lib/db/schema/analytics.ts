@@ -6,7 +6,7 @@ import { pgTable, uuid, varchar, timestamp, jsonb, boolean, integer } from 'driz
 export const pageVisits = pgTable('page_visits', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	sessionId: varchar('session_id', { length: 255 }).notNull(),
-	userId: varchar('user_id', { length: 255 }).notNull(), // Persistent user identifier
+	visitorId: varchar('visitor_id', { length: 255 }).notNull(), // Anonymous visitor identifier
 	fingerprint: varchar('fingerprint', { length: 255 }), // Browser fingerprint hash
 	
 	// Traffic Source Data
@@ -47,7 +47,7 @@ export const emailConversions = pgTable('email_conversions', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	email: varchar('email', { length: 255 }).notNull(),
 	sessionId: varchar('session_id', { length: 255 }).notNull(),
-	userId: varchar('user_id', { length: 255 }).notNull(), // Persistent user identifier
+	visitorId: varchar('visitor_id', { length: 255 }).notNull(), // Anonymous visitor identifier
 	
 	// Link to original visit
 	visitId: uuid('visit_id').references(() => pageVisits.id),
@@ -74,7 +74,7 @@ export const emailConversions = pgTable('email_conversions', {
 export const ctaClicks = pgTable('cta_clicks', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	sessionId: varchar('session_id', { length: 255 }).notNull(),
-	userId: varchar('user_id', { length: 255 }).notNull(), // Persistent user identifier
+	visitorId: varchar('visitor_id', { length: 255 }).notNull(), // Anonymous visitor identifier
 	visitId: uuid('visit_id').references(() => pageVisits.id),
 	
 	buttonLocation: varchar('button_location', { length: 100 }).notNull(), // hero, final-cta, etc

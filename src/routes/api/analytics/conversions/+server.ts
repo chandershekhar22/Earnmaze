@@ -29,12 +29,12 @@ export const GET: RequestHandler = async (event) => {
 			.where(dateFilter.length > 0 ? and(...dateFilter) : undefined);
 		const totalVisits = totalVisitsResult[0]?.count || 0;
 
-		// Unique users
-		const uniqueUsersResult = await db
-			.select({ count: sql<number>`count(DISTINCT ${pageVisits.userId})::int` })
+		// Unique visitors
+		const uniqueVisitorsResult = await db
+			.select({ count: sql<number>`count(DISTINCT ${pageVisits.visitorId})::int` })
 			.from(pageVisits)
 			.where(dateFilter.length > 0 ? and(...dateFilter) : undefined);
-		const uniqueUsers = uniqueUsersResult[0]?.count || 0;
+		const uniqueVisitors = uniqueVisitorsResult[0]?.count || 0;
 
 		// Total conversions
 		const totalConversionsResult = await db
@@ -42,20 +42,20 @@ export const GET: RequestHandler = async (event) => {
 			.from(emailConversions);
 		const totalConversions = totalConversionsResult[0]?.count || 0;
 
-		// Unique converting users
-		const uniqueConvertingUsersResult = await db
-			.select({ count: sql<number>`count(DISTINCT ${emailConversions.userId})::int` })
+		// Unique converting visitors
+		const uniqueConvertingVisitorsResult = await db
+			.select({ count: sql<number>`count(DISTINCT ${emailConversions.visitorId})::int` })
 			.from(emailConversions);
-		const uniqueConvertingUsers = uniqueConvertingUsersResult[0]?.count || 0;
+		const uniqueConvertingVisitors = uniqueConvertingVisitorsResult[0]?.count || 0;
 
 		// Conversion rate
 		const conversionRate = totalVisits > 0 
 			? ((totalConversions / totalVisits) * 100).toFixed(2) 
 			: '0.00';
 
-		// Unique user conversion rate
-		const uniqueConversionRate = uniqueUsers > 0 
-			? ((uniqueConvertingUsers / uniqueUsers) * 100).toFixed(2) 
+		// Unique visitor conversion rate
+		const uniqueConversionRate = uniqueVisitors > 0 
+			? ((uniqueConvertingVisitors / uniqueVisitors) * 100).toFixed(2) 
 			: '0.00';
 
 		// Total CTA clicks
@@ -147,9 +147,9 @@ export const GET: RequestHandler = async (event) => {
 		return json({
 			summary: {
 				totalVisits,
-				uniqueUsers,
+				uniqueVisitors,
 				totalConversions,
-				uniqueConvertingUsers,
+				uniqueConvertingVisitors,
 				conversionRate: parseFloat(conversionRate),
 				uniqueConversionRate: parseFloat(uniqueConversionRate),
 				totalCtaClicks,

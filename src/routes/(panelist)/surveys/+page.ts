@@ -1,5 +1,5 @@
-// src/routes/+page.ts
-import type { Survey } from '$lib/types/survey';
+// src/routes/(panelist)/surveys/+page.ts
+import type { AvailableSurveysResponse, SurveyTransactionsResponse } from '$types/api-responses';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, depends }) => {
@@ -10,14 +10,14 @@ export const load: PageLoad = async ({ fetch, depends }) => {
   if (!surveysRes.ok) {
     throw new Error('Failed to fetch survey data');
   }
-  const availableSurveyData: Survey[] = await surveysRes.json();
+  const availableSurveyData: AvailableSurveysResponse = await surveysRes.json();
 
   // Fetch survey transactions
   const transactionsRes = await fetch('/api/panelist/survey-transactions');
   if (!transactionsRes.ok) {
     throw new Error('Failed to fetch survey transactions');
   }
-  const surveyTransactions = await transactionsRes.json();
+  const surveyTransactions: SurveyTransactionsResponse = await transactionsRes.json();
 
   return {
     availableSurveyData,

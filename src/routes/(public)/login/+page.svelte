@@ -78,126 +78,74 @@
 <div class="w-full max-w-lg space-y-8">
 	<!-- Modern Header Section -->
 	<div class="text-center space-y-4">
-		<div class="relative">
-			<div class="absolute inset-0 flex items-center justify-center">
-				<div
-					class="w-20 h-20 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full opacity-20 blur-xl animate-pulse"
-				></div>
-			</div>
-			<div
-				class="relative w-16 h-16 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-2xl"
-			>
-				<span class="text-2xl text-white font-bold">EM</span>
-			</div>
+		<div class="w-16 h-16 bg-gradient-to-r from-violet-600 to-blue-600 rounded-2xl flex items-center justify-center mx-auto">
+			<span class="text-2xl text-white font-bold">EM</span>
 		</div>
-		<h1
-			class="text-4xl font-bold bg-gradient-to-r from-gray-900 via-emerald-800 to-blue-800 bg-clip-text text-transparent"
-		>
+		<h1 class="text-4xl font-bold text-neutral-900">
 			Welcome back
 		</h1>
-		<p class="text-lg text-gray-600 leading-relaxed">
-			Sign in to your EarnMaze account and continue earning
+		<p class="text-lg text-neutral-600">
+			Sign in to your EarnMaze account
 		</p>
 	</div>
 
-	<!-- Ultra-Modern Form Card -->
-	<div class="relative">
-		<!-- Background Effects -->
-		<div
-			class="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-blue-500/10 to-purple-500/10 rounded-3xl blur-xl"
-		></div>
-		<div
-			class="absolute inset-0 bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl"
-		></div>
+	<!-- Modern Form Card -->
+	<div class="bg-white border border-neutral-200 rounded-3xl p-8 space-y-6">
+		<form onsubmit={handleFormSubmit} class="space-y-6">
+			{#if authStore.state.error}
+				<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
+					<svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+					</svg>
+					<span class="font-medium">{authStore.state.error}</span>
+				</div>
+			{/if}
 
-		<div class="relative p-8 space-y-6">
-			<form onsubmit={handleFormSubmit} class="space-y-6">
-				{#if authStore.state.error}
-					<div
-						class="relative overflow-hidden bg-red-50/80 backdrop-blur-sm border border-red-200/50 text-red-700 px-6 py-4 rounded-2xl shadow-lg"
-					>
-						<div class="absolute inset-0 bg-gradient-to-r from-red-500/5 to-pink-500/5"></div>
-						<div class="relative flex items-center">
-							<div
-								class="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0"
-							>
-								<span class="text-white text-xs">!</span>
-							</div>
-							<span class="font-medium">{authStore.state.error}</span>
-						</div>
-					</div>
-				{/if}
+			<!-- Email Field -->
+			<div class="space-y-2">
+				<label for="email" class="block text-sm font-medium text-neutral-700">Email address</label>
+				<input
+					id="email"
+					type="email"
+					bind:value={email}
+					required
+					class="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all text-neutral-900 placeholder-neutral-400"
+					placeholder="you@example.com"
+				/>
+			</div>
 
-				<!-- Email Field -->
-				<div class="space-y-2">
-					<label for="email" class="block text-sm font-semibold text-gray-700 tracking-wide"
-						>Email address</label
-					>
-					<div class="relative group">
-						<div
-							class="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-						></div>
-						<input
-							id="email"
-							type="email"
-							bind:value={email}
-							required
-							class="relative w-full px-4 py-4 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
-							placeholder="Enter your email address"
-						/>
-						<div class="absolute inset-y-0 right-0 flex items-center pr-4">
-							<div class="w-2 h-2 bg-emerald-400 rounded-full opacity-50"></div>
-						</div>
-					</div>
+			<!-- Password Field -->
+			<div class="space-y-2">
+				<label for="password" class="block text-sm font-medium text-neutral-700">Password</label>
+				<input
+					id="password"
+					type="password"
+					bind:value={password}
+					required
+					class="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all text-neutral-900 placeholder-neutral-400"
+					placeholder="Enter your password"
+				/>
+			</div>
+
+			<!-- Remember Me & Forgot Password -->
+			<div class="flex items-center justify-between">
+				<div class="flex items-center">
+					<input
+						id="remember-me"
+						type="checkbox"
+						class="h-4 w-4 text-violet-600 focus:ring-violet-500 border-neutral-300 rounded"
+					/>
+					<label for="remember-me" class="ml-2 block text-sm text-neutral-700">
+						Remember me
+					</label>
 				</div>
 
-				<!-- Password Field -->
-				<div class="space-y-2">
-					<label for="password" class="block text-sm font-semibold text-gray-700 tracking-wide"
-						>Password</label
+				<div>
+					<a
+						href="/forgot-password"
+						class="text-sm font-medium text-violet-600 hover:text-violet-700 transition-colors"
 					>
-					<div class="relative group">
-						<div
-							class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-						></div>
-						<input
-							id="password"
-							type="password"
-							bind:value={password}
-							required
-							class="relative w-full px-4 py-4 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
-							placeholder="Enter your password"
-						/>
-						<div class="absolute inset-y-0 right-0 flex items-center pr-4">
-							<div class="w-2 h-2 bg-blue-400 rounded-full opacity-50"></div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Remember Me & Forgot Password -->
-				<div class="flex items-center justify-between pt-2">
-					<div
-						class="relative overflow-hidden bg-gray-50/80 backdrop-blur-sm border border-gray-100/50 rounded-xl px-4 py-3 shadow-sm"
-					>
-						<div class="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-slate-500/5"></div>
-						<div class="relative flex items-center">
-							<input
-								id="remember-me"
-								type="checkbox"
-								class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded transition-colors duration-200"
-							/>
-							<label for="remember-me" class="ml-2 block text-sm text-gray-700 font-medium">
-								Remember me
-							</label>
-						</div>
-					</div>
-
-					<div>
-						<a
-							href="/forgot-password"
-							class="group inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-500 transition-all duration-200"
-						>
-							<span class="group-hover:translate-x-1 transition-transform duration-200"
+						<span
 								>Forgot password?</span
 							>
 						</a>
@@ -257,28 +205,13 @@
 							{/if}
 						</div>
 					</button>
-				</div>
-			</form>
+			</div>			
+		</form>
 
-			<!-- Register Link -->
-			<div class="relative text-center pt-6 z-10">
-				<div class="absolute inset-0 flex items-center pointer-events-none">
-					<div class="w-full border-t border-gray-200/50"></div>
-				</div>
-				<div class="relative flex justify-center text-sm z-10">
-					<span class="px-4 bg-white/80 text-gray-500">Don't have an account?</span>
-				</div>
-				<div class="mt-4 relative z-10">
-					<a
-						href="/register"
-						class="group inline-flex items-center font-semibold text-emerald-600 hover:text-emerald-500 transition-all duration-200 cursor-pointer relative z-10"
-					>
-						<span class="group-hover:translate-x-1 transition-transform duration-200"
-							>Sign up for free</span
-						>
-						<span class="ml-2 group-hover:translate-x-1 transition-transform duration-200">→</span>
-					</a>
-				</div>
+		<!-- Register Link -->
+		<div class="relative text-center pt-6">
+			<div class="text-sm text-neutral-600">
+				Don't have an account? <a href="/register" class="font-medium text-violet-600 hover:text-violet-700 transition-colors">Sign up for free →</a>
 			</div>
 		</div>
 	</div>

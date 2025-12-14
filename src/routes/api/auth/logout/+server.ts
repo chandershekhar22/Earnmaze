@@ -1,6 +1,7 @@
-import { redirect } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import { invalidateSession } from '$lib/db';
 import type { RequestHandler } from './$types';
+import { Logger } from '$lib/utils/app-logger';
 
 export const POST: RequestHandler = async ({ cookies }) => {
 	try {
@@ -8,19 +9,18 @@ export const POST: RequestHandler = async ({ cookies }) => {
 		
 		if (sessionId) {
 			await invalidateSession(sessionId);
+			Logger.root.info({ context: 'auth', sessionId }, 'Session invalidated on logout');
+		}
+		else {
+			Logger.root.warn({ context: 'auth' }, 'Logout requested without session cookie');
 		}
 
 		cookies.delete('session', { path: '/' });
+		Logger.root.info({ context: 'auth' }, 'Session cookie cleared');
 
-		// Redirect to home page after logout
-		throw redirect(303, '/');
+		return json({ success: true });
 	} catch (error) {
-		// If error is a redirect, re-throw it
-		if (error instanceof Response) {
-			throw error;
-		}
-		console.error('Logout error:', error);
-		// On error, still redirect to home
-		throw redirect(303, '/');
+		Logger.root.error({ context: 'auth', error }, 'Logout error');
+		return json({ success: false, error: 'LOGOUT_FAILED' }, { status: 500 });
 	}
 };

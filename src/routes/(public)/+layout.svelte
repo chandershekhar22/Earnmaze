@@ -49,27 +49,27 @@
 	{#if isAuthPage}
 		<!-- Auth pages layout -->
 		<main
-			class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8"
+			class="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-neutral-100 py-12 px-4 sm:px-6 lg:px-8"
 		>
 			{@render children()}
 		</main>
 	{:else}
 		<!-- Public pages layout -->
 		<div class="min-h-screen bg-white">
-			<header class="bg-white border-b border-gray-200 sticky top-0 z-40 backdrop-blur-sm bg-white/95">
+			<header class="bg-white border-b border-neutral-200 sticky top-0 z-40 backdrop-blur-sm bg-white/95">
 				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div class="flex justify-between items-center py-3 md:py-4">
 					<div class="flex items-center">
-						<a href="/" class="text-xl md:text-2xl font-bold text-primary-600 flex items-center">
+						<a href="/" class="text-xl md:text-2xl font-bold text-violet-600 flex items-center">
 							<img src="/favicon.svg" alt="EarnMaze Logo" class="w-8 h-8 md:w-10 md:h-10 mr-2" />
 							<span>EarnMaze</span>
 						</a>
 					</div>
 						{#if !isEarnMoneyPage}
 							<nav class="flex items-center space-x-2 md:space-x-4">
-								<a href="/about" class="hidden sm:inline-block link text-sm md:text-base">About</a>
-								<a href="/login" class="btn-secondary text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 touch-manipulation">Sign In</a>
-								<a href="/register" class="btn-primary text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 touch-manipulation">Get Started</a>
+								<a href="/about" class="hidden sm:inline-block text-neutral-600 hover:text-violet-600 transition-colors text-sm md:text-base">About</a>
+								<a href="/login" class="text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 text-neutral-700 hover:text-violet-600 font-medium transition-colors touch-manipulation">Sign In</a>
+								<a href="/register" class="text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all touch-manipulation">Get Started</a>
 							</nav>
 						{/if}
 					</div>
@@ -82,7 +82,7 @@
 	{/if}
 {:else}
 	<!-- Loading state -->
-	<div class="min-h-screen flex items-center justify-center bg-gray-50">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+	<div class="min-h-screen flex items-center justify-center bg-neutral-50">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
 	</div>
 {/if}

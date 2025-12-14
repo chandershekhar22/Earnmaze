@@ -5,7 +5,7 @@
 
 // Client-side tracking (browser only) - safe for all imports
 export {
-	getUserId,
+	getVisitorId,
 	getBrowserFingerprint,
 	getSessionId,
 	getUtmParams,

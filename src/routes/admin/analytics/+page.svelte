@@ -54,14 +54,14 @@
 				</div>
 
 				<div class="bg-white rounded-lg shadow p-6">
-					<h3 class="text-sm font-medium text-gray-500 mb-2">Unique Users</h3>
-					<p class="text-3xl font-bold text-blue-600">{analytics.summary.uniqueUsers.toLocaleString()}</p>
+					<h3 class="text-sm font-medium text-gray-500 mb-2">Unique Visitors</h3>
+					<p class="text-3xl font-bold text-blue-600">{analytics.summary.uniqueVisitors.toLocaleString()}</p>
 				</div>
 
 				<div class="bg-white rounded-lg shadow p-6">
 					<h3 class="text-sm font-medium text-gray-500 mb-2">Conversions</h3>
 					<p class="text-3xl font-bold text-green-600">{analytics.summary.totalConversions.toLocaleString()}</p>
-					<p class="text-xs text-gray-500 mt-1">{analytics.summary.uniqueConvertingUsers} unique</p>
+					<p class="text-xs text-gray-500 mt-1">{analytics.summary.uniqueConvertingVisitors} unique</p>
 				</div>
 
 				<div class="bg-white rounded-lg shadow p-6">
@@ -70,7 +70,7 @@
 				</div>
 
 				<div class="bg-white rounded-lg shadow p-6">
-					<h3 class="text-sm font-medium text-gray-500 mb-2">User Conv. Rate</h3>
+					<h3 class="text-sm font-medium text-gray-500 mb-2">Visitor Conv. Rate</h3>
 					<p class="text-3xl font-bold text-purple-600">{analytics.summary.uniqueConversionRate}%</p>
 				</div>
 

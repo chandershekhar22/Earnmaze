@@ -1,8 +1,7 @@
 import { requireAdmin } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db';
-import { user } from '$lib/db/schema/auth';
-import { panelist, panelistPoint } from '$lib/db/schema/panelists';
+import { panelistPoint, user } from '$lib/db/schema';
 import { eq, desc, sql, like, or } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
@@ -60,13 +59,12 @@ export const load: PageServerLoad = async (event) => {
 		const userIds = users.map(u => u.id);
 		const panelistStats = userIds.length > 0 ? await db
 			.select({
-				userId: panelist.userId,
+				userId: panelistPoint.panelistId,		
 				currentPoints: panelistPoint.currentPoints,
-				lifetimePoints: panelistPoint.lifetimePoints
+				pendingPoints: panelistPoint.pendingPoints
 			})
-			.from(panelist)
-			.leftJoin(panelistPoint, eq(panelist.id, panelistPoint.panelistId))
-			.where(sql`${panelist.userId} IN (${sql.join(userIds.map(id => sql`${id}`), sql`, `)})`)
+			.from(panelistPoint)
+			.where(sql`${panelistPoint.panelistId} IN (${sql.join(userIds.map(id => sql`${id}`), sql`, `)})`)
 			: [];
 
 		// Merge panelist data with users

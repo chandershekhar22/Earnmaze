@@ -38,7 +38,7 @@ export async function getAuthUser(event: RequestEvent): Promise<AuthUser | null>
 
 		return {
 			id: userData.id,
-			name: userData.name,
+			name: userData.name || 'User',
 			email: userData.email,
 			userType: userData.userType as UserType,
 			emailVerified: userData.emailVerified,

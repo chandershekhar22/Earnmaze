@@ -3,6 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import { validateSession } from '$lib/db';
 import { getDashboardUrl, canAccessRoute } from '$lib/utils/dashboard-routing';
 import { checkGeoRestriction, logGeoRestrictionEvent } from '$lib/server/geo-restriction';
+import { generateRayId } from '$lib/utils/app-logger';
 
 // Simple rate limiting store (in-memory)
 // For production, use Redis or a proper rate limiting service
@@ -111,13 +112,21 @@ setInterval(() => {
 export const handle: Handle = async ({ event, resolve }) => {
   const pathname = event.url.pathname;
   const ipAddress = event.getClientAddress();
+  const correlationId = generateRayId();
+  event.locals.correlationId = correlationId;
+
+  const withCorrelation = (response: Response) => {
+    response.headers.set('x-request-id', correlationId);
+    response.headers.set('x-correlation-id', correlationId);
+    return response;
+  };
 
   // ========== RATE LIMITING ==========
   // Skip rate limiting for exempt paths
   if (!matchesAnyPath(pathname, ROUTE_CONFIG.rateLimitExempt)) {
     const rateLimitKey = `${ipAddress}:${pathname}`;
     if (!checkRateLimit(rateLimitKey, 100, 60000)) {
-      return new Response(
+      return withCorrelation(new Response(
         JSON.stringify({
           success: false,
           error: 'RATE_LIMIT_EXCEEDED',
@@ -127,7 +136,7 @@ export const handle: Handle = async ({ event, resolve }) => {
           status: 429,
           headers: { 'Content-Type': 'application/json', 'Retry-After': '60' }
         }
-      );
+      ));
     }
   }
 
@@ -148,7 +157,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     const isApiRequest = pathname.startsWith('/api/');
     
     if (isApiRequest) {
-      return new Response(
+      return withCorrelation(new Response(
         JSON.stringify({
           success: false,
           error: 'REGION_RESTRICTED',
@@ -164,7 +173,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             'Content-Type': 'application/json'
           }
         }
-      );
+      ));
     } else {
       // For page requests, redirect to a blocked page or show error
       throw redirect(302, `/geo-blocked?reason=${encodeURIComponent(geoCheck.reason || 'region_restricted')}`);
@@ -200,7 +209,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   if (isProtectedApiRoute) {
     if (!event.locals.user) {
-      return new Response(
+      return withCorrelation(new Response(
         JSON.stringify({ 
           error: 'Unauthorized', 
           message: 'Authentication required' 
@@ -211,7 +220,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             'Content-Type': 'application/json'
           }
         }
-      );
+      ));
     }
   }
 
@@ -251,6 +260,6 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Resolve the request and add security headers
   const response = await resolve(event);
   setSecurityHeaders(response.headers);
-  
+  withCorrelation(response);
   return response;
 };

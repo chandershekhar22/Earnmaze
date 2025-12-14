@@ -3,7 +3,8 @@ import { eq } from 'drizzle-orm';
 import { db } from '../index';
 import { user, session, userTypeEnum } from '../schema/auth';
 import { randomBytes } from 'crypto';
-import { panelist, panelistPoint } from '../schema/panelists';
+import { initializePanelistPoints } from './panelist-points.repository.server';
+import { celery } from '$lib/utils/celery';
 
 export async function hashPassword(password: string): Promise<string> {
 	return await hash(password);
@@ -69,52 +70,69 @@ export async function getUserByEmail(email: string) {
 	return result[0] || null;
 }
 
+/**
+ * Create user without password (for guest/email-only registration)
+ * Used when user provides only email initially and will set password later
+ */
 export async function createUser(data: {
 	email: string;
-	password: string;
-	name?: string;
+	name?: string | null;
+	password?: string | null;
 	userType?: string;
+	registrationSource?: string;
+	utmSource?: string | null;
+	utmMedium?: string | null;
+	utmCampaign?: string | null;
+	referredBy?: string | null;
 }) {
-	const hashedPassword = await hashPassword(data.password);
-	const userTypeValue = userTypeEnum.enumValues.includes(data.userType as typeof userTypeEnum.enumValues[number])
+	const userTypeValue = userTypeEnum.enumValues.includes(
+		data.userType as typeof userTypeEnum.enumValues[number]
+	)
 		? data.userType
-		: "panelist"; // default to panelist
+		: 'panelist'; // default to panelist
+	const referralCode = randomBytes(4).toString('hex').toUpperCase();
+	
+	let hashedPassword: string | undefined;
+	if (data.password) {
+		hashedPassword = await hashPassword(data.password);
+	}
+	const [newUser] = await db
+		.insert(user)
+		.values({
+			email: data.email,
+			name: data.name || null,
+			password: data.password ? hashedPassword : null, // No password initially
+			isPasswordSet: false, // Flag indicating password needs to be set
+			emailVerified: false,
+			userType: userTypeValue as typeof userTypeEnum.enumValues[number],
+			registrationSource: data.registrationSource || 'unknown',
+			utmSource: data.utmSource,
+			utmMedium: data.utmMedium,
+			utmCampaign: data.utmCampaign,
+			referralCode,
+			referredBy: data.referredBy,
+			isActive: true,
+			status: 'pending_verification',
+			loginCount: 0,
+		})
+		.returning();
 
-	const result = await db.insert(user).values({
-		email: data.email,
-		password: hashedPassword,
-		name: data.name || '',
-		userType: userTypeValue as typeof userTypeEnum.enumValues[number]
-	}).returning();
-
-	// generate panelist record if userType is panelist
+	// Create panelist profile if userType is panelist
 	if (userTypeValue === 'panelist') {
-		const insertedUserId = result[0].id;
-		const newPanelist = await db.insert(panelist).values({
-			userId: insertedUserId,
-			// other default panelist fields can be set here
-		}).returning();
-		await db.insert(panelistPoint).values({
-			panelistId: newPanelist[0].id,
-			currentPoints: 0,
-			lifetimePoints: 0,
-		});
+		
+		// initialize panelist
+		// Initialize points (welcome + bonus)
+		await initializePanelistPoints(newUser.id);
+		// send welcome email via celery
+		celery.sendTask('email.send.welcome', [newUser.email]);
 	}
 
-	// todo: ADD RESPONDENT RECORD CREATION
 
-	return result;
+	return { user: newUser };
 }
 
-/**
- * Get panelist ID from user ID
- */
-export async function getPanelistIdFromUserId(userId: string): Promise<string | null> {
-	const result = await db
-		.select({ id: panelist.id })
-		.from(panelist)
-		.where(eq(panelist.userId, userId))
-		.limit(1);
-
-	return result[0]?.id || null;
+export async function getUserByReferralCode(referralCode: string) {
+	const result = await db.select().from(user).where(eq(user.referralCode, referralCode)).limit(1);
+	return result[0] || null;
 }
+

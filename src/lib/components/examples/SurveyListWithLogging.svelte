@@ -1,14 +1,9 @@
-<!--
-  Example component demonstrating app-wide logger usage
-  Shows how to integrate logging into your Svelte components
--->
-
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { Logger, Features, Perf, Session } from '$lib/utils/app-logger';
+	import { Logger, Features, Perf } from '$lib/utils/app-logger';
 
-	// Component-specific logger
-	const componentLogger = Logger.components;
+	// Component-specific logger using root with context
+	const componentLogger = Logger.root.child({ context: 'components', component: 'SurveyListWithLogging' });
 
 	interface Survey {
 		id: string;
@@ -18,13 +13,13 @@
 		estimatedDuration: number;
 	}
 
-	let surveyData: Survey[] = [];
-	let isLoading = false;
-	let error: string | null = null;
+	let surveyData = $state<Survey[]>([]);
+	let isLoading = $state(false);
+	let error = $state<string | null>(null);
 
 	onMount(() => {
 		componentLogger.info('SurveyList component mounted');
-		Features.track('survey-list', 'view');
+		Features.trackPageView('/components/survey-list-with-logging');
 		loadSurveys();
 	});
 
@@ -53,11 +48,9 @@
 				success: true 
 			});
 			
-			componentLogger.info('Surveys loaded successfully', { 
-				count: surveyData.length 
-			});
+			componentLogger.info({ count: surveyData.length }, 'Surveys loaded successfully');
 			
-			Features.track('survey-list', 'loaded', { 
+			Features.trackUserAction('surveys-loaded', 'survey-list', { 
 				surveyCount: surveyData.length 
 			});
 
@@ -69,13 +62,10 @@
 				error: error 
 			});
 			
-			componentLogger.error('Failed to load surveys', { 
-				error,
-				sessionId: Session.getSessionId()
-			});
+			componentLogger.error({ error }, 'Failed to load surveys');
 			
-			Features.track('survey-list', 'error', { 
-				error: error 
+			Features.trackUserAction('surveys-error', 'survey-list', { 
+				error 
 			});
 		} finally {
 			isLoading = false;
@@ -83,11 +73,7 @@
 	}
 
 	function handleSurveyClick(surveyId: string, surveyTitle: string) {
-		componentLogger.info('Survey clicked', { 
-			surveyId, 
-			surveyTitle,
-			userId: Session.getUserId()
-		});
+		componentLogger.info({ surveyId, surveyTitle }, 'Survey clicked');
 		
 		Features.trackUserAction('survey-click', 'survey-list', {
 			surveyId,
@@ -106,17 +92,17 @@
 	{:else if error}
 		<div class="error">
 			<p>Error: {error}</p>
-			<button on:click={loadSurveys}>Retry</button>
+			<button onclick={loadSurveys}>Retry</button>
 		</div>
 	{:else}
 		<div class="survey-grid">
 			{#each surveyData as survey (survey.id)}
 				<div 
 					class="survey-card"
-					on:click={() => handleSurveyClick(survey.id, survey.title)}
+					onclick={() => handleSurveyClick(survey.id, survey.title)}
 					role="button"
 					tabindex="0"
-					on:keydown={(e) => e.key === 'Enter' && handleSurveyClick(survey.id, survey.title)}
+					onkeydown={(e) => e.key === 'Enter' && handleSurveyClick(survey.id, survey.title)}
 				>
 					<h3>{survey.title}</h3>
 					<p>{survey.description}</p>

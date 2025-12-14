@@ -1,7 +1,9 @@
 /**
  * Logger utility for EarnMaze Panel
- * Provides structured logging with different log levels and contexts
+ * Re-implemented on top of pino for structured, fast logging.
  */
+
+import pino, { type Logger as PinoLogger, type LoggerOptions } from 'pino';
 
 export enum LogLevel {
 	DEBUG = 0,
@@ -21,105 +23,70 @@ export interface LogEntry {
 	userId?: string;
 }
 
-class Logger {
-	private logLevel: LogLevel;
-	private context: string;
-	private isDevelopment: boolean;
+const isDev = process.env.NODE_ENV !== 'production';
 
-	constructor(context: string = 'App', logLevel: LogLevel = LogLevel.INFO) {
-		this.context = context;
-		this.logLevel = logLevel;
-		this.isDevelopment = process.env.NODE_ENV === 'development' || typeof window !== 'undefined';
-	}
-
-	private shouldLog(level: LogLevel): boolean {
-		return level >= this.logLevel;
-	}
-
-	private formatMessage(level: LogLevel, message: string, data?: LogData): string {
-		const timestamp = new Date().toISOString();
-		const levelName = LogLevel[level];
-		const dataStr = data ? ` | Data: ${JSON.stringify(data, null, 2)}` : '';
-		return `[${timestamp}] ${levelName} [${this.context}]: ${message}${dataStr}`;
-	}
-
-	private log(level: LogLevel, message: string, data?: LogData, userId?: string): void {
-		if (!this.shouldLog(level)) return;
-
-		const logEntry: LogEntry = {
-			level,
-			message,
-			context: this.context,
-			data,
-			timestamp: new Date(),
-			userId
-		};
-
-		const formattedMessage = this.formatMessage(level, message, data);
-
-		// Console logging for development
-		if (this.isDevelopment) {
-			switch (level) {
-				case LogLevel.DEBUG:
-					console.debug(formattedMessage);
-					break;
-				case LogLevel.INFO:
-					console.info(formattedMessage);
-					break;
-				case LogLevel.WARN:
-					console.warn(formattedMessage);
-					break;
-				case LogLevel.ERROR:
-					console.error(formattedMessage);
-					break;
+const baseOptions: LoggerOptions = {
+	level: isDev ? 'debug' : 'info',
+	transport: isDev
+		? {
+			target: 'pino-pretty',
+			options: {
+				colorize: true,
+				singleLine: true,
+				translateTime: 'SYS:standard'
 			}
 		}
+		: undefined
+};
 
-		// In production, you might want to send logs to a service
-		if (!this.isDevelopment && level >= LogLevel.ERROR) {
-			this.sendToLoggingService(logEntry);
-		}
+function levelToPino(level?: LogLevel): pino.LevelWithSilent {
+	if (level === LogLevel.DEBUG) return 'debug';
+	if (level === LogLevel.WARN) return 'warn';
+	if (level === LogLevel.ERROR) return 'error';
+	return 'info';
+}
+
+class Logger {
+	private logger: PinoLogger;
+
+	constructor(context: string = 'App', logLevel: LogLevel = LogLevel.INFO) {
+		this.logger = pino({
+			...baseOptions,
+			level: levelToPino(logLevel),
+			base: { context }
+		});
 	}
 
-	private async sendToLoggingService(logEntry: LogEntry): Promise<void> {
-		try {
-			// This is where you'd send logs to your logging service
-			// Example: Sentry, LogRocket, DataDog, etc.
-			await fetch('/api/logs', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(logEntry)
-			});
-		} catch (error) {
-			console.error('Failed to send log to service:', error);
-		}
+	private normalize(data?: LogData): unknown {
+		if (data === undefined) return undefined;
+		if (data !== null && typeof data === 'object') return data;
+		return { data };
 	}
 
 	debug(message: string, data?: LogData, userId?: string): void {
-		this.log(LogLevel.DEBUG, message, data, userId);
+		this.logger.debug({ userId, data: this.normalize(data) }, message);
 	}
 
 	info(message: string, data?: LogData, userId?: string): void {
-		this.log(LogLevel.INFO, message, data, userId);
+		this.logger.info({ userId, data: this.normalize(data) }, message);
 	}
 
 	warn(message: string, data?: LogData, userId?: string): void {
-		this.log(LogLevel.WARN, message, data, userId);
+		this.logger.warn({ userId, data: this.normalize(data) }, message);
 	}
 
 	error(message: string, data?: LogData, userId?: string): void {
-		this.log(LogLevel.ERROR, message, data, userId);
+		this.logger.error({ userId, data: this.normalize(data) }, message);
 	}
 
-	// Authentication specific logging methods
 	authSuccess(action: string, userId: string, data?: LogData): void {
-		const logData = typeof data === 'object' && data !== null ? { userId, ...data } : { userId, data };
-		this.info(`Auth Success: ${action}`, logData, userId);
+		const payload = this.normalize(data);
+		this.info(`Auth Success: ${action}`, { userId, ...((payload as Record<string, unknown>) || {}) }, userId);
 	}
 
 	authFailure(action: string, error: string, data?: LogData): void {
-		const logData = typeof data === 'object' && data !== null ? { error, ...data } : { error, data };
-		this.error(`Auth Failure: ${action}`, logData);
+		const payload = this.normalize(data);
+		this.error(`Auth Failure: ${action}`, { error, ...((payload as Record<string, unknown>) || {}) });
 	}
 
 	authAttempt(action: string, email?: string): void {
@@ -128,42 +95,38 @@ class Logger {
 
 	private maskEmail(email: string): string {
 		const [local, domain] = email.split('@');
+		if (!domain) return '***';
 		if (local.length <= 2) return `${local}***@${domain}`;
 		return `${local.substring(0, 2)}***@${domain}`;
 	}
 
-	// Performance logging
 	performance(operation: string, duration: number, data?: LogData): void {
-		const logData = typeof data === 'object' && data !== null ? { duration: `${duration}ms`, ...data } : { duration: `${duration}ms`, data };
-		this.info(`Performance: ${operation}`, logData);
+		const payload = this.normalize(data) as Record<string, unknown> | undefined;
+		this.info(`Performance: ${operation}`, { duration: `${duration}ms`, ...(payload || {}) });
 	}
 
-	// User action logging
 	userAction(action: string, userId: string, data?: LogData): void {
-		const logData = typeof data === 'object' && data !== null ? { userId, ...data } : { userId, data };
-		this.info(`User Action: ${action}`, logData, userId);
+		const payload = this.normalize(data) as Record<string, unknown> | undefined;
+		this.info(`User Action: ${action}`, { userId, ...(payload || {}) }, userId);
 	}
 
-	// API call logging
 	apiCall(method: string, endpoint: string, status: number, duration?: number): void {
-		const level = status >= 400 ? LogLevel.ERROR : LogLevel.INFO;
-		this.log(level, `API Call: ${method} ${endpoint}`, { 
-			status, 
-			duration: duration ? `${duration}ms` : undefined 
-		});
+		const level = status >= 400 ? 'error' : 'info';
+		const meta = {
+			status,
+			duration: duration ? `${duration}ms` : undefined
+		};
+		(this.logger as any)[level]({ data: meta }, `API Call: ${method} ${endpoint}`);
 	}
 }
 
-// Create logger instances for different contexts
 export const createLogger = (context: string, logLevel?: LogLevel): Logger => {
 	return new Logger(context, logLevel);
 };
 
-// Pre-configured loggers for common use cases
 export const authLogger = createLogger('Auth');
 export const apiLogger = createLogger('API');
 export const dbLogger = createLogger('Database');
 export const appLogger = createLogger('App');
 
-// Default export
 export default Logger;

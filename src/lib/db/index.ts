@@ -12,40 +12,64 @@ export {
 	validateSession,
 	invalidateSession,
 	getUserByEmail,
-	createUser,
-	getPanelistIdFromUserId
+	createUser
 } from './repositories/auth.repository.server';
 
-// Panelist repository
+// Panelist Points repository
 export {
-	updatePanelistTier,
-	calculateProfileCompletion,
-	updateEngagementMetrics,
-	updateQualityMetrics,
-	addPanelistTag,
-	getPanelistsByTags,
-	autoTagPanelist,
-	getPanelistDashboard,
-	getHighValuePanelists,
-	updatePanelistPoints,
-	trackPanelistDevice,
-	recordPanelistStatusChange,
+	resetPanelistPoints,
+	addPendingPoints,
+	confirmPendingPoints,
+	rejectPendingPoints,
+	addBonusPoints,
+	redeemPoints,
 	getPanelistPoints,
-	getPanelistPointsTransactions,
+	initializePanelistPoints
+} from './repositories/panelist-points.repository.server';
+
+// Panelist Points Aggregations repository (derived metrics)
+export {
+	getLifetimePoints,
+	getTotalBonusPoints,
+	getTotalRedeemedPoints,
+	getTotalRejectedPoints,
+	getPointsSummary,
+	getRecentTransactions,
+} from './repositories/panelist-points-aggregations.repository.server';
+
+// Panelist Transactions repository
+export {
 	getPanelistSurveyTransactions,
-	getPanelistRecentActivity,
-	getAvailableSurveysCount
-} from './repositories/panelist.repository.server';
+	getOrCreateStartedSurveyTransaction,
+} from './repositories/panelist-transactions.repository.server';
+
+// Panelist Tier repository
+export {
+	calculateProfileCompletion
+} from './repositories/panelist-tier.repository.server';
 
 // Survey repository
 export {
-	syncSurveyFromExternal,
-	getAvailableSurveysForPanelist,
-	checkPanelistQualification,
-	createSurveyInvitation,
-	bulkInvitePanelists,
-	getSurveyDashboard
+	getSurveyDashboard,
+	getAllAvailableSurveys,
+	getSurveyById
 } from './repositories/survey.repository.server';
+
+// Guest session repository
+export {
+	generateGuestToken,
+	createGuestSession,
+	createGuestSessionForUser,
+	findActiveGuestSessionByEmail,
+	validateGuestSession,
+	getGuestSessionById,
+	invalidateGuestSession,
+	linkSurveyTransactionToSession,
+	getGuestSessionTransactions,
+	updateGuestSessionStats,
+	upgradeGuestSession,
+	hasRecentGuestSession
+} from './repositories/guest-session.repository.server';
 
 // Analytics repository
 export {
@@ -65,6 +89,19 @@ export {
 	hasEmailConverted,
 	getVisitorJourney
 } from './repositories/analytics.repository.server';
+
+// Settings repository
+export {
+	getAppSetting,
+	getAppSettings,
+	getAllAppSettings,
+	setAppSetting,
+	setAppSettings,
+	deleteAppSetting,
+	getAppSettingAsInt,
+	getAppSettingAsBoolean,
+	getAppSettingAsJson
+} from './repositories/settings.repository.server';
 
 // Re-export schema
 export * from './schema';

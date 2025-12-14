@@ -11,7 +11,7 @@ import { eq, sql, desc, count } from 'drizzle-orm';
  * Record a page visit
  */
 export async function createPageVisit(visitData: {
-	userId: string;
+	visitorId: string;
 	sessionId: string;
 	fingerprint: string;
 	landingPage: string;
@@ -30,7 +30,7 @@ export async function createPageVisit(visitData: {
 	language?: string | null;
 }) {
 	return await db.insert(pageVisits).values({
-		userId: visitData.userId,
+		visitorId: visitData.visitorId,
 		sessionId: visitData.sessionId,
 		fingerprint: visitData.fingerprint,
 		landingPage: visitData.landingPage,
@@ -52,25 +52,47 @@ export async function createPageVisit(visitData: {
 }
 
 /**
+ * Get visit data by session ID
+ */
+export async function getVisitBySessionId(sessionId: string) {
+	const result = await db
+		.select({ 
+			id: pageVisits.id,
+			utmSource: pageVisits.utmSource,
+			utmMedium: pageVisits.utmMedium,
+			utmCampaign: pageVisits.utmCampaign,
+		})
+		.from(pageVisits)
+		.where(eq(pageVisits.sessionId, sessionId))
+		.orderBy(pageVisits.visitedAt)
+		.limit(1);
+	
+	return result.length > 0 ? result[0] : null;
+}
+
+/**
  * Record an email conversion
  */
 export async function createEmailConversion(conversionData: {
-	userId: string;
+	visitorId: string;
 	sessionId: string;
 	email: string;
+	visitId?: string | null;
 	timeToConvertSeconds?: number | null;
 	utmSource?: string | null;
 	utmMedium?: string | null;
 	utmCampaign?: string | null;
 }) {
 	return await db.insert(emailConversions).values({
-		userId: conversionData.userId,
+		visitorId: conversionData.visitorId,
 		sessionId: conversionData.sessionId,
 		email: conversionData.email,
+		visitId: conversionData.visitId || null,
 		timeToConvertSeconds: conversionData.timeToConvertSeconds || null,
 		utmSource: conversionData.utmSource || null,
 		utmMedium: conversionData.utmMedium || null,
 		utmCampaign: conversionData.utmCampaign || null,
+		isConverted: true,
 		convertedAt: new Date()
 	});
 }
@@ -79,12 +101,12 @@ export async function createEmailConversion(conversionData: {
  * Record a CTA click
  */
 export async function createCtaClick(clickData: {
-	userId: string;
+	visitorId: string;
 	sessionId: string;
 	buttonLocation: string;
 }) {
 	return await db.insert(ctaClicks).values({
-		userId: clickData.userId,
+		visitorId: clickData.visitorId,
 		sessionId: clickData.sessionId,
 		buttonLocation: clickData.buttonLocation,
 		clickedAt: new Date()
@@ -121,7 +143,7 @@ export async function getTotalCtaClicks(): Promise<number> {
 export async function getUniqueVisitors(): Promise<number> {
 	const result = await db
 		.select({
-			count: sql<number>`COUNT(DISTINCT ${pageVisits.userId})`
+			count: sql<number>`COUNT(DISTINCT ${pageVisits.visitorId})`
 		})
 		.from(pageVisits);
 	
@@ -229,13 +251,13 @@ export async function hasEmailConverted(email: string): Promise<boolean> {
 }
 
 /**
- * Get visitor journey (all activities for a user)
+ * Get visitor journey (all activities for a visitor)
  */
-export async function getVisitorJourney(userId: string) {
+export async function getVisitorJourney(visitorId: string) {
 	const [visits, conversions, clicks] = await Promise.all([
-		db.select().from(pageVisits).where(eq(pageVisits.userId, userId)),
-		db.select().from(emailConversions).where(eq(emailConversions.userId, userId)),
-		db.select().from(ctaClicks).where(eq(ctaClicks.userId, userId))
+		db.select().from(pageVisits).where(eq(pageVisits.visitorId, visitorId)),
+		db.select().from(emailConversions).where(eq(emailConversions.visitorId, visitorId)),
+		db.select().from(ctaClicks).where(eq(ctaClicks.visitorId, visitorId))
 	]);
 	
 	return {

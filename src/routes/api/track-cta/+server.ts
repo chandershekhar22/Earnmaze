@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const body = await request.json();
-		const { userId, sessionId, buttonLocation } = body;
+		const { visitorId, sessionId, buttonLocation } = body;
 
 		// Find the visit ID for this session
 		const visit = await db
@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Insert CTA click tracking
 		await db.insert(ctaClicks).values({
-			userId,
+			visitorId,
 			sessionId,
 			visitId,
 			buttonLocation,

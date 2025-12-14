@@ -4,12 +4,13 @@ import type { RequestHandler } from './$types';
 import { createSession, createUser, getUserByEmail } from '$lib/db';
 import { validateTurnstileToken } from '$lib/server/turnstile';
 import type { RegisterResponse, AuthUserResponse } from '$lib/types/api-responses';
-import { sendEmail } from '$lib/utils/send_mail';
-import { getWelcomeEmailHtml, getWelcomeEmailText } from '$lib/email-templates';
+import { getUserByReferralCode } from '$lib/db/repositories/auth.repository.server';
+import { Logger } from '$lib/utils/app-logger';
+import { isValidEmail, normalizeEmail } from '$lib/utils/validation';
 
 export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
 	try {
-		const { email, password, name, turnstileToken } = await request.json();
+		const { email, password, name, turnstileToken, referralCode } = await request.json();
 
 		if (!email || !password) {
 			return json({ error: 'Email and password are required' }, { status: 400 });
@@ -21,17 +22,36 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 			return json({ error: turnstileError }, { status: 400 });
 		}
 
+		// Validate email with utility function
+		if (!isValidEmail(email)) {
+			Logger.root.warn({ context: 'auth', email }, 'Invalid email format attempted');
+			return json({ error: 'Invalid email address' }, { status: 400 });
+		}
+
+		const normalizedEmail = normalizeEmail(email);
+
 		// Check if user already exists
-		const existingUser = await getUserByEmail(email);
+		const existingUser = await getUserByEmail(normalizedEmail);
 		if (existingUser) {
 			return json({ error: 'User with this email already exists' }, { status: 409 });
 		}
 
+		const referrer = await getUserByReferralCode(referralCode || '');
+		if (referralCode && !referrer) {
+			Logger.root.warn({ context: 'auth', email, referralCode }, 'Invalid referral code used during registration');
+		}
+
+
 		// Create new user
 		await createUser({
-			email,
+			email: normalizedEmail,
 			password,
-			name
+			name,
+			userType: 'panelist',
+			registrationSource: 'registration-page',
+			utmSource: null,
+			utmMedium: null,
+			utmCampaign: null,
 		});
 
 		// Get the created user
@@ -39,14 +59,6 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 		if (!user) {
 			return json({ error: 'Failed to create user' }, { status: 500 });
 		}
-
-		await sendEmail({
-			from: 'EarnMaze <support@mail.earnmaze.com>',
-			to: [user.email],
-			subject: 'Welcome to EarnMaze!',
-			html: getWelcomeEmailHtml(user.name || 'there'),
-			text: getWelcomeEmailText(user.name || 'there'),
-		});
 
 		// Create session
 		const sessionId = await createSession(user.id);
@@ -75,7 +87,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 
 		return json(response);
 	} catch (error) {
-		console.error('Registration error:', error);
+		Logger.root.error({ context: 'errors', error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined }, 'Registration error');
 		return json({ error: 'Internal server error' }, { status: 500 });
 	}
 };

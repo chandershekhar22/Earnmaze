@@ -50,11 +50,6 @@
 			href: '/profile', 
 			icon: 'user' 
 		},
-		{ 
-			name: 'History', 
-			href: '/history', 
-			icon: 'history' 
-		}
 	]);
 
 	// Track if points have been fetched to prevent infinite loops
@@ -71,54 +66,40 @@
 
 <!-- Mobile Overlay -->
 {#if isOpen}
-	<div 
+	<button 
+		type="button"
 		class="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
 		onclick={() => isOpen = false}
-	></div>
+		aria-label="Close navigation overlay"
+	></button>
 {/if}
 
-<aside class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col shadow-2xl transform transition-transform duration-300 ease-in-out {isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}">
+<aside class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-neutral-200 flex flex-col transform transition-transform duration-300 ease-in-out {isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}">
 	<!-- Header -->
-	<div class="p-5 md:p-6 border-b border-gray-700 flex items-center justify-between">
-		<div class="flex items-center space-x-3">
-			<div class="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg">
-				<svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+	<div class="p-6 border-b border-neutral-200 flex items-center justify-between">
+		<div class="flex items-center gap-3">
+			<div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-blue-500 rounded-xl flex items-center justify-center">
+				<svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
 					<path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
 				</svg>
 			</div>
 			<div>
-				<div class="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+				<div class="text-xl font-bold text-neutral-900">
 					EarnMaze
 				</div>
-				<div class="text-xs text-gray-400">Survey Panel</div>
+				<div class="text-xs text-neutral-500">Survey Panel</div>
 			</div>
 		</div>
 		<!-- Close button for mobile -->
 		<button 
 			onclick={() => isOpen = false}
-			class="lg:hidden p-2 text-gray-400 hover:text-white transition-colors"
+			aria-label="Close sidebar"
+			class="lg:hidden p-2 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-xl transition-colors"
 		>
-			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 			</svg>
 		</button>
-	</div>
-	
-	<!-- User Info -->
-	<div class="p-3 md:p-4 bg-gray-800/50 border-b border-gray-700">
-		<div class="flex items-center space-x-3">
-			<div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-				<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-					<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-				</svg>
-			</div>
-			<div class="flex-1 min-w-0">
-				<div class="text-sm font-medium text-white truncate">
-					{authStore.state.user?.name || authStore.state.user?.userType || "Panelist"}
-				</div>
-				<div class="text-xs text-gray-400">Active Member</div>
-			</div>
-		</div>
 	</div>
 	
 	<!-- Navigation -->
@@ -127,10 +108,10 @@
 			<button
 				onclick={() => navigateTo(item.href)}
 				class="w-full group flex items-center px-3 md:px-4 py-2.5 md:py-3 text-sm font-medium rounded-lg md:rounded-xl transition-all duration-200 active:scale-[0.98] md:hover:scale-105 touch-manipulation {isActive(item.href) 
-					? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20' 
-					: 'text-gray-300 hover:bg-gray-700/50 hover:text-white'}"
+					? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20' 
+					: 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900'}"
 			>
-				<span class="mr-4 flex-shrink-0 {isActive(item.href) ? 'text-white' : 'text-gray-400 group-hover:text-white'}">
+				<span class="mr-3 flex-shrink-0 {isActive(item.href) ? 'text-white' : 'text-neutral-500 group-hover:text-violet-600'}">
 					{#if item.icon === 'home'}
 						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
 							<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
@@ -163,32 +144,32 @@
 				</span>
 				<span class="truncate">{item.name}</span>
 				{#if isActive(item.href)}
-					<div class="ml-auto w-2 h-2 bg-white rounded-full opacity-75"></div>
+					<div class="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
 				{/if}
 			</button>
 		{/each}
 	</nav>
 	
 	<!-- Points Display -->
-	<div class="p-3 md:p-4 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border-y border-gray-700">
+	<div class="p-4 bg-amber-50 border-y border-neutral-200">
 		<div class="flex items-center justify-between">
-			<div class="flex items-center space-x-2">
-				<svg class="w-4 h-4 md:w-5 md:h-5 text-yellow-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+			<div class="flex items-center gap-2">
+				<svg class="w-5 h-5 text-amber-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
 					<path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
 					<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
 				</svg>
-				<span class="text-xs md:text-sm text-gray-300 truncate">Points Balance</span>
+				<span class="text-sm text-neutral-600 truncate">Balance</span>
 			</div>
-			<span class="text-base md:text-lg font-bold text-yellow-400 flex-shrink-0">{(pointsStore.data?.availablePoints ?? 0).toLocaleString()}</span>
+			<span class="text-lg font-bold text-amber-700 flex-shrink-0">{(pointsStore.data?.availablePoints ?? 0).toLocaleString()}</span>
 		</div>
 	</div>
 	
 	<!-- Footer -->
-	<div class="p-3 md:p-4 border-t border-gray-700 space-y-2 md:space-y-3">
+	<div class="p-4 border-t border-neutral-200 space-y-3">
 		<!-- Logout Button -->
 		<button
 			onclick={handleLogout}
-			class="w-full flex items-center justify-center space-x-2 px-3 md:px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all duration-200 active:scale-[0.98] touch-manipulation"
+			class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-xl transition-all"
 		>
 			<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
 				<path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
@@ -197,12 +178,8 @@
 		</button>
 		
 		<!-- Copyright -->
-		<div class="flex items-center justify-between text-xs text-gray-400">
-			<span class="truncate">© 2025 EarnMaze</span>
-			<div class="flex items-center space-x-1 flex-shrink-0">
-				<div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-				<span>Online</span>
-			</div>
+		<div class="text-center text-xs text-neutral-400">
+			© 2025 EarnMaze
 		</div>
 	</div>
 </aside>

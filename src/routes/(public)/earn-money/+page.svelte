@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { 
-		getUserId,
+		getVisitorId,
 		getSessionId, 
 		getUtmParams, 
 		trackPageVisit, 
@@ -16,7 +16,7 @@
 	let isSubmitting = $state(false);
 	let errorMessage = $state('');
 	let turnstileToken = $state<string | null>(null);
-	let turnstileRef: any;
+	let turnstileRef = $state<any>(null);
 	
 	let rewards = [
 		{ name: 'PayPal Cash', icon: '💵', popular: true },
@@ -73,7 +73,7 @@
 		errorMessage = '';
 
 		try {
-			const userId = getUserId();
+			const visitorId = getVisitorId();
 			const sessionId = getSessionId();
 			const utmParams = getUtmParams();
 			const timeToConvert = getTimeToConvert();
@@ -85,7 +85,7 @@
 				},
 				body: JSON.stringify({ 
 					email,
-					userId,
+					visitorId,
 					sessionId,
 					utmParams,
 					timeToConvert,
@@ -95,8 +95,11 @@
 
 			const data = await response.json();
 
-			if (response.ok && data.redirectUrl) {
-				window.location.href = data.redirectUrl;
+			if (response.ok && data.success) {
+				// Cookie is set by server (httpOnly)
+				// Add new user parameter if this is a new registration
+				let redirectUrl = data.redirectUrl || '/guest/dashboard';
+				window.location.href = redirectUrl;
 			} else {
 				errorMessage = data.error || 'Something went wrong. Please try again.';
 				isSubmitting = false;
@@ -148,7 +151,7 @@
 
 <!-- Hero Section -->
 <section
-	class="relative overflow-hidden bg-gradient-to-br from-primary-600 via-purple-600 to-primary-700 py-16 sm:py-20 md:py-24 lg:py-28"
+	class="relative overflow-hidden bg-gradient-to-br from-violet-600 via-indigo-600 to-violet-700 py-16 sm:py-20 md:py-24 lg:py-28"
 	aria-labelledby="hero-heading"
 >
 	<!-- Animated Background -->
@@ -214,10 +217,10 @@
 <section class="py-10 sm:py-12 md:py-16 lg:py-20 bg-white" aria-labelledby="rewards-heading">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="text-center mb-8 sm:mb-10 md:mb-12">
-			<h2 id="rewards-heading" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-2 sm:mb-3 px-4">
-				Choose Your <span class="text-primary-600">Reward</span>
+			<h2 id="rewards-heading" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-neutral-900 mb-2 sm:mb-3 px-4">
+				Choose Your <span class="text-violet-600">Reward</span>
 			</h2>
-			<p class="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+			<p class="text-sm sm:text-base md:text-lg text-neutral-600 max-w-2xl mx-auto px-4">
 				Redeem your points for cash or gift cards from top brands
 			</p>
 		</div>
@@ -230,16 +233,16 @@
 							HOT
 						</div>
 					{/if}
-					<div class="p-3 sm:p-4 md:p-5 bg-gradient-to-br from-gray-50 to-white rounded-lg sm:rounded-xl border-2 border-gray-200 hover:border-primary-400 hover:shadow-xl active:shadow-md transition-all duration-300 text-center transform hover:-translate-y-1 active:-translate-y-0.5 touch-manipulation">
+					<div class="p-3 sm:p-4 md:p-5 bg-gradient-to-br from-neutral-50 to-white rounded-lg sm:rounded-xl border-2 border-neutral-200 hover:border-violet-400 hover:shadow-xl active:shadow-md transition-all duration-300 text-center transform hover:-translate-y-1 active:-translate-y-0.5 touch-manipulation">
 						<div class="text-2xl sm:text-3xl md:text-4xl mb-1.5 sm:mb-2" aria-hidden="true">{reward.icon}</div>
-						<div class="text-[10px] sm:text-xs md:text-sm font-bold text-gray-700 leading-tight">{reward.name}</div>
+						<div class="text-[10px] sm:text-xs md:text-sm font-bold text-neutral-700 leading-tight">{reward.name}</div>
 					</div>
 				</div>
 			{/each}
 		</div>
 
 		<div class="text-center px-4">
-			<p class="text-xs sm:text-sm md:text-base text-gray-600 font-semibold">+ 50 More Reward Options!</p>
+			<p class="text-xs sm:text-sm md:text-base text-neutral-600 font-semibold">+ 50 More Reward Options!</p>
 		</div>
 	</div>
 </section>
@@ -247,7 +250,7 @@
 <!-- Final CTA Section -->
 <section class="relative py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden" aria-labelledby="cta-heading">
 	<!-- Gradient Background -->
-	<div class="absolute inset-0 bg-gradient-to-br from-primary-700 via-primary-600 to-yellow-500" aria-hidden="true"></div>
+	<div class="absolute inset-0 bg-gradient-to-br from-violet-700 via-violet-600 to-amber-500" aria-hidden="true"></div>
 	
 	<!-- Pattern Overlay -->
 	<div class="absolute inset-0 opacity-10" aria-hidden="true">
@@ -325,7 +328,7 @@
 			<!-- Close Button -->
 			<button
 				onclick={closeEmailModal}
-				class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+				class="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 transition-colors"
 				aria-label="Close modal"
 			>
 				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -335,11 +338,15 @@
 
 			<!-- Modal Content -->
 			<div class="text-center mb-6">
-				<div class="text-4xl mb-3">🎉</div>
-				<h3 id="modal-title" class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+				<div class="w-14 h-14 bg-violet-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+					<svg class="w-7 h-7 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+					</svg>
+				</div>
+				<h3 id="modal-title" class="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">
 					Get Started Now!
 				</h3>
-				<p class="text-sm sm:text-base text-gray-600">
+				<p class="text-sm sm:text-base text-neutral-600">
 					Enter your email to claim your earnings
 				</p>
 			</div>
@@ -355,7 +362,7 @@
 						placeholder="Enter your email address"
 						required
 						disabled={isSubmitting}
-						class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
+						class="w-full px-4 py-3 border-2 border-neutral-300 rounded-lg focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none transition-all text-base disabled:bg-neutral-100 disabled:cursor-not-allowed"
 					/>
 				</div>
 
@@ -380,7 +387,7 @@
 				<button
 					type="submit"
 					disabled={isSubmitting || !turnstileToken}
-					class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+					class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 				>
 					{#if isSubmitting}
 						<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -394,7 +401,7 @@
 				</button>
 			</form>
 
-			<p class="mt-4 text-xs text-center text-gray-500">
+			<p class="mt-4 text-xs text-center text-neutral-500">
 				By continuing, you agree to our Terms of Service and Privacy Policy
 			</p>
 		</div>

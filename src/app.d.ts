@@ -9,6 +9,7 @@ declare global {
 				userId: string;
 				expiresAt: Date;
 			} | null;
+			correlationId?: string;
 		}
 	}
 }

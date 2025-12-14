@@ -29,13 +29,7 @@
 		errorId = Date.now().toString();
 
 		if (logError) {
-			Logger.errors.error('Component error caught by boundary', {
-				error: err.message,
-				stack: err.stack,
-				errorId,
-				component: 'ErrorBoundary',
-				errorInfo
-			});
+			Logger.root.error({ context: 'errors', error: err.message, stack: err.stack, errorId, component: 'ErrorBoundary', errorInfo }, 'Component error caught by boundary');
 		}
 
 		if (showToast) {

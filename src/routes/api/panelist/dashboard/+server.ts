@@ -1,7 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getPanelistDashboard, getPanelistRecentActivity, getAvailableSurveysCount } from '$lib/db';
+
 import type { PanelistDashboardResponse } from '$lib/types/api-responses';
+import { getPanelistPoints, getPointsSummary } from '$lib/db';
+import { getAvailableSurveysCount, getSurveyCompletionsPanelist } from '$lib/db/repositories/survey.repository.server';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	try {
@@ -17,26 +19,17 @@ export const GET: RequestHandler = async ({ locals }) => {
 			return json({ error: 'Forbidden' }, { status: 403 });
 		}
 		
-		const dashboardData = await getPanelistDashboard(user.id);
-		const recentActivity = await getPanelistRecentActivity(user.id, 5);
-		const availableSurveys = await getAvailableSurveysCount(user.id);
+		const pointsSummary = await getPointsSummary(user.id);
+		const points = await getPanelistPoints(user.id);
+		const availableSurveys = await getAvailableSurveysCount();
+		const surveysCompleted = await getSurveyCompletionsPanelist(user.id);
 
 		// Construct typed response
 		const response: PanelistDashboardResponse = {
-			totalPoints: dashboardData.totalPoints,
-			lifetimeEarnings: dashboardData.lifetimeEarnings,
-			surveysCompleted: dashboardData.surveysCompleted,
-			averageRating: dashboardData.averageRating,
-			currentTier: dashboardData.currentTier,
-			completionRate: dashboardData.completionRate,
-			recentActivity: recentActivity.map(activity => ({
-				id: activity.id,
-				type: activity.type,
-				description: activity.description,
-				amount: activity.amount,
-				timestamp: activity.timestamp,
-			})),
-			availableSurveys,
+			lifetimePoints: pointsSummary.lifetimePoints || 0,
+			availableSurveys: availableSurveys || 0,
+			currentPoints: points.currentPoints || 0,
+			surveysCompleted: surveysCompleted || 0
 		};
 
 		return json(response);

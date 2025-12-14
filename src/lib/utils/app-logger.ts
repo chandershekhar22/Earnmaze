@@ -1,376 +1,295 @@
-/**
- * App-wide Logger Configuration
- * Centralized logging setup for the entire EarnMaze Panel application
- */
-
-import { createLogger, LogLevel, type LogData } from './logger';
+import pino, { type Logger as PinoLogger, type LoggerOptions, multistream } from 'pino';
 import { browser, dev } from '$app/environment';
+import type { ClientLogLevel, ClientLogPayload } from '$types/logging';
 
-// App-wide logging configuration
-export const LOG_CONFIG = {
-	// Log levels per environment
-	development: {
-		console: LogLevel.DEBUG,
-		api: LogLevel.ERROR,
-		file: LogLevel.INFO
-	},
-	production: {
-		console: LogLevel.ERROR,
-		api: LogLevel.WARN,
-		file: LogLevel.INFO
-	},
-	// Feature flags
-	enableConsoleLogging: dev || browser,
-	enableApiLogging: true,
-	enablePerformanceLogging: true,
-	enableUserTracking: true,
-	// Log retention
-	maxLogEntries: 1000,
-	logRetentionDays: 30
-};
+export type LogData = Record<string, unknown> | string | number | boolean | null | undefined;
 
-// Get current environment log level
-const currentEnv = dev ? 'development' : 'production';
-const logLevel = LOG_CONFIG[currentEnv].console;
-
-// Core application loggers
-export const AppLoggers = {
-	// Authentication & Authorization
-	auth: createLogger('Auth', logLevel),
-	
-	// API & Network
-	api: createLogger('API', logLevel),
-	network: createLogger('Network', logLevel),
-	
-	// Database & Storage
-	database: createLogger('Database', logLevel),
-	storage: createLogger('Storage', logLevel),
-	
-	// UI & Components
-	ui: createLogger('UI', logLevel),
-	components: createLogger('Components', logLevel),
-	
-	// Business Logic
-	surveys: createLogger('Surveys', logLevel),
-	respondents: createLogger('Respondents', logLevel),
-	analytics: createLogger('Analytics', logLevel),
-	rewards: createLogger('Rewards', logLevel),
-	points: createLogger('Points', logLevel),
-	
-	// System & Performance
-	performance: createLogger('Performance', logLevel),
-	security: createLogger('Security', logLevel),
-	system: createLogger('System', logLevel),
-	
-	// Error Handling
-	errors: createLogger('Errors', LogLevel.ERROR),
-	
-	// General Application
-	app: createLogger('App', logLevel)
-};
-
-// Global error handler with logging
-export function setupGlobalErrorHandling() {
-	if (!browser) return;
-
-	// Unhandled promise rejections
-	window.addEventListener('unhandledrejection', (event) => {
-		AppLoggers.errors.error('Unhandled promise rejection', {
-			reason: event.reason,
-			promise: event.promise,
-			url: window.location.href,
-			userAgent: navigator.userAgent
-		});
-	});
-
-	// Global JavaScript errors
-	window.addEventListener('error', (event) => {
-		AppLoggers.errors.error('Global JavaScript error', {
-			message: event.message,
-			filename: event.filename,
-			line: event.lineno,
-			column: event.colno,
-			error: event.error?.stack,
-			url: window.location.href
-		});
-	});
-
-	// Resource loading errors
-	window.addEventListener('error', (event) => {
-		if (event.target !== window) {
-			AppLoggers.errors.error('Resource loading error', {
-				tagName: (event.target as Element)?.tagName,
-				src: (event.target as HTMLImageElement)?.src || (event.target as HTMLScriptElement)?.src,
-				url: window.location.href
-			});
+const isDev = dev;
+const logLevel = browser ? 'error' : isDev ? 'debug' : 'info';
+const transport = !browser && isDev
+	? {
+		target: 'pino-pretty',
+		options: {
+			colorize: true,
+			singleLine: true,
+			translateTime: 'SYS:standard'
 		}
-	}, true);
+	}
+	: undefined;
+
+const enableRabbit = !browser && typeof process !== 'undefined' && Boolean(process.env.RABBITMQ_URL);
+const rabbitQueue = !browser && typeof process !== 'undefined' ? (process.env.RABBITMQ_LOG_QUEUE || 'app-logs') : 'app-logs';
+
+const baseOptions: LoggerOptions = {
+	level: logLevel,
+	base: { app: 'em-panel' },
+	transport
+};
+
+// Lightweight RabbitMQ publisher (fire-and-forget). Only active server-side when RABBITMQ_URL is set.
+let rabbitInit: Promise<any> | null = null;
+let rabbitChannel: any = null;
+
+const ensureRabbit = async () => {
+	if (rabbitChannel) return rabbitChannel;
+	if (!rabbitInit) {
+		rabbitInit = (async () => {
+			try {
+				// Dynamic import to avoid bundling client-side
+				// @ts-ignore optional dependency; runtime-only when configured
+				const amqp = await import('amqplib');
+				const connection = await amqp.connect((typeof process !== 'undefined' ? process.env.RABBITMQ_URL : '') as string);
+				const channel = await connection.createChannel();
+				await channel.assertQueue(rabbitQueue, { durable: true });
+				rabbitChannel = channel;
+				return channel;
+			} catch (err) {
+				console.error('RabbitMQ log transport init failed', err);
+				rabbitChannel = null;
+				return null;
+			}
+		})();
+	}
+	return rabbitInit;
+};
+
+const rabbitStream = {
+	write: (msg: string) => {
+		if (!enableRabbit) return;
+		void ensureRabbit().then((channel) => {
+			if (!channel) return;
+			try {
+				channel.sendToQueue(rabbitQueue, Buffer.from(msg), { persistent: true });
+			} catch (err) {
+				console.error('RabbitMQ log publish failed', err);
+			}
+		});
+	}
+};
+
+const streams = browser
+	? undefined
+	: multistream([
+		{ stream: process.stdout },
+		...(enableRabbit ? [{ stream: rabbitStream }] : [])
+	]);
+
+// Backend logger (server-only transports)
+const serverLogger = streams ? pino(baseOptions, streams) : pino(baseOptions);
+
+// Frontend logger (console only, structured objects in browser) with remote posting
+const sendClientLog = async (payload: ClientLogPayload) => {
+	if (!browser || typeof fetch !== 'function') return;
+	try {
+		await fetch('/api/logs', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
+		});
+	} catch (err) {
+		// Swallow to avoid log loops
+	}
+};
+
+const clientLogger = pino({
+	level: logLevel,
+	base: { app: 'em-panel', context: 'ui' },
+	browser: { asObject: true }
+});
+
+if (browser) {
+	(['info', 'warn', 'error'] as const).forEach((level) => {
+		const original = (clientLogger as any)[level].bind(clientLogger);
+		(clientLogger as any)[level] = (obj: any, msg?: string, ...rest: unknown[]) => {
+			const message = typeof obj === 'string' && !msg ? obj : msg || '';
+			const data = typeof obj === 'object' && obj !== null ? obj : undefined;
+			void sendClientLog({
+				level: level as ClientLogLevel,
+				message: message || 'client-log',
+				data: data as Record<string, unknown> | undefined,
+				href: typeof window !== 'undefined' ? window.location.href : undefined
+			});
+			return original(obj, msg, ...rest);
+		};
+	});
 }
 
-// Performance monitoring utilities
-export class PerformanceMonitor {
+// Export both; root resolves to environment-appropriate logger for existing call sites
+export const Logger: { root: PinoLogger; server: PinoLogger; client: PinoLogger } = {
+	root: browser ? clientLogger : serverLogger,
+	server: serverLogger,
+	client: clientLogger
+};
+
+// Generate a Cloudflare-style Ray ID (16 hex chars: 8 for timestamp seconds + 8 random)
+export function generateRayId(): string {
+	const timestampHex = Math.floor(Date.now() / 1000).toString(16).padStart(8, '0');
+	const randomHex = (() => {
+		const length = 8;
+		// Prefer crypto APIs when available (browser or Node)
+		if (typeof crypto !== 'undefined' && 'getRandomValues' in crypto) {
+			const bytes = new Uint8Array(length / 2);
+			crypto.getRandomValues(bytes);
+			return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+		}
+		if (typeof crypto !== 'undefined') {
+			const randomUUID = (crypto as { randomUUID?: () => string }).randomUUID;
+			if (typeof randomUUID === 'function') {
+				return randomUUID().replace(/-/g, '').slice(0, length);
+			}
+		}
+		// Fallback to Math.random (less secure but acceptable for log correlation)
+		return Array.from({ length }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+	})();
+	return `${timestampHex}${randomHex}`;
+}
+
+// Create a child logger scoped to a user/session for consistent attribution
+export function getUserLogger(userId?: string | null, sessionId?: string | null, data?: LogData): PinoLogger {
+	const normalized = normalize(data);
+	return Logger.root.child({
+		context: 'user',
+		userId: userId ?? undefined,
+		sessionId: sessionId ?? undefined,
+		...normalized
+	});
+}
+
+// Child logger dedicated to errors with optional correlation/request IDs
+export function getErrorLogger(correlationId?: string | null, data?: LogData): PinoLogger {
+	const normalized = normalize(data);
+	return Logger.root.child({ context: 'errors', correlationId: correlationId ?? undefined, ...normalized });
+}
+
+// Helpers
+const normalize = (data?: LogData): Record<string, unknown> | undefined => {
+	if (data === undefined) return undefined;
+	if (data !== null && typeof data === 'object') return data as Record<string, unknown>;
+	return { data };
+};
+
+// Performance helper
+export class Perf {
 	private static observations = new Map<string, number>();
 
 	static start(operation: string): string {
-		const id = `${operation}_${Date.now()}_${Math.random()}`;
-		this.observations.set(id, performance.now());
-		AppLoggers.performance.debug(`Started: ${operation}`, { operationId: id });
+		const id = `${operation}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+		this.observations.set(id, (typeof performance !== 'undefined' ? performance.now() : Date.now()));
+		Logger.root.debug({ context: 'performance', operationId: id }, `Started: ${operation}`);
 		return id;
 	}
 
-	static end(operationId: string, additionalData?: LogData): void {
-		const startTime = this.observations.get(operationId);
-		if (!startTime) {
-			AppLoggers.performance.warn('Performance measurement not found', { operationId });
+	static end(operationId: string, data?: LogData): void {
+		const start = this.observations.get(operationId);
+		if (start === undefined) {
+			Logger.root.warn({ context: 'performance', operationId }, 'Performance measurement not found');
 			return;
 		}
-
-		const duration = performance.now() - startTime;
-		const operation = operationId.split('_')[0];
-		
+		const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+		const duration = now - start;
 		this.observations.delete(operationId);
-		
-        AppLoggers.performance.info(`Completed: ${operation}`, {
-            operationId,
-            duration: `${duration.toFixed(2)}ms`,
-            ...(typeof additionalData === 'object' && additionalData !== null ? additionalData : { data: additionalData })
-        });
 
-		// Log slow operations
+		Logger.root.info({ context: 'performance', operationId, durationMs: Number(duration.toFixed(2)), ...normalize(data) }, 'Completed');
+
 		if (duration > 1000) {
-			AppLoggers.performance.warn(`Slow operation detected: ${operation}`, {
-				duration: `${duration.toFixed(2)}ms`,
-				threshold: '1000ms',
-				 ...(typeof additionalData === 'object' && additionalData !== null ? additionalData : { data: additionalData })
-			});
+			Logger.root.warn({ context: 'performance', operationId, durationMs: Number(duration.toFixed(2)), thresholdMs: 1000, ...normalize(data) }, 'Slow operation');
 		}
 	}
 
-	static measure<T>(operation: string, fn: () => T | Promise<T>, additionalLogData?: LogData): T | Promise<T> {
-		const operationId = this.start(operation);
-        const additionalData = (typeof additionalLogData === 'object' && additionalLogData !== null) ? additionalLogData : { data: additionalLogData };
-
+	static measure<T>(operation: string, fn: () => T | Promise<T>, data?: LogData): T | Promise<T> {
+		const id = this.start(operation);
+		const extra = normalize(data);
 		try {
-			const result = fn();
-			
-			if (result instanceof Promise) {
-				return result
+			const res = fn();
+			if (res instanceof Promise) {
+				return res
 					.then((value) => {
-						this.end(operationId, { success: true, ...additionalData });
+						this.end(id, { success: true, ...extra });
 						return value;
 					})
-					.catch((error) => {
-						this.end(operationId, { success: false, error: error.message, ...additionalData });
-						throw error;
+					.catch((err) => {
+						this.end(id, { success: false, error: err instanceof Error ? err.message : String(err), ...extra });
+						throw err;
 					});
-			} else {
-				this.end(operationId, { success: true, ...additionalData });
-				return result;
 			}
-		} catch (error) {
-			this.end(operationId, { success: false, error: (error as Error).message, ...additionalData });
-			throw error;
+			this.end(id, { success: true, ...extra });
+			return res;
+		} catch (err) {
+			this.end(id, { success: false, error: err instanceof Error ? err.message : String(err), ...extra });
+			throw err;
 		}
 	}
 }
 
-// User session tracking
-export class SessionTracker {
-	private static sessionId: string;
-	private static userId?: string;
-
-	static initialize(): void {
-		if (!browser) return;
-
-		this.sessionId = this.generateSessionId();
-		AppLoggers.system.info('Session initialized', {
-			sessionId: this.sessionId,
-			timestamp: new Date().toISOString(),
-			userAgent: navigator.userAgent,
-			url: window.location.href
-		});
-
-		// Track page visibility changes
-		document.addEventListener('visibilitychange', () => {
-			AppLoggers.ui.info('Page visibility changed', {
-				sessionId: this.sessionId,
-				hidden: document.hidden,
-				visibilityState: document.visibilityState
-			});
-		});
-
-		// Track page unload
-		window.addEventListener('beforeunload', () => {
-			AppLoggers.system.info('Session ending', {
-				sessionId: this.sessionId,
-				duration: Date.now() - parseInt(this.sessionId.split('_')[1])
-			});
-		});
+// Feature tracking (lightweight)
+export class Features {
+	static trackPageView(path: string, data?: LogData): void {
+		Logger.root.info({ context: 'app', path, ...normalize(data) }, 'Page view');
 	}
 
-	static setUser(userId: string): void {
-		this.userId = userId;
-		AppLoggers.system.info('User session updated', {
-			sessionId: this.sessionId,
-			userId,
-			timestamp: new Date().toISOString()
-		});
-	}
-
-	static getSessionId(): string {
-		return this.sessionId;
-	}
-
-	static getUserId(): string | undefined {
-		return this.userId;
-	}
-
-	private static generateSessionId(): string {
-		return `session_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+	static trackUserAction(action: string, context?: string, data?: LogData): void {
+		Logger.root.info({ context: 'app', action, area: context, ...normalize(data) }, 'User action');
 	}
 }
 
-// API call interceptor with logging
-export class ApiInterceptor {
-	static logRequest(method: string, url: string, data?: LogData): string {
-		const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(2)}`;
-		
-		AppLoggers.api.info(`API Request: ${method} ${url}`, {
-			requestId,
-			method,
-			url,
-			data: data ? JSON.stringify(data) : undefined,
-			timestamp: new Date().toISOString(),
-			sessionId: SessionTracker.getSessionId(),
-			userId: SessionTracker.getUserId()
-		});
-
-		return requestId;
+// Security logging
+export class Security {
+	private static mask(identifier?: string): string | undefined {
+		if (!identifier) return undefined;
+		if (identifier.includes('@')) {
+			const [local, domain] = identifier.split('@');
+			if (!domain) return '***';
+			if (local.length <= 2) return `${local}***@${domain}`;
+			return `${local.slice(0, 2)}***@${domain}`;
+		}
+		return identifier.length <= 6
+			? `${identifier.slice(0, 2)}***`
+			: `${identifier.slice(0, 3)}***${identifier.slice(-2)}`;
 	}
 
-	static logResponse(requestId: string, status: number, duration: number, data?: LogData): void {
-		const logLevel = status >= 400 ? 'error' : 'info';
-		
-		AppLoggers.api[logLevel](`API Response: ${status}`, {
-			requestId,
-			status,
-			duration: `${duration}ms`,
-			data: data ? JSON.stringify(data) : undefined,
-			success: status < 400,
-			timestamp: new Date().toISOString()
-		});
-	}
-
-	static logError(requestId: string, error: Error, duration: number): void {
-		AppLoggers.api.error('API Error', {
-			requestId,
-			error: error.message,
-			stack: error.stack,
-			duration: `${duration}ms`,
-			timestamp: new Date().toISOString()
-		});
-	}
-}
-
-// Feature usage tracking
-export class FeatureTracker {
-	static track(feature: string, action: string, additionalLogData?: LogData): void {
-         const additionalData = (typeof additionalLogData === 'object' && additionalLogData !== null) ? additionalLogData : { data: additionalLogData };
-		AppLoggers.analytics.info(`Feature: ${feature} - ${action}`, {
-			feature,
-			action,
-			sessionId: SessionTracker.getSessionId(),
-			userId: SessionTracker.getUserId(),
-			timestamp: new Date().toISOString(),
-			url: browser ? window.location.pathname : undefined,
-			...additionalData
-		});
-	}
-
-	static trackPageView(path: string): void {
-		AppLoggers.analytics.info('Page view', {
-			path,
-			sessionId: SessionTracker.getSessionId(),
-			userId: SessionTracker.getUserId(),
-			timestamp: new Date().toISOString(),
-			referrer: browser ? document.referrer : undefined
-		});
-	}
-
-	static trackUserAction(action: string, context?: string, additionalLogData?: LogData): void {
-         const additionalData = (typeof additionalLogData === 'object' && additionalLogData !== null) ? additionalLogData : { data: additionalLogData };
-		AppLoggers.analytics.info(`User action: ${action}`, {
-			action,
-			context,
-			sessionId: SessionTracker.getSessionId(),
-			userId: SessionTracker.getUserId(),
-			timestamp: new Date().toISOString(),
-			...additionalData
-		});
-	}
-}
-
-// Security event logging
-export class SecurityLogger {
-	static logAuthAttempt(type: 'login' | 'register' | 'logout', email?: string, success?: boolean): void {
-		AppLoggers.security.info(`Auth attempt: ${type}`, {
-			type,
-			email: email ? this.maskEmail(email) : undefined,
-			success,
-			sessionId: SessionTracker.getSessionId(),
-			timestamp: new Date().toISOString(),
-			ip: browser ? this.getClientIP() : undefined,
-			userAgent: browser ? navigator.userAgent : undefined
-		});
+	static logAuthAttempt(type: 'login' | 'register' | 'logout', identifier?: string, success?: boolean, details?: LogData): void {
+		Logger.root.info({ context: 'security', type, identifier: this.mask(identifier), success, ...normalize(details) }, 'Auth attempt');
 	}
 
 	static logSecurityEvent(event: string, severity: 'low' | 'medium' | 'high', details?: LogData): void {
-		const logLevel = severity === 'high' ? 'error' : severity === 'medium' ? 'warn' : 'info';
-        const additionalData = (typeof details === 'object' && details !== null) ? details : { data: details };
-
-		AppLoggers.security[logLevel](`Security event: ${event}`, {
-			event,
-			severity,
-			sessionId: SessionTracker.getSessionId(),
-			userId: SessionTracker.getUserId(),
-			timestamp: new Date().toISOString(),
-			...additionalData
-		});
-	}
-
-	private static maskEmail(email: string): string {
-		const [local, domain] = email.split('@');
-		if (local.length <= 2) return `${local}***@${domain}`;
-		return `${local.substring(0, 2)}***@${domain}`;
-	}
-
-	private static getClientIP(): string {
-		// This would need to be implemented server-side
-		return 'client-side';
+		const level = severity === 'high' ? 'error' : severity === 'medium' ? 'warn' : 'info';
+		(Logger.root as any)[level]({ context: 'security', event, severity, ...normalize(details) }, 'Security event');
 	}
 }
 
-// Initialize app-wide logging
+// Minimal global error hooks (browser only)
 export function initializeAppLogging(): void {
 	if (!browser) return;
 
-	SessionTracker.initialize();
-	setupGlobalErrorHandling();
-	
-	AppLoggers.app.info('Application logging initialized', {
-		environment: dev ? 'development' : 'production',
-		logLevel: LogLevel[logLevel],
-		config: LOG_CONFIG,
-		timestamp: new Date().toISOString()
+	window.addEventListener('unhandledrejection', (event) => {
+		Logger.root.error({ context: 'errors', reason: event.reason, promise: String(event.promise), href: window.location.href }, 'Unhandled promise rejection');
 	});
+
+	window.addEventListener('error', (event) => {
+		Logger.root.error({ context: 'errors', message: event.message, filename: event.filename, line: event.lineno, column: event.colno, href: window.location.href }, 'Global error');
+	});
+
+	Logger.root.info({ context: 'app', environment: dev ? 'development' : 'production' }, 'Application logging initialized');
 }
 
-// Export everything for easy access
-export {
-	AppLoggers as Logger,
-	PerformanceMonitor as Perf,
-	SessionTracker as Session,
-	ApiInterceptor as API,
-	FeatureTracker as Features,
-	SecurityLogger as Security
+// Aliases for compatibility with existing imports
+export const API = {
+	request(method: string, url: string, data?: LogData): string {
+		const requestId = `req-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+		Logger.root.info({ context: 'api', requestId, method, url, ...normalize(data) }, 'API request');
+		return requestId;
+	},
+
+	response(requestId: string, status: number, durationMs: number, data?: LogData): void {
+		const level = status >= 400 ? 'error' : 'info';
+		(Logger.root as any)[level]({ context: 'api', requestId, status, durationMs, ...normalize(data) }, 'API response');
+	},
+
+	error(requestId: string, err: Error, durationMs: number): void {
+		Logger.root.error({ context: 'api', requestId, error: err.message, stack: err.stack, durationMs }, 'API error');
+	}
 };
+
+// Back-compat names (Logger, Perf, Features, Security already exported above)
+export const Session = { initialize: () => {}, setUser: () => {} };
+// User session tracking

@@ -1,10 +1,10 @@
 import { requireAdmin } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
-import { db } from '$lib/db';
+import { db, pointsTransactions } from '$lib/db';
 import { user, session } from '$lib/db/schema/auth';
 import { surveyTransaction } from '$lib/db/schema/surveys';
-import { pointsTransactions } from '$lib/db/schema/transactions';
-import { eq, count, sql, desc } from 'drizzle-orm';
+import { emailConversions } from '$lib/db/schema/analytics';
+import { eq, count, sql, desc, or } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
@@ -30,9 +30,10 @@ export const load: PageServerLoad = async (event) => {
 			.from(surveyTransaction);
 
 		const [totalPointsAwarded] = await db
-			.select({ total: sql<number>`COALESCE(SUM(${pointsTransactions.amount}), 0)` })
+			.select({ total: sql<number>`COALESCE(SUM(${pointsTransactions.points}), 0)` })
 			.from(pointsTransactions)
-			.where(eq(pointsTransactions.type, 'earned'));
+			.where(or(eq(pointsTransactions.type, 'earned'),
+				eq(pointsTransactions.type, 'bonus')));
 
 		// Get recent users
 		const recentUsers = await db
@@ -75,6 +76,28 @@ export const load: PageServerLoad = async (event) => {
 			.from(user)
 			.where(sql`${user.createdAt} >= ${thirtyDaysAgo.toISOString()}`);
 
+		// Get total email conversions
+		const [totalConversions] = await db
+			.select({ count: count() })
+			.from(emailConversions);
+
+		// Get recent email conversions
+		const recentConversions = await db
+			.select({
+				id: emailConversions.id,
+				email: emailConversions.email,
+				visitorId: emailConversions.visitorId,
+				sessionId: emailConversions.sessionId,
+				utmSource: emailConversions.utmSource,
+				utmMedium: emailConversions.utmMedium,
+				utmCampaign: emailConversions.utmCampaign,
+				timeToConvertSeconds: emailConversions.timeToConvertSeconds,
+				convertedAt: emailConversions.convertedAt
+			})
+			.from(emailConversions)
+			.orderBy(desc(emailConversions.convertedAt))
+			.limit(10);
+
 		return {
 			stats: {
 				totalUsers: totalUsers?.count || 0,
@@ -83,10 +106,12 @@ export const load: PageServerLoad = async (event) => {
 				totalResponses: totalResponses?.count || 0,
 				totalPointsAwarded: totalPointsAwarded?.total || 0,
 				activeSessions: activeSessions?.count || 0,
-				newUsersLast30Days: newUsersLast30Days?.count || 0
+				newUsersLast30Days: newUsersLast30Days?.count || 0,
+				totalConversions: totalConversions?.count || 0
 			},
 			recentUsers,
-			recentResponses
+			recentResponses,
+			recentConversions
 		};
 	} catch (error) {
 		console.error('Error loading admin dashboard:', error);
@@ -98,10 +123,12 @@ export const load: PageServerLoad = async (event) => {
 				totalResponses: 0,
 				totalPointsAwarded: 0,
 				activeSessions: 0,
-				newUsersLast30Days: 0
+				newUsersLast30Days: 0,
+				totalConversions: 0
 			},
 			recentUsers: [],
-			recentResponses: []
+			recentResponses: [],
+			recentConversions: []
 		};
 	}
 };

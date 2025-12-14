@@ -28,33 +28,22 @@
 		appliedTheme = themeStore.getAppliedTheme();
 
 		// Log application startup
-		Logger.app.info('Application mounted and initialized', {
-			route: $page.route.id,
-			url: $page.url.pathname,
-			timestamp: new Date().toISOString()
-		});
+		Logger.root.info({ context: 'app', route: $page.route.id, url: $page.url.pathname, timestamp: new Date().toISOString() }, 'Application mounted and initialized');
 	});
 
 	// Track route changes
 	$effect(() => {
 		if (mounted && $page.route.id) {
 			Features.trackPageView($page.url.pathname);
-			Logger.ui.info('Route changed', {
-				route: $page.route.id,
-				path: $page.url.pathname,
-				params: $page.params
-			});
+			Logger.root.info({ context: 'ui', route: $page.route.id, path: $page.url.pathname, params: $page.params }, 'Route changed');
 		}
 	});
 
 	// Track user authentication state changes
 	$effect(() => {
 		if (mounted && authStore.state.user) {
-			Session.setUser(authStore.state.user.id);
-			Logger.auth.info('User session active', {
-				userId: authStore.state.user.id,
-				email: authStore.state.user.email
-			});
+			Session.setUser();
+			Logger.root.info({ context: 'auth', userId: authStore.state.user.id, email: authStore.state.user.email }, 'User session active');
 		}
 	});
 

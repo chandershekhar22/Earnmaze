@@ -19,11 +19,17 @@ export const userTypeEnum = pgEnum("user_type_enum", [
     "moderator",
 ]);
 
+// Enums
+export const userStatusEnum = pgEnum("user_status_enum", [
+  "active", "suspended", "banned", "inactive", "pending_verification"
+]);
+
 export const user = pgTable("users", {
     id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    name: text("name").notNull(),
+    name: text("name"),
     email: varchar("email", { length: 255 }).notNull().unique(),
-    password: text("password").notNull(),
+    password: text("password"),
+    isPasswordSet: boolean("is_password_set").default(false).notNull(),
     emailVerified: boolean("email_verified")
         .$defaultFn(() => false)
         .notNull(),
@@ -35,7 +41,10 @@ export const user = pgTable("users", {
     utmCampaign: varchar("utm_campaign", { length: 100 }),
     lastLoginAt: timestamp("last_login_at"),
     loginCount: integer("login_count").default(0),
+    referralCode: varchar("referral_code", { length: 20 }).unique(),
+    referredBy: uuid("referred_by"),
     isActive: boolean("is_active").default(true).notNull(),
+    status: userStatusEnum("status").notNull().default("active"),
     isDeleted: boolean("is_deleted").default(false),
     createdBy: uuid("created_by"),
     updatedBy: uuid("updated_by"),
@@ -50,6 +59,13 @@ export const user = pgTable("users", {
     index("users_created_by_idx").on(table.createdBy),
     index("users_deleted_at_idx").on(table.deletedAt),
 ]);
+
+export const userRelations = {
+    referredBy: {
+        fields: [user.referredBy],
+        references: [user.id],
+    },
+};
 
 export const session = pgTable("sessions", {
     id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),

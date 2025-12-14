@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getPanelistPointsTransactions } from '$lib/db';
+import { getPanelistPointsTransactions } from '$lib/db/repositories/panelist-points.repository.server';
+import type { PointsTransactionsResponse } from '$types/api-responses';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	try {
@@ -18,7 +19,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 		const transactions = await getPanelistPointsTransactions(user.id);
 
-		return json(transactions);
+		return json(transactions satisfies PointsTransactionsResponse);
 	} catch (error) {
 		console.error('Transactions API error:', error);
 		return json({ error: 'Failed to fetch transactions' }, { status: 500 });

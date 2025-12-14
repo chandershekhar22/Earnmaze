@@ -4,32 +4,33 @@
  * Only runs in browser environment
  */
 
-// Generate or retrieve persistent user ID (survives across sessions)
-export function getUserId(): string {
-	const USER_KEY = 'analytics_user_id';
+// Generate or retrieve persistent visitor ID (survives across sessions)
+export function getVisitorId(): string {
+	const VISITOR_KEY = 'analytics_visitor_id';
 	
 	if (typeof window === 'undefined') return '';
 	
 	try {
-		// Try localStorage first (persists across sessions)
-		let userId = localStorage.getItem(USER_KEY);
+		let visitorId = localStorage.getItem(VISITOR_KEY);
 		
-		if (!userId) {
-			// Generate new user ID
-			userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-			localStorage.setItem(USER_KEY, userId);
+		if (!visitorId) {
+			visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+			localStorage.setItem(VISITOR_KEY, visitorId);
 		}
 		
-		return userId;
-	} catch (e) {
-		// Fallback if localStorage is unavailable
-		return `user_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+		return visitorId;
+	} catch {
+		return `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 	}
 }
+
+// Cache fingerprint for performance
+let cachedFingerprint: string | null = null;
 
 // Generate browser fingerprint (for identifying users even without cookies)
 export async function getBrowserFingerprint(): Promise<string> {
 	if (typeof window === 'undefined') return '';
+	if (cachedFingerprint) return cachedFingerprint;
 	
 	const components: string[] = [];
 	
@@ -69,7 +70,7 @@ export async function getBrowserFingerprint(): Promise<string> {
 			ctx.fillText('fingerprint', 2, 15);
 			components.push(canvas.toDataURL());
 		}
-	} catch (e) {
+	} catch {
 		// Canvas fingerprinting blocked
 	}
 	
@@ -84,13 +85,13 @@ export async function getBrowserFingerprint(): Promise<string> {
 				components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL));
 			}
 		}
-	} catch (e) {
+	} catch {
 		// WebGL not available
 	}
 	
 	// Create hash from components
-	const fingerprint = await hashString(components.join('|||'));
-	return fingerprint;
+	cachedFingerprint = await hashString(components.join('|||'));
+	return cachedFingerprint;
 }
 
 // Simple hash function for fingerprinting
@@ -138,8 +139,7 @@ export function getSessionId(): string {
 		sessionStorage.setItem(`${SESSION_KEY}_timestamp`, Date.now().toString());
 		
 		return sessionId;
-	} catch (e) {
-		// Fallback if sessionStorage is unavailable
+	} catch {
 		return `sess_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 	}
 }
@@ -185,27 +185,17 @@ export function getBrowserName(): string {
 	if (typeof window === 'undefined') return 'unknown';
 	
 	const ua = navigator.userAgent;
-	let browserName = 'unknown';
 	
-	if (ua.indexOf('Firefox') > -1) {
-		browserName = 'Firefox';
-	} else if (ua.indexOf('SamsungBrowser') > -1) {
-		browserName = 'Samsung Internet';
-	} else if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) {
-		browserName = 'Opera';
-	} else if (ua.indexOf('Trident') > -1) {
-		browserName = 'Internet Explorer';
-	} else if (ua.indexOf('Edge') > -1) {
-		browserName = 'Edge';
-	} else if (ua.indexOf('Edg') > -1) {
-		browserName = 'Edge Chromium';
-	} else if (ua.indexOf('Chrome') > -1) {
-		browserName = 'Chrome';
-	} else if (ua.indexOf('Safari') > -1) {
-		browserName = 'Safari';
-	}
+	if (ua.includes('Firefox')) return 'Firefox';
+	if (ua.includes('SamsungBrowser')) return 'Samsung Internet';
+	if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
+	if (ua.includes('Trident')) return 'Internet Explorer';
+	if (ua.includes('Edg')) return 'Edge Chromium';
+	if (ua.includes('Edge')) return 'Edge';
+	if (ua.includes('Chrome')) return 'Chrome';
+	if (ua.includes('Safari')) return 'Safari';
 	
-	return browserName;
+	return 'unknown';
 }
 
 // Get OS name
@@ -213,23 +203,15 @@ export function getOsName(): string {
 	if (typeof window === 'undefined') return 'unknown';
 	
 	const ua = navigator.userAgent;
-	let osName = 'unknown';
 	
-	if (ua.indexOf('Win') > -1) {
-		osName = 'Windows';
-	} else if (ua.indexOf('Mac') > -1) {
-		osName = 'MacOS';
-	} else if (ua.indexOf('X11') > -1) {
-		osName = 'UNIX';
-	} else if (ua.indexOf('Linux') > -1) {
-		osName = 'Linux';
-	} else if (/Android/.test(ua)) {
-		osName = 'Android';
-	} else if (/iPhone|iPad|iPod/.test(ua)) {
-		osName = 'iOS';
-	}
+	if (/iPhone|iPad|iPod/.test(ua)) return 'iOS';
+	if (/Android/.test(ua)) return 'Android';
+	if (ua.includes('Win')) return 'Windows';
+	if (ua.includes('Mac')) return 'MacOS';
+	if (ua.includes('Linux')) return 'Linux';
+	if (ua.includes('X11')) return 'UNIX';
 	
-	return osName;
+	return 'unknown';
 }
 
 // Get screen resolution
@@ -243,7 +225,7 @@ export function getTimezone(): string {
 	if (typeof Intl === 'undefined') return 'unknown';
 	try {
 		return Intl.DateTimeFormat().resolvedOptions().timeZone;
-	} catch (e) {
+	} catch {
 		return 'unknown';
 	}
 }
@@ -256,13 +238,13 @@ export function getLanguage(): string {
 
 // Track page visit
 export async function trackPageVisit() {
-	const userId = getUserId();
+	const visitorId = getVisitorId();
 	const sessionId = getSessionId();
 	const utmParams = getUtmParams();
 	const fingerprint = await getBrowserFingerprint();
 	
 	const visitData = {
-		userId,
+		visitorId,
 		sessionId,
 		fingerprint,
 		...utmParams,
@@ -290,14 +272,14 @@ export async function trackPageVisit() {
 
 // Track CTA click
 export async function trackCtaClick(buttonLocation: string) {
-	const userId = getUserId();
+	const visitorId = getVisitorId();
 	const sessionId = getSessionId();
 	
 	try {
 		await fetch('/api/track-cta', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ userId, sessionId, buttonLocation }),
+			body: JSON.stringify({ visitorId, sessionId, buttonLocation }),
 		});
 	} catch (error) {
 		console.error('Failed to track CTA click:', error);

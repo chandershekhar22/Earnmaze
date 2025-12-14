@@ -7,7 +7,7 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 	try {
 		const body = await request.json();
 		const {
-			userId,
+			visitorId,
 			sessionId,
 			fingerprint,
 			utm_source,
@@ -31,7 +31,7 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 
 		// Insert visit tracking
 		await db.insert(pageVisits).values({
-			userId,
+			visitorId,
 			sessionId,
 			fingerprint,
 			utmSource: utm_source,

@@ -8,6 +8,8 @@
  * 4. Clear API contracts between client and server
  */
 
+import type { pointsTransactionTypes } from "$lib/constants/constants";
+
 // Base response types
 export interface ApiSuccessResponse<T = unknown> {
 	success: true;
@@ -95,19 +97,9 @@ export interface RegisterErrorResponse extends ApiErrorResponse {
  * GET /api/panelist/dashboard
  */
 export interface PanelistDashboardResponse {
-	totalPoints: number;
-	lifetimeEarnings: number;
+	currentPoints: number;
+	lifetimePoints: number;
 	surveysCompleted: number;
-	averageRating: number;
-	currentTier: string;
-	completionRate: number;
-	recentActivity: Array<{
-		id: string;
-		type: 'survey_completed' | 'points_earned' | 'reward_redeemed';
-		description: string;
-		amount?: number;
-		timestamp: Date | string;
-	}>;
 	availableSurveys: number;
 }
 
@@ -130,25 +122,17 @@ export interface PanelistPointsResponse {
  */
 export interface PointsTransactionItem {
 	id: string;
-	type: 'earned' | 'redeemed' | 'bonus' | 'penalty' | 'adjustment';
-	amount: number;
-	balanceAfter: number;
+	type: typeof pointsTransactionTypes[number];
+	points: number;
+	currentBalance: number;
+	pendingBalance: number;
 	description: string;
-	referenceType?: 'survey' | 'reward' | 'referral' | 'bonus' | 'manual';
-	referenceId?: string;
+	referenceType?: string | null;
+	referenceId?: string | null;
 	createdAt: Date | string;
 }
 
-export interface PointsTransactionsResponse {
-	transactions: PointsTransactionItem[];
-	currentBalance: number;
-	pagination?: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-	};
-}
+export type PointsTransactionsResponse = PointsTransactionItem[];
 
 /**
  * Survey transactions list
@@ -188,17 +172,8 @@ export interface AvailableSurveyItem {
 	id: string;
 	title: string;
 	description: string;
-	category: string;
-	pointsReward: number;
-	estimatedMinutes: number;
-	targetResponses: number;
-	currentResponses: number;
-	expiresAt?: Date | string;
-	qualificationCriteria?: Array<{
-		field: string;
-		operator: string;
-		value: unknown;
-	}>;
+	points: number;
+	link: string;
 }
 
 /**

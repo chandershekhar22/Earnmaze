@@ -5,12 +5,13 @@ export * from './auth';
 export * from './panelist';
 export * from './survey';
 export * from './api-responses';
+export * from './guest-session';
 
 // Database schema types
 export type { user, session } from '../db/schema/auth';
-export type { survey, surveyInvitation, surveyQuestion, surveyTransaction } from '../db/schema/surveys';
-export type { panelist, panelistDemographics, panelistGeography, panelistProfessional } from '../db/schema/panelists';
-export type { pointsTransactions } from '../db/schema/transactions';
+export type { survey, surveyTransaction } from '../db/schema/surveys';
+export type { panelistDemographics, panelistGeography, panelistProfessional } from '../db/schema/panelist-profile';
+export type { pointsTransactions, panelistPoint } from '../db/schema/panelist-points';
 
 // API Request/Response Types
 export interface ApiResponse<T = unknown> {

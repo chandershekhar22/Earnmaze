@@ -16,38 +16,30 @@ class PointsStore {
 	});
 
 	async fetchPoints() {
-		Logger.points.info('Fetching user points');
-		const requestId = API.logRequest('GET', '/api/panelist/points');
+		Logger.root.info({ context: 'points' }, 'Fetching user points');
+		const requestId = API.request('GET', '/api/panelist/points');
 		const startTime = performance.now();
 
 		try {
 			const response = await fetch('/api/panelist/points');
 			const duration = performance.now() - startTime;
 
-			API.logResponse(requestId, response.status, duration);
+			API.response(requestId, response.status, duration);
 
 			if (response.ok) {
 				const pointsData = await response.json();
-				Logger.points.info('Points fetched successfully', {
-					availablePoints: pointsData.availablePoints,
-					totalPoints: pointsData.totalPoints
-				});
+				Logger.root.info({ context: 'points', availablePoints: pointsData.availablePoints, totalPoints: pointsData.totalPoints }, 'Points fetched successfully');
 				this.data = pointsData;
 				return pointsData;
 			} else {
-				Logger.points.warn('Failed to fetch points', {
-					statusCode: response.status
-				});
+				Logger.root.warn({ context: 'points', statusCode: response.status }, 'Failed to fetch points');
 				// Keep existing data on error
 				return null;
 			}
 		} catch (error) {
 			const duration = performance.now() - startTime;
-			API.logError(requestId, error as Error, duration);
-			Logger.points.error('Points fetch network error', {
-				error: error instanceof Error ? error.message : 'Unknown error',
-				duration: `${duration}ms`
-			});
+			API.error(requestId, error as Error, duration);
+			Logger.root.error({ context: 'errors', error: error instanceof Error ? error.message : 'Unknown error', duration: `${duration}ms` }, 'Points fetch network error');
 			// Keep existing data on error
 			return null;
 		}
@@ -59,7 +51,7 @@ class PointsStore {
 			...this.data,
 			...pointsData
 		};
-		Logger.points.info('Points updated locally', pointsData);
+		Logger.root.info({ context: 'points', ...pointsData }, 'Points updated locally');
 	}
 
 	// Reset points (useful for logout)
@@ -70,7 +62,7 @@ class PointsStore {
 			pendingPoints: 0,
 			lifetimeEarned: 0
 		};
-		Logger.points.info('Points reset');
+		Logger.root.info({ context: 'points' }, 'Points reset');
 	}
 }
 

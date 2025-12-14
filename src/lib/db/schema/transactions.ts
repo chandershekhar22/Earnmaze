@@ -13,17 +13,10 @@ import {
   jsonb,
   pgEnum,
 } from "drizzle-orm/pg-core";
+import { user } from "./auth";
 
 // Enums
-export const pointsTransactionTypeEnum = pgEnum("points_transaction_type_enum", [
-  "earned",
-  "redeemed",
-  "bonus",
-  "penalty",
-  "adjustment",
-  "refund",
-  "expired",
-]);
+
 
 export const redemptionTypeEnum = pgEnum("redemption_type_enum", [
   "paypal",
@@ -42,32 +35,8 @@ export const rewardTypeEnum = pgEnum("reward_type_enum", [
   "experience",
 ]);
 
-export const pointsTransactions = pgTable("points_transactions", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  panelistId: uuid("panelist_id").notNull(),
-  type: pointsTransactionTypeEnum("type").notNull(), // earned, redeemed, bonus, penalty, adjustment, refund, expired
-  category: varchar("category", { length: 50 }), // survey_completion, referral, daily_bonus, quality_bonus, etc
-  amount: integer("amount").notNull(), // positive for earnings, negative for redemptions/penalties
-  balance: integer("balance").notNull(), // running balance after this transaction
-  description: varchar("description", { length: 255 }).notNull(),
-  referenceId: uuid("reference_id"), // survey completion id, redemption id, etc
-  referenceType: varchar("reference_type", { length: 32 }), // survey_completion, redemption, bonus, etc
-  status: varchar("status", { length: 32 }).default("completed"), // pending, completed, failed, cancelled
-  expiresAt: timestamp("expires_at"), // for points that expire
-  metadata: jsonb("metadata"), // JSON for additional details
-  adminNotes: text("admin_notes"), // internal notes for admins
-  processedBy: uuid("processed_by"), // admin user id if manually processed
-  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
-  processedAt: timestamp("processed_at"),
-}, (table) => [
-  index("points_transactions_panelist_id_idx").on(table.panelistId),
-  index("points_transactions_type_idx").on(table.type),
-  index("points_transactions_category_idx").on(table.category),
-  index("points_transactions_status_idx").on(table.status),
-  index("points_transactions_reference_idx").on(table.referenceType, table.referenceId),
-  index("points_transactions_created_at_idx").on(table.createdAt),
-  index("points_transactions_expires_at_idx").on(table.expiresAt),
-]);
+
+
 
 export const redemptions = pgTable("redemptions", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -133,21 +102,6 @@ export const referrals = pgTable("referrals", {
   uniqueIndex("referrals_unique_idx").on(table.referrerId, table.referredId),
 ]);
 
-export const pointsExpiry = pgTable("points_expiry", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  panelistId: uuid("panelist_id").notNull(),
-  transactionId: uuid("transaction_id").notNull(), // original points transaction
-  points: integer("points").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  status: varchar("status", { length: 32 }).default("active"), // active, expired, redeemed
-  expiredAt: timestamp("expired_at"),
-  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
-}, (table) => [
-  index("points_expiry_panelist_id_idx").on(table.panelistId),
-  index("points_expiry_transaction_id_idx").on(table.transactionId),
-  index("points_expiry_expires_at_idx").on(table.expiresAt),
-  index("points_expiry_status_idx").on(table.status),
-]);
 
 export const rewards = pgTable("rewards", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),

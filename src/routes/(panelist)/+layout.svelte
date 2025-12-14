@@ -28,22 +28,14 @@
 			authChecked = true;
 			
 			if (!authStore.state.user) {
-				Logger.auth.warn('Unauthenticated access attempt to panelist area', {
-					route: $page.route.id,
-					path: $page.url.pathname
-				});
+				Logger.root.warn({ context: 'auth', route: $page.route.id, path: $page.url.pathname }, 'Unauthenticated access attempt to panelist area');
 				const redirectUrl = encodeURIComponent($page.url.pathname);
 				goto(`/login?redirect=${redirectUrl}`);
 			} else {
 				// Check if user type is panelist or admin
 				const userType = authStore.state.user.userType;
 				if (userType !== 'panelist' && userType !== 'admin') {
-					Logger.auth.warn('Unauthorized user type accessing panelist area', {
-						userId: authStore.state.user.id,
-						userType,
-						route: $page.route.id,
-						path: $page.url.pathname
-					});
+					Logger.root.warn({ context: 'auth', userId: authStore.state.user.id, userType, route: $page.route.id, path: $page.url.pathname }, 'Unauthorized user type accessing panelist area');
 					// Redirect to their appropriate dashboard
 					if (userType === 'client') {
 						goto('/client/dashboard');
@@ -54,12 +46,7 @@
 					}
 				} else {
 					// Log panelist area access
-					Logger.ui.info('Panelist area accessed', {
-						userId: authStore.state.user.id,
-						userType,
-						route: $page.route.id,
-						path: $page.url.pathname
-					});
+					Logger.root.info({ context: 'ui', userId: authStore.state.user.id, userType, route: $page.route.id, path: $page.url.pathname }, 'Panelist area accessed');
 				}
 			}
 		}
@@ -68,7 +55,7 @@
 	$effect(() => {
 		// Handle session expiration
 		if (mounted && authChecked && !authStore.state.isLoading && !authStore.state.user) {
-			Logger.auth.info('User session expired in respondent area, redirecting to login');
+			Logger.root.info({ context: 'auth' }, 'User session expired in respondent area, redirecting to login');
 			goto('/login');
 		}
 	});
@@ -81,12 +68,12 @@
 
 {#if mounted && authStore.state.user}
 	<!-- Respondent dashboard layout with sidebar -->
-	<div class="flex h-screen bg-gray-50 overflow-hidden">
+	<div class="flex h-screen bg-neutral-50 overflow-hidden">
 		<Sidebar bind:isOpen={isSidebarOpen} />
 		<div class="flex-1 flex flex-col overflow-hidden w-full lg:w-auto">
 			<Header onMenuClick={toggleSidebar} />
-			<main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 md:p-6">
-				<div class="max-w-7xl mx-auto">
+			<main class="flex-1 overflow-x-hidden overflow-y-auto bg-neutral-50 p-4 md:p-6">
+				<div class="mx-auto">
 					{@render children()}
 				</div>
 			</main>
@@ -94,15 +81,15 @@
 	</div>
 {:else if mounted && authChecked}
 	<!-- Fallback loading state while redirecting -->
-	<div class="min-h-screen flex items-center justify-center bg-gray-50">
+	<div class="min-h-screen flex items-center justify-center bg-neutral-50">
 		<div class="text-center">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
-			<p class="text-gray-600">Redirecting to login...</p>
+			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto mb-4"></div>
+			<p class="text-neutral-600">Redirecting to login...</p>
 		</div>
 	</div>
 {:else}
 	<!-- Initial loading state -->
-	<div class="min-h-screen flex items-center justify-center bg-gray-50">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+	<div class="min-h-screen flex items-center justify-center bg-neutral-50">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
 	</div>
 {/if}

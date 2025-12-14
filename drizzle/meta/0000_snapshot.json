@@ -1,5 +1,5 @@
 {
-  "id": "462c49b3-a20b-453c-8e3e-ffef9991eb13",
+  "id": "8b8d9ab0-29ab-40b1-bc49-cbfd5b7c51f8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -166,7 +166,7 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "email": {
           "name": "email",
@@ -178,7 +178,14 @@
           "name": "password",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "is_password_set": {
+          "name": "is_password_set",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "email_verified": {
           "name": "email_verified",
@@ -236,12 +243,32 @@
           "notNull": false,
           "default": 0
         },
+        "referral_code": {
+          "name": "referral_code",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "referred_by": {
+          "name": "referred_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "is_active": {
           "name": "is_active",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "status": {
+          "name": "status",
+          "type": "user_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
         },
         "is_deleted": {
           "name": "is_deleted",
@@ -322,6 +349,13 @@
           "columns": [
             "email"
           ]
+        },
+        "users_referral_code_unique": {
+          "name": "users_referral_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "referral_code"
+          ]
         }
       },
       "policies": {},
@@ -338,18 +372,6 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
-        },
-        "external_id": {
-          "name": "external_id",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source_portal": {
-          "name": "source_portal",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
         },
         "title": {
           "name": "title",
@@ -370,162 +392,18 @@
           "notNull": true,
           "default": 100
         },
-        "estimated_minutes": {
-          "name": "estimated_minutes",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 5
-        },
-        "category": {
-          "name": "category",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tags": {
-          "name": "tags",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "survey_status_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'available'"
-        },
         "is_active": {
           "name": "is_active",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": true
         },
-        "priority": {
-          "name": "priority",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "target_audience": {
-          "name": "target_audience",
+        "link": {
+          "name": "link",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
-        },
-        "screening_questions": {
-          "name": "screening_questions",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "qualifications": {
-          "name": "qualifications",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "excluded_panelists": {
-          "name": "excluded_panelists",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "max_completions": {
-          "name": "max_completions",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "current_completions": {
-          "name": "current_completions",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "panel_quota": {
-          "name": "panel_quota",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "completion_rate": {
-          "name": "completion_rate",
-          "type": "numeric(5, 2)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'0.00'"
-        },
-        "average_rating": {
-          "name": "average_rating",
-          "type": "numeric(3, 2)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'0.00'"
-        },
-        "average_completion_time": {
-          "name": "average_completion_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "quality_score": {
-          "name": "quality_score",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 100
-        },
-        "is_public": {
-          "name": "is_public",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "requires_approval": {
-          "name": "requires_approval",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "auto_assign": {
-          "name": "auto_assign",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "allow_reentries": {
-          "name": "allow_reentries",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "external_url": {
-          "name": "external_url",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "available_from": {
-          "name": "available_from",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "available_until": {
-          "name": "available_until",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "is_deleted": {
           "name": "is_deleted",
@@ -542,6 +420,12 @@
         },
         "updated_by": {
           "name": "updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -574,42 +458,6 @@
         }
       },
       "indexes": {
-        "surveys_unique_external_idx": {
-          "name": "surveys_unique_external_idx",
-          "columns": [
-            {
-              "expression": "source_portal",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "external_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "surveys_status_idx": {
-          "name": "surveys_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "surveys_active_idx": {
           "name": "surveys_active_idx",
           "columns": [
@@ -625,140 +473,11 @@
           "method": "btree",
           "with": {}
         },
-        "surveys_category_idx": {
-          "name": "surveys_category_idx",
-          "columns": [
-            {
-              "expression": "category",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "surveys_priority_idx": {
-          "name": "surveys_priority_idx",
-          "columns": [
-            {
-              "expression": "priority",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "surveys_points_idx": {
           "name": "surveys_points_idx",
           "columns": [
             {
               "expression": "points",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "surveys_public_idx": {
-          "name": "surveys_public_idx",
-          "columns": [
-            {
-              "expression": "is_public",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "surveys_quality_idx": {
-          "name": "surveys_quality_idx",
-          "columns": [
-            {
-              "expression": "quality_score",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "surveys_completion_rate_idx": {
-          "name": "surveys_completion_rate_idx",
-          "columns": [
-            {
-              "expression": "completion_rate",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "surveys_available_public_idx": {
-          "name": "surveys_available_public_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "is_public",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "is_active",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "surveys_targeting_idx": {
-          "name": "surveys_targeting_idx",
-          "columns": [
-            {
-              "expression": "category",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "points",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "is_active",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -807,646 +526,26 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.survey_invitations": {
-      "name": "survey_invitations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "survey_id": {
-          "name": "survey_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "panelist_id": {
-          "name": "panelist_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "invitation_type": {
-          "name": "invitation_type",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'targeted'"
-        },
-        "invitation_method": {
-          "name": "invitation_method",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'email'"
-        },
-        "status": {
-          "name": "status",
-          "type": "invitation_status_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'sent'"
-        },
-        "targeting_reason": {
-          "name": "targeting_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "qualification_status": {
-          "name": "qualification_status",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "disqualification_reason": {
-          "name": "disqualification_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sent_at": {
-          "name": "sent_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "opened_at": {
-          "name": "opened_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "clicked_at": {
-          "name": "clicked_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "qualified_at": {
-          "name": "qualified_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ip_address": {
-          "name": "ip_address",
-          "type": "varchar(45)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_agent": {
-          "name": "user_agent",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "referrer_url": {
-          "name": "referrer_url",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "survey_invitations_survey_id_idx": {
-          "name": "survey_invitations_survey_id_idx",
-          "columns": [
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_panelist_id_idx": {
-          "name": "survey_invitations_panelist_id_idx",
-          "columns": [
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_status_idx": {
-          "name": "survey_invitations_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_qualification_idx": {
-          "name": "survey_invitations_qualification_idx",
-          "columns": [
-            {
-              "expression": "qualification_status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_sent_at_idx": {
-          "name": "survey_invitations_sent_at_idx",
-          "columns": [
-            {
-              "expression": "sent_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_expires_at_idx": {
-          "name": "survey_invitations_expires_at_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_survey_status_idx": {
-          "name": "survey_invitations_survey_status_idx",
-          "columns": [
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_panelist_status_idx": {
-          "name": "survey_invitations_panelist_status_idx",
-          "columns": [
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_unique_idx": {
-          "name": "survey_invitations_unique_idx",
-          "columns": [
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_created_by_idx": {
-          "name": "survey_invitations_created_by_idx",
-          "columns": [
-            {
-              "expression": "created_by",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_invitations_deleted_at_idx": {
-          "name": "survey_invitations_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "survey_invitations_survey_id_surveys_id_fk": {
-          "name": "survey_invitations_survey_id_surveys_id_fk",
-          "tableFrom": "survey_invitations",
-          "tableTo": "surveys",
-          "columnsFrom": [
-            "survey_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "survey_invitations_panelist_id_panelists_id_fk": {
-          "name": "survey_invitations_panelist_id_panelists_id_fk",
-          "tableFrom": "survey_invitations",
-          "tableTo": "panelists",
-          "columnsFrom": [
-            "panelist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.survey_questions": {
-      "name": "survey_questions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "survey_id": {
-          "name": "survey_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "external_question_id": {
-          "name": "external_question_id",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "type": {
-          "name": "type",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "question": {
-          "name": "question",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_screening": {
-          "name": "is_screening",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "screening_criteria": {
-          "name": "screening_criteria",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "options": {
-          "name": "options",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "required": {
-          "name": "required",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "validation": {
-          "name": "validation",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "disqualify_values": {
-          "name": "disqualify_values",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "survey_questions_survey_id_idx": {
-          "name": "survey_questions_survey_id_idx",
-          "columns": [
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_questions_type_idx": {
-          "name": "survey_questions_type_idx",
-          "columns": [
-            {
-              "expression": "type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_questions_screening_idx": {
-          "name": "survey_questions_screening_idx",
-          "columns": [
-            {
-              "expression": "is_screening",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_questions_order_idx": {
-          "name": "survey_questions_order_idx",
-          "columns": [
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_questions_external_id_idx": {
-          "name": "survey_questions_external_id_idx",
-          "columns": [
-            {
-              "expression": "external_question_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_questions_created_by_idx": {
-          "name": "survey_questions_created_by_idx",
-          "columns": [
-            {
-              "expression": "created_by",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_questions_deleted_at_idx": {
-          "name": "survey_questions_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "survey_questions_survey_id_surveys_id_fk": {
-          "name": "survey_questions_survey_id_surveys_id_fk",
-          "tableFrom": "survey_questions",
-          "tableTo": "surveys",
-          "columnsFrom": [
-            "survey_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.survey_transactions": {
       "name": "survey_transactions",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "survey_transactions_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "panelist_id": {
           "name": "panelist_id",
@@ -1459,6 +558,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "respondent_id": {
+          "name": "respondent_id",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
         },
         "status": {
           "name": "status",
@@ -1474,19 +579,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": 0
-        },
-        "bonus_points": {
-          "name": "bonus_points",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "quality_rating": {
-          "name": "quality_rating",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "time_spent_seconds": {
           "name": "time_spent_seconds",
@@ -1507,31 +599,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -1545,17 +612,11 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
-        "survey_completions_survey_id_idx": {
-          "name": "survey_completions_survey_id_idx",
+        "survey_transactions_survey_id_idx": {
+          "name": "survey_transactions_survey_id_idx",
           "columns": [
             {
               "expression": "survey_id",
@@ -1569,8 +630,8 @@
           "method": "btree",
           "with": {}
         },
-        "survey_completions_panelist_id_idx": {
-          "name": "survey_completions_panelist_id_idx",
+        "survey_transactions_panelist_id_idx": {
+          "name": "survey_transactions_panelist_id_idx",
           "columns": [
             {
               "expression": "panelist_id",
@@ -1584,8 +645,8 @@
           "method": "btree",
           "with": {}
         },
-        "survey_completions_status_idx": {
-          "name": "survey_completions_status_idx",
+        "survey_transactions_status_idx": {
+          "name": "survey_transactions_status_idx",
           "columns": [
             {
               "expression": "status",
@@ -1598,101 +659,20 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "survey_completions_completed_at_idx": {
-          "name": "survey_completions_completed_at_idx",
-          "columns": [
-            {
-              "expression": "completed_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_completions_quality_idx": {
-          "name": "survey_completions_quality_idx",
-          "columns": [
-            {
-              "expression": "quality_rating",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_completions_unique_idx": {
-          "name": "survey_completions_unique_idx",
-          "columns": [
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_completions_created_by_idx": {
-          "name": "survey_completions_created_by_idx",
-          "columns": [
-            {
-              "expression": "created_by",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_completions_deleted_at_idx": {
-          "name": "survey_completions_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
-        "survey_transactions_panelist_id_panelists_id_fk": {
-          "name": "survey_transactions_panelist_id_panelists_id_fk",
+        "survey_transactions_panelist_id_users_id_fk": {
+          "name": "survey_transactions_panelist_id_users_id_fk",
           "tableFrom": "survey_transactions",
-          "tableTo": "panelists",
+          "tableTo": "users",
           "columnsFrom": [
             "panelist_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "survey_transactions_survey_id_surveys_id_fk": {
@@ -1705,7 +685,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -1721,20 +701,24 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "survey_transaction_details_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
-        "survey_id": {
-          "name": "survey_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "panelist_id": {
-          "name": "panelist_id",
-          "type": "uuid",
+        "survey_transaction_id": {
+          "name": "survey_transaction_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -1768,27 +752,225 @@
           "primaryKey": false,
           "notNull": false
         },
-        "referrer_url": {
-          "name": "referrer_url",
-          "type": "varchar(500)",
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "survey_transaction_details_survey_transaction_id_idx": {
+          "name": "survey_transaction_details_survey_transaction_id_idx",
+          "columns": [
+            {
+              "expression": "survey_transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "survey_transaction_details_survey_transaction_id_survey_transactions_id_fk": {
+          "name": "survey_transaction_details_survey_transaction_id_survey_transactions_id_fk",
+          "tableFrom": "survey_transaction_details",
+          "tableTo": "survey_transactions",
+          "columnsFrom": [
+            "survey_transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.panelist_points": {
+      "name": "panelist_points",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "panelist_points_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "panelist_id": {
+          "name": "panelist_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "current_points": {
+          "name": "current_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "pending_points": {
+          "name": "pending_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "utm_source": {
-          "name": "utm_source",
-          "type": "varchar(100)",
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "panelist_points_panelist_id_idx": {
+          "name": "panelist_points_panelist_id_idx",
+          "columns": [
+            {
+              "expression": "panelist_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "panelist_points_current_idx": {
+          "name": "panelist_points_current_idx",
+          "columns": [
+            {
+              "expression": "current_points",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "panelist_points_panelist_id_users_id_fk": {
+          "name": "panelist_points_panelist_id_users_id_fk",
+          "tableFrom": "panelist_points",
+          "tableTo": "users",
+          "columnsFrom": [
+            "panelist_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "panelist_points_panelist_id_unique": {
+          "name": "panelist_points_panelist_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "panelist_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.points_transactions": {
+      "name": "points_transactions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "panelist_id": {
+          "name": "panelist_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "points_transaction_type_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "points": {
+          "name": "points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "current_balance": {
+          "name": "current_balance",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pending_balance": {
+          "name": "pending_balance",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reference_id": {
+          "name": "reference_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "utm_medium": {
-          "name": "utm_medium",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "utm_campaign": {
-          "name": "utm_campaign",
-          "type": "varchar(100)",
+        "reference_type": {
+          "name": "reference_type",
+          "type": "varchar(32)",
           "primaryKey": false,
           "notNull": false
         },
@@ -1798,21 +980,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
+        "admin_notes": {
+          "name": "admin_notes",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "updated_by": {
-          "name": "updated_by",
+        "created_by": {
+          "name": "created_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -1823,39 +998,11 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
-        "survey_transaction_details_survey_id_idx": {
-          "name": "survey_transaction_details_survey_id_idx",
-          "columns": [
-            {
-              "expression": "survey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_transaction_details_panelist_id_idx": {
-          "name": "survey_transaction_details_panelist_id_idx",
+        "points_transactions_panelist_id_idx": {
+          "name": "points_transactions_panelist_id_idx",
           "columns": [
             {
               "expression": "panelist_id",
@@ -1869,11 +1016,11 @@
           "method": "btree",
           "with": {}
         },
-        "survey_transaction_details_device_type_idx": {
-          "name": "survey_transaction_details_device_type_idx",
+        "points_transactions_type_idx": {
+          "name": "points_transactions_type_idx",
           "columns": [
             {
-              "expression": "device_type",
+              "expression": "type",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1884,11 +1031,17 @@
           "method": "btree",
           "with": {}
         },
-        "survey_transaction_details_ip_address_idx": {
-          "name": "survey_transaction_details_ip_address_idx",
+        "points_transactions_reference_idx": {
+          "name": "points_transactions_reference_idx",
           "columns": [
             {
-              "expression": "ip_address",
+              "expression": "reference_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "reference_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1899,249 +1052,8 @@
           "method": "btree",
           "with": {}
         },
-        "survey_transaction_details_utm_source_idx": {
-          "name": "survey_transaction_details_utm_source_idx",
-          "columns": [
-            {
-              "expression": "utm_source",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_transaction_details_created_by_idx": {
-          "name": "survey_transaction_details_created_by_idx",
-          "columns": [
-            {
-              "expression": "created_by",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "survey_transaction_details_deleted_at_idx": {
-          "name": "survey_transaction_details_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.panelists": {
-      "name": "panelists",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "panelist_status_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
-        },
-        "tier": {
-          "name": "tier",
-          "type": "panelist_tier_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'bronze'"
-        },
-        "referral_code": {
-          "name": "referral_code",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "referred_by": {
-          "name": "referred_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "consent_given": {
-          "name": "consent_given",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "data_retention_expires_at": {
-          "name": "data_retention_expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "panelists_user_id_idx": {
-          "name": "panelists_user_id_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelists_referral_code_idx": {
-          "name": "panelists_referral_code_idx",
-          "columns": [
-            {
-              "expression": "referral_code",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelists_status_idx": {
-          "name": "panelists_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelists_tier_idx": {
-          "name": "panelists_tier_idx",
-          "columns": [
-            {
-              "expression": "tier",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelists_referred_by_idx": {
-          "name": "panelists_referred_by_idx",
-          "columns": [
-            {
-              "expression": "referred_by",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelists_deleted_at_idx": {
-          "name": "panelists_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelists_created_at_idx": {
-          "name": "panelists_created_at_idx",
+        "points_transactions_created_at_idx": {
+          "name": "points_transactions_created_at_idx",
           "columns": [
             {
               "expression": "created_at",
@@ -2156,24 +1068,23 @@
           "with": {}
         }
       },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "panelists_user_id_unique": {
-          "name": "panelists_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
-        },
-        "panelists_referral_code_unique": {
-          "name": "panelists_referral_code_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "referral_code"
-          ]
+      "foreignKeys": {
+        "points_transactions_panelist_id_users_id_fk": {
+          "name": "points_transactions_panelist_id_users_id_fk",
+          "tableFrom": "points_transactions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "panelist_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -2184,10 +1095,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "panelist_demographics_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "panelist_id": {
           "name": "panelist_id",
@@ -2238,31 +1159,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "updated_by": {
           "name": "updated_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
@@ -2270,12 +1171,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -2353,28 +1248,13 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "panelist_demographics_deleted_at_idx": {
-          "name": "panelist_demographics_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
-        "panelist_demographics_panelist_id_panelists_id_fk": {
-          "name": "panelist_demographics_panelist_id_panelists_id_fk",
+        "panelist_demographics_panelist_id_users_id_fk": {
+          "name": "panelist_demographics_panelist_id_users_id_fk",
           "tableFrom": "panelist_demographics",
-          "tableTo": "panelists",
+          "tableTo": "users",
           "columnsFrom": [
             "panelist_id"
           ],
@@ -2399,262 +1279,26 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.panelist_engagement": {
-      "name": "panelist_engagement",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "panelist_id": {
-          "name": "panelist_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "streak_days": {
-          "name": "streak_days",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "longest_streak": {
-          "name": "longest_streak",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "total_active_days": {
-          "name": "total_active_days",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "last_active_at": {
-          "name": "last_active_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_survey_at": {
-          "name": "last_survey_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "total_surveys": {
-          "name": "total_surveys",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "completed_surveys": {
-          "name": "completed_surveys",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "disqualified_surveys": {
-          "name": "disqualified_surveys",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "completion_rate": {
-          "name": "completion_rate",
-          "type": "numeric(5, 2)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'0.00'"
-        },
-        "average_time_per_survey": {
-          "name": "average_time_per_survey",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "panelist_engagement_panelist_id_idx": {
-          "name": "panelist_engagement_panelist_id_idx",
-          "columns": [
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_engagement_streak_idx": {
-          "name": "panelist_engagement_streak_idx",
-          "columns": [
-            {
-              "expression": "streak_days",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_engagement_last_active_idx": {
-          "name": "panelist_engagement_last_active_idx",
-          "columns": [
-            {
-              "expression": "last_active_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_engagement_completion_rate_idx": {
-          "name": "panelist_engagement_completion_rate_idx",
-          "columns": [
-            {
-              "expression": "completion_rate",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_engagement_total_surveys_idx": {
-          "name": "panelist_engagement_total_surveys_idx",
-          "columns": [
-            {
-              "expression": "total_surveys",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_engagement_deleted_at_idx": {
-          "name": "panelist_engagement_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "panelist_engagement_panelist_id_panelists_id_fk": {
-          "name": "panelist_engagement_panelist_id_panelists_id_fk",
-          "tableFrom": "panelist_engagement",
-          "tableTo": "panelists",
-          "columnsFrom": [
-            "panelist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "panelist_engagement_panelist_id_unique": {
-          "name": "panelist_engagement_panelist_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "panelist_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.panelist_geography": {
       "name": "panelist_geography",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "panelist_geography_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "panelist_id": {
           "name": "panelist_id",
@@ -2704,31 +1348,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "updated_by": {
           "name": "updated_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
@@ -2736,12 +1360,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -2774,106 +1392,13 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "panelist_geography_state_idx": {
-          "name": "panelist_geography_state_idx",
-          "columns": [
-            {
-              "expression": "state",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_geography_city_idx": {
-          "name": "panelist_geography_city_idx",
-          "columns": [
-            {
-              "expression": "city",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_geography_location_idx": {
-          "name": "panelist_geography_location_idx",
-          "columns": [
-            {
-              "expression": "country",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "state",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "city",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_geography_coordinates_idx": {
-          "name": "panelist_geography_coordinates_idx",
-          "columns": [
-            {
-              "expression": "latitude",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "longitude",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_geography_deleted_at_idx": {
-          "name": "panelist_geography_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
-        "panelist_geography_panelist_id_panelists_id_fk": {
-          "name": "panelist_geography_panelist_id_panelists_id_fk",
+        "panelist_geography_panelist_id_users_id_fk": {
+          "name": "panelist_geography_panelist_id_users_id_fk",
           "tableFrom": "panelist_geography",
-          "tableTo": "panelists",
+          "tableTo": "users",
           "columnsFrom": [
             "panelist_id"
           ],
@@ -2904,10 +1429,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "panelist_lifestyle_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "panelist_id": {
           "name": "panelist_id",
@@ -2975,31 +1510,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "updated_by": {
           "name": "updated_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
@@ -3007,12 +1522,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -3060,28 +1569,13 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "panelist_lifestyle_deleted_at_idx": {
-          "name": "panelist_lifestyle_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
-        "panelist_lifestyle_panelist_id_panelists_id_fk": {
-          "name": "panelist_lifestyle_panelist_id_panelists_id_fk",
+        "panelist_lifestyle_panelist_id_users_id_fk": {
+          "name": "panelist_lifestyle_panelist_id_users_id_fk",
           "tableFrom": "panelist_lifestyle",
-          "tableTo": "panelists",
+          "tableTo": "users",
           "columnsFrom": [
             "panelist_id"
           ],
@@ -3106,219 +1600,32 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.panelist_points": {
-      "name": "panelist_points",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "panelist_id": {
-          "name": "panelist_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "current_points": {
-          "name": "current_points",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "lifetime_points": {
-          "name": "lifetime_points",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "pending_points": {
-          "name": "pending_points",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "redeemed_points": {
-          "name": "redeemed_points",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "bonus_points": {
-          "name": "bonus_points",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "tier_progress": {
-          "name": "tier_progress",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "panelist_points_panelist_id_idx": {
-          "name": "panelist_points_panelist_id_idx",
-          "columns": [
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_points_current_idx": {
-          "name": "panelist_points_current_idx",
-          "columns": [
-            {
-              "expression": "current_points",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_points_lifetime_idx": {
-          "name": "panelist_points_lifetime_idx",
-          "columns": [
-            {
-              "expression": "lifetime_points",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_points_deleted_at_idx": {
-          "name": "panelist_points_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "panelist_points_panelist_id_panelists_id_fk": {
-          "name": "panelist_points_panelist_id_panelists_id_fk",
-          "tableFrom": "panelist_points",
-          "tableTo": "panelists",
-          "columnsFrom": [
-            "panelist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "panelist_points_panelist_id_unique": {
-          "name": "panelist_points_panelist_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "panelist_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.panelist_preferences": {
       "name": "panelist_preferences",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "panelist_preferences_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "panelist_id": {
           "name": "panelist_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "timezone": {
-          "name": "timezone",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'UTC'"
         },
         "locale": {
           "name": "locale",
@@ -3407,31 +1714,11 @@
           "notNull": false,
           "default": true
         },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "updated_by": {
           "name": "updated_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
@@ -3439,12 +1726,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -3462,88 +1743,13 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "panelist_preferences_timezone_idx": {
-          "name": "panelist_preferences_timezone_idx",
-          "columns": [
-            {
-              "expression": "timezone",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_preferences_locale_idx": {
-          "name": "panelist_preferences_locale_idx",
-          "columns": [
-            {
-              "expression": "locale",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_preferences_language_idx": {
-          "name": "panelist_preferences_language_idx",
-          "columns": [
-            {
-              "expression": "preferred_language",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_preferences_privacy_idx": {
-          "name": "panelist_preferences_privacy_idx",
-          "columns": [
-            {
-              "expression": "privacy_level",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_preferences_deleted_at_idx": {
-          "name": "panelist_preferences_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
-        "panelist_preferences_panelist_id_panelists_id_fk": {
-          "name": "panelist_preferences_panelist_id_panelists_id_fk",
+        "panelist_preferences_panelist_id_users_id_fk": {
+          "name": "panelist_preferences_panelist_id_users_id_fk",
           "tableFrom": "panelist_preferences",
-          "tableTo": "panelists",
+          "tableTo": "users",
           "columnsFrom": [
             "panelist_id"
           ],
@@ -3574,10 +1780,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "panelist_professional_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "panelist_id": {
           "name": "panelist_id",
@@ -3633,31 +1849,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "updated_by": {
           "name": "updated_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
@@ -3665,12 +1861,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -3778,28 +1968,13 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "panelist_professional_deleted_at_idx": {
-          "name": "panelist_professional_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
-        "panelist_professional_panelist_id_panelists_id_fk": {
-          "name": "panelist_professional_panelist_id_panelists_id_fk",
+        "panelist_professional_panelist_id_users_id_fk": {
+          "name": "panelist_professional_panelist_id_users_id_fk",
           "tableFrom": "panelist_professional",
-          "tableTo": "panelists",
+          "tableTo": "users",
           "columnsFrom": [
             "panelist_id"
           ],
@@ -3830,16 +2005,34 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "panelist_quality_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "panelist_id": {
           "name": "panelist_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "tier": {
+          "name": "tier",
+          "type": "panelist_tier_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'bronze'"
         },
         "quality_score": {
           "name": "quality_score",
@@ -3883,31 +2076,11 @@
           "notNull": false,
           "default": 100
         },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "updated_by": {
           "name": "updated_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
@@ -3915,12 +2088,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -3938,73 +2105,13 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "panelist_quality_score_idx": {
-          "name": "panelist_quality_score_idx",
-          "columns": [
-            {
-              "expression": "quality_score",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_quality_flags_idx": {
-          "name": "panelist_quality_flags_idx",
-          "columns": [
-            {
-              "expression": "quality_flags",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_quality_rating_idx": {
-          "name": "panelist_quality_rating_idx",
-          "columns": [
-            {
-              "expression": "average_rating",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_quality_deleted_at_idx": {
-          "name": "panelist_quality_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
-        "panelist_quality_panelist_id_panelists_id_fk": {
-          "name": "panelist_quality_panelist_id_panelists_id_fk",
+        "panelist_quality_panelist_id_users_id_fk": {
+          "name": "panelist_quality_panelist_id_users_id_fk",
           "tableFrom": "panelist_quality",
-          "tableTo": "panelists",
+          "tableTo": "users",
           "columnsFrom": [
             "panelist_id"
           ],
@@ -4029,301 +2136,26 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.panelist_segments": {
-      "name": "panelist_segments",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "panelist_id": {
-          "name": "panelist_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "segment_name": {
-          "name": "segment_name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "segment_type": {
-          "name": "segment_type",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "segment_value": {
-          "name": "segment_value",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "confidence": {
-          "name": "confidence",
-          "type": "numeric(3, 2)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'1.00'"
-        },
-        "source": {
-          "name": "source",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "panelist_segments_panelist_id_idx": {
-          "name": "panelist_segments_panelist_id_idx",
-          "columns": [
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_segments_name_idx": {
-          "name": "panelist_segments_name_idx",
-          "columns": [
-            {
-              "expression": "segment_name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_segments_type_idx": {
-          "name": "panelist_segments_type_idx",
-          "columns": [
-            {
-              "expression": "segment_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_segments_value_idx": {
-          "name": "panelist_segments_value_idx",
-          "columns": [
-            {
-              "expression": "segment_value",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_segments_active_idx": {
-          "name": "panelist_segments_active_idx",
-          "columns": [
-            {
-              "expression": "is_active",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_segments_source_idx": {
-          "name": "panelist_segments_source_idx",
-          "columns": [
-            {
-              "expression": "source",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_segments_targeting_idx": {
-          "name": "panelist_segments_targeting_idx",
-          "columns": [
-            {
-              "expression": "segment_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "segment_value",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "is_active",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_segments_panelist_active_idx": {
-          "name": "panelist_segments_panelist_active_idx",
-          "columns": [
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "is_active",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_segments_deleted_at_idx": {
-          "name": "panelist_segments_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "panelist_segments_panelist_id_panelists_id_fk": {
-          "name": "panelist_segments_panelist_id_panelists_id_fk",
-          "tableFrom": "panelist_segments",
-          "tableTo": "panelists",
-          "columnsFrom": [
-            "panelist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "panelist_segments_panelist_id_unique": {
-          "name": "panelist_segments_panelist_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "panelist_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.panelist_stats": {
       "name": "panelist_stats",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "panelist_stats_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "panelist_id": {
           "name": "panelist_id",
@@ -4375,27 +2207,6 @@
         },
         "average_time_per_survey": {
           "name": "average_time_per_survey",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "total_points_earned": {
-          "name": "total_points_earned",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "total_points_redeemed": {
-          "name": "total_points_redeemed",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "total_bonus_points": {
-          "name": "total_bonus_points",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -4585,21 +2396,6 @@
           "method": "btree",
           "with": {}
         },
-        "panelist_stats_points_earned_idx": {
-          "name": "panelist_stats_points_earned_idx",
-          "columns": [
-            {
-              "expression": "total_points_earned",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "panelist_stats_last_active_idx": {
           "name": "panelist_stats_last_active_idx",
           "columns": [
@@ -4632,10 +2428,10 @@
         }
       },
       "foreignKeys": {
-        "panelist_stats_panelist_id_panelists_id_fk": {
-          "name": "panelist_stats_panelist_id_panelists_id_fk",
+        "panelist_stats_panelist_id_users_id_fk": {
+          "name": "panelist_stats_panelist_id_users_id_fk",
           "tableFrom": "panelist_stats",
-          "tableTo": "panelists",
+          "tableTo": "users",
           "columnsFrom": [
             "panelist_id"
           ],
@@ -4656,579 +2452,6 @@
           ]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.panelist_verification": {
-      "name": "panelist_verification",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "panelist_id": {
-          "name": "panelist_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pending'"
-        },
-        "identity_verified": {
-          "name": "identity_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "phone_verified": {
-          "name": "phone_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "email_verified": {
-          "name": "email_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "address_verified": {
-          "name": "address_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "verification_data": {
-          "name": "verification_data",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "verification_attempts": {
-          "name": "verification_attempts",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "last_attempt_at": {
-          "name": "last_attempt_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "verified_at": {
-          "name": "verified_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_by": {
-          "name": "updated_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "panelist_verification_status_idx": {
-          "name": "panelist_verification_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_verification_identity_idx": {
-          "name": "panelist_verification_identity_idx",
-          "columns": [
-            {
-              "expression": "identity_verified",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_verification_phone_idx": {
-          "name": "panelist_verification_phone_idx",
-          "columns": [
-            {
-              "expression": "phone_verified",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_verification_email_idx": {
-          "name": "panelist_verification_email_idx",
-          "columns": [
-            {
-              "expression": "email_verified",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "panelist_verification_deleted_at_idx": {
-          "name": "panelist_verification_deleted_at_idx",
-          "columns": [
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "panelist_verification_panelist_id_panelists_id_fk": {
-          "name": "panelist_verification_panelist_id_panelists_id_fk",
-          "tableFrom": "panelist_verification",
-          "tableTo": "panelists",
-          "columnsFrom": [
-            "panelist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "panelist_verification_panelist_id_unique": {
-          "name": "panelist_verification_panelist_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "panelist_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.points_expiry": {
-      "name": "points_expiry",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "panelist_id": {
-          "name": "panelist_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "transaction_id": {
-          "name": "transaction_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "points": {
-          "name": "points",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'active'"
-        },
-        "expired_at": {
-          "name": "expired_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        }
-      },
-      "indexes": {
-        "points_expiry_panelist_id_idx": {
-          "name": "points_expiry_panelist_id_idx",
-          "columns": [
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_expiry_transaction_id_idx": {
-          "name": "points_expiry_transaction_id_idx",
-          "columns": [
-            {
-              "expression": "transaction_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_expiry_expires_at_idx": {
-          "name": "points_expiry_expires_at_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_expiry_status_idx": {
-          "name": "points_expiry_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.points_transactions": {
-      "name": "points_transactions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "panelist_id": {
-          "name": "panelist_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "points_transaction_type_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "category": {
-          "name": "category",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "amount": {
-          "name": "amount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "balance": {
-          "name": "balance",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reference_id": {
-          "name": "reference_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reference_type": {
-          "name": "reference_type",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'completed'"
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "admin_notes": {
-          "name": "admin_notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "processed_by": {
-          "name": "processed_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "processed_at": {
-          "name": "processed_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "points_transactions_panelist_id_idx": {
-          "name": "points_transactions_panelist_id_idx",
-          "columns": [
-            {
-              "expression": "panelist_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_transactions_type_idx": {
-          "name": "points_transactions_type_idx",
-          "columns": [
-            {
-              "expression": "type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_transactions_category_idx": {
-          "name": "points_transactions_category_idx",
-          "columns": [
-            {
-              "expression": "category",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_transactions_status_idx": {
-          "name": "points_transactions_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_transactions_reference_idx": {
-          "name": "points_transactions_reference_idx",
-          "columns": [
-            {
-              "expression": "reference_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "reference_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_transactions_created_at_idx": {
-          "name": "points_transactions_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "points_transactions_expires_at_idx": {
-          "name": "points_transactions_expires_at_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -6697,8 +3920,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "visitor_id": {
+          "name": "visitor_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -6774,8 +3997,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "visitor_id": {
+          "name": "visitor_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -6870,8 +4093,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "visitor_id": {
+          "name": "visitor_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -7005,9 +4228,346 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.app_settings": {
+      "name": "app_settings",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "varchar(255)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.guest_sessions": {
+      "name": "guest_sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "guest_session_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "varchar(45)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "surveys_viewed": {
+          "name": "surveys_viewed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "surveys_completed": {
+          "name": "surveys_completed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "session_points": {
+          "name": "session_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "upgraded_to_user_id": {
+          "name": "upgraded_to_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "upgraded_at": {
+          "name": "upgraded_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fingerprint": {
+          "name": "fingerprint",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_activity_at": {
+          "name": "last_activity_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "guest_sessions_email_idx": {
+          "name": "guest_sessions_email_idx",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "guest_sessions_token_idx": {
+          "name": "guest_sessions_token_idx",
+          "columns": [
+            {
+              "expression": "token",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "guest_sessions_status_idx": {
+          "name": "guest_sessions_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "guest_sessions_expires_at_idx": {
+          "name": "guest_sessions_expires_at_idx",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "guest_sessions_fingerprint_idx": {
+          "name": "guest_sessions_fingerprint_idx",
+          "columns": [
+            {
+              "expression": "fingerprint",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "guest_sessions_token_unique": {
+          "name": "guest_sessions_token_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.guest_survey_activity": {
+      "name": "guest_survey_activity",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "guest_session_id": {
+          "name": "guest_session_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "survey_transaction_id": {
+          "name": "survey_transaction_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "guest_activity_session_idx": {
+          "name": "guest_activity_session_idx",
+          "columns": [
+            {
+              "expression": "guest_session_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "guest_activity_transaction_idx": {
+          "name": "guest_activity_transaction_idx",
+          "columns": [
+            {
+              "expression": "survey_transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "guest_survey_activity_guest_session_id_guest_sessions_id_fk": {
+          "name": "guest_survey_activity_guest_session_id_guest_sessions_id_fk",
+          "tableFrom": "guest_survey_activity",
+          "tableTo": "guest_sessions",
+          "columnsFrom": [
+            "guest_session_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
+    "public.user_status_enum": {
+      "name": "user_status_enum",
+      "schema": "public",
+      "values": [
+        "active",
+        "suspended",
+        "banned",
+        "inactive",
+        "pending_verification"
+      ]
+    },
     "public.user_type_enum": {
       "name": "user_type_enum",
       "schema": "public",
@@ -7024,7 +4584,7 @@
       "values": [
         "started",
         "completed",
-        "submitted",
+        "terminated",
         "disqualified"
       ]
     },
@@ -7050,15 +4610,19 @@
         "pending"
       ]
     },
-    "public.panelist_status_enum": {
-      "name": "panelist_status_enum",
+    "public.points_transaction_type_enum": {
+      "name": "points_transaction_type_enum",
       "schema": "public",
       "values": [
-        "active",
-        "suspended",
-        "banned",
-        "inactive",
-        "pending_verification"
+        "earned",
+        "redeemed",
+        "bonus",
+        "confirmed",
+        "rejected",
+        "penalty",
+        "adjustment",
+        "refund",
+        "expired"
       ]
     },
     "public.panelist_tier_enum": {
@@ -7082,19 +4646,6 @@
         "custom"
       ]
     },
-    "public.points_transaction_type_enum": {
-      "name": "points_transaction_type_enum",
-      "schema": "public",
-      "values": [
-        "earned",
-        "redeemed",
-        "bonus",
-        "penalty",
-        "adjustment",
-        "refund",
-        "expired"
-      ]
-    },
     "public.redemption_type_enum": {
       "name": "redemption_type_enum",
       "schema": "public",
@@ -7116,6 +4667,15 @@
         "product",
         "discount",
         "experience"
+      ]
+    },
+    "public.guest_session_status": {
+      "name": "guest_session_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "expired",
+        "upgraded"
       ]
     }
   },
