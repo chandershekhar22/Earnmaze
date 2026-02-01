@@ -184,12 +184,9 @@
 				<h2 class="text-2xl font-bold text-neutral-900 mb-4">13. Compliance</h2>
 				<p class="text-neutral-700">
 				EarnMaze complies with applicable privacy laws and data protection regulations. Users have the right to access, correct, or delete their personal information. For privacy-related requests or concerns, please contact our support team.
-
-		<!-- Footer Navigation -->
-		<div class="mt-16 pt-8 border-t border-neutral-200 flex justify-between items-center">
-			<a href="/" class="text-violet-600 hover:text-violet-700 font-medium">← Back to Home</a>
-			<a href="/terms-of-service" class="text-violet-600 hover:text-violet-700 font-medium">Terms of Service →</a>
-		</div>
+			</p>
+		</section>
+	</div>
 	</div>
 </div>
 
