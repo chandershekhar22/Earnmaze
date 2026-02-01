@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/db';
 import { survey, surveyTransaction } from '$lib/db/schema';
 import { eq, desc, sql, like, or, and, count, isNull } from 'drizzle-orm';
+import { Logger } from '$lib/utils/app-logger';
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
@@ -121,7 +122,7 @@ export const load: PageServerLoad = async (event) => {
 			}
 		};
 	} catch (error) {
-		console.error('Error loading surveys:', error);
+		Logger.root.error({ context: 'admin', error }, 'Failed to load surveys page');
 		return {
 			surveys: [],
 			pagination: {

@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
+	import { authStore } from '$lib/stores/auth.svelte';
 	
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
@@ -13,6 +15,11 @@
 		{ href: '/admin/surveys', label: 'Surveys' },
 		{ href: '/admin/settings', label: 'Settings' }
 	];
+
+	async function handleLogout() {
+		await authStore.logout();
+		goto('/login');
+	}
 
 	// Get current page name from path
 	let currentPageName = $derived.by(() => {
@@ -57,14 +64,13 @@
 						</span>
 					</span>
 					
-					<form method="POST" action="/api/auth/logout">
-						<button 
-							type="submit"
-							class="px-4 py-2 text-sm text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
-						>
-							Logout
-						</button>
-					</form>
+					<button
+						onclick={handleLogout}
+						type="button"
+						class="px-4 py-2 text-sm text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+					>
+						Logout
+					</button>
 				</div>
 			</div>
 		</div>

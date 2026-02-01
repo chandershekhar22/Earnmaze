@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import { guestStore } from '$lib/stores/guest.svelte';
 	import { onMount } from 'svelte';
 	import { Logger, Features } from '$lib/utils/app-logger';
@@ -44,7 +43,7 @@
 		await guestStore.fetchDashboard();
 		
 		if (!guestStore.isAuthenticated) {
-			goto('/guest/login');
+			goto('/');
 		}
 	}
 
@@ -58,7 +57,7 @@
 				
 				if (diff <= 0) {
 					timeRemaining = 'Expired';
-					goto('/guest/login');
+					goto('/');
 					return;
 				}
 				
@@ -82,12 +81,12 @@
 
 	async function handleUpgradeClick() {
 		Features.trackUserAction('upgrade-click', 'guest-dashboard');
-		goto('/register?guest=true&email=' + encodeURIComponent(guestStore.data?.email || ''));
+		goto('/guest/upgrade');
 	}
 
 	async function handleLogout() {
 		await guestStore.logout();
-		goto('/guest/login');
+		goto('/');
 	}
 </script>
 

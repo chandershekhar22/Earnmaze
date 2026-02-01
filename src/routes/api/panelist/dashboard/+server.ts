@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-
+import { Logger } from '$lib/utils/app-logger';
 import type { PanelistDashboardResponse } from '$lib/types/api-responses';
 import { getPanelistPoints, getPointsSummary } from '$lib/db';
 import { getAvailableSurveysCount, getSurveyCompletionsPanelist } from '$lib/db/repositories/survey.repository.server';
@@ -34,7 +34,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 		return json(response);
 	} catch (error) {
-		console.error('Dashboard API error:', error);
+		Logger.root.error({ context: 'api', userId: locals.user?.id, error }, 'Dashboard API error');
 		return json({ error: 'Failed to fetch dashboard data' }, { status: 500 });
 	}
 };

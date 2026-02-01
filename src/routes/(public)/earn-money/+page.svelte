@@ -288,8 +288,8 @@
 				<span class="text-[10px] sm:text-xs md:text-sm font-semibold">SSL Secured</span>
 			</div>
 			<div class="flex items-center gap-1.5 sm:gap-2" role="listitem">
-				<span aria-hidden="true" class="text-base sm:text-lg md:text-xl">✓</span>
-				<span class="text-[10px] sm:text-xs md:text-sm font-semibold">GDPR Compliant</span>
+				<span aria-hidden="true" class="text-base sm:text-lg md:text-xl">🔐</span>
+				<span class="text-[10px] sm:text-xs md:text-sm font-semibold">Privacy Protected</span>
 			</div>
 			<div class="flex items-center gap-1.5 sm:gap-2" role="listitem">
 				<span aria-hidden="true" class="text-base sm:text-lg md:text-xl">💯</span>

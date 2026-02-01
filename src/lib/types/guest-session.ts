@@ -73,6 +73,31 @@ export interface UpgradeAccountRequest {
 	turnstileToken: string;
 }
 
+/**
+ * Guest upgrade: start OTP
+ * POST /api/guest/upgrade/start
+ */
+export interface GuestUpgradeStartRequest {
+	turnstileToken: string;
+}
+
+/**
+ * Guest upgrade: verify OTP
+ * POST /api/guest/upgrade/verify
+ */
+export interface GuestUpgradeVerifyRequest {
+	otp: string;
+}
+
+/**
+ * Guest upgrade: set password
+ * POST /api/guest/upgrade/set-password
+ */
+export interface GuestUpgradeSetPasswordRequest {
+	upgradeToken: string;
+	password: string;
+}
+
 // ============================================================================
 // Guest API Response Types
 // ============================================================================
@@ -105,6 +130,27 @@ export interface UpgradeAccountResponse {
 	error?: string;
 	message?: string;
 }
+
+export interface GuestUpgradeStartResponse {
+	success: boolean;
+	data?: {
+		expiresAt: string;
+	};
+	error?: string;
+	message?: string;
+}
+
+export interface GuestUpgradeVerifyResponse {
+	success: boolean;
+	data?: {
+		upgradeToken: string;
+		expiresAt: string;
+	};
+	error?: string;
+	message?: string;
+}
+
+export type GuestUpgradeSetPasswordResponse = UpgradeAccountResponse;
 
 /**
  * Guest logout response

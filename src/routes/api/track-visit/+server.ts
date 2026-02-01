@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { Logger } from '$lib/utils/app-logger';
 import { db } from '$lib/db';
 import { pageVisits } from '$lib/db/schema/analytics';
 
@@ -54,7 +55,7 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 
 		return json({ success: true });
 	} catch (error) {
-		console.error('Error tracking visit:', error);
+		Logger.root.error({ context: 'analytics', error }, 'Error tracking visit');
 		return json({ error: 'Failed to track visit' }, { status: 500 });
 	}
 };

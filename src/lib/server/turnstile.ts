@@ -4,6 +4,7 @@
  */
 
 import { env } from '$env/dynamic/private';
+import { Logger } from '$lib/utils/app-logger';
 
 const TURNSTILE_SECRET_KEY = env.TURNSTILE_SECRET_KEY;
 
@@ -25,7 +26,10 @@ export async function verifyTurnstile(
 ): Promise<TurnstileVerificationResult> {
 	// Skip verification in development if using test keys
 	if (env.NODE_ENV === 'development' && TURNSTILE_SECRET_KEY?.startsWith('1x')) {
-		console.log('Development mode: Skipping Turnstile verification (test keys)');
+		Logger.root.debug(
+			{ context: 'security', mode: 'development' },
+			'Skipping Turnstile verification (test keys)'
+		);
 		return {
 			success: true,
 			challengeTs: new Date().toISOString(),
@@ -55,7 +59,10 @@ export async function verifyTurnstile(
 		clearTimeout(timeoutId);
 
 		if (!response.ok) {
-			console.error('Turnstile verification request failed:', response.status);
+			Logger.root.error(
+				{ context: 'security', status: response.status },
+				'Turnstile verification request failed'
+			);
 			return {
 				success: false,
 				errorCodes: ['network-error'],
@@ -73,7 +80,10 @@ export async function verifyTurnstile(
 			cdata: data.cdata,
 		};
 	} catch (error) {
-		console.error('Turnstile verification error:', error);
+		Logger.root.error(
+			{ context: 'security', error },
+			'Turnstile verification error'
+		);
 		return {
 			success: false,
 			errorCodes: ['verification-failed'],
@@ -96,7 +106,10 @@ export async function validateTurnstileToken(
 
 	// Check if secret key is configured
 	if (!TURNSTILE_SECRET_KEY) {
-		console.error('TURNSTILE_SECRET_KEY not configured');
+		Logger.root.error(
+			{ context: 'security' },
+			'TURNSTILE_SECRET_KEY not configured'
+		);
 		return 'CAPTCHA verification unavailable';
 	}
 
@@ -104,7 +117,10 @@ export async function validateTurnstileToken(
 	const result = await verifyTurnstile(token, remoteip);
 
 	if (!result.success) {
-		console.error('Turnstile verification failed:', result.errorCodes);
+		Logger.root.warn(
+			{ context: 'security', errorCodes: result.errorCodes },
+			'Turnstile verification failed'
+		);
 		
 		// Map error codes to user-friendly messages
 		if (result.errorCodes?.includes('timeout-or-duplicate')) {

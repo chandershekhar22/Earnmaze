@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, jsonb, boolean, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, timestamp, jsonb, boolean, integer, index } from 'drizzle-orm/pg-core';
 
 /**
  * Landing page visits tracking
@@ -38,7 +38,14 @@ export const pageVisits = pgTable('page_visits', {
 	
 	// Additional Data
 	metadata: jsonb('metadata'),
-});
+}, (table) => [
+	index('idx_page_visit_visitor_id').on(table.visitorId),
+	index('idx_page_visit_session_id').on(table.sessionId),
+	index('idx_page_visit_timestamp').on(table.visitedAt),
+	index('idx_page_visit_fingerprint').on(table.fingerprint),
+	index('idx_page_visit_utm_source').on(table.utmSource),
+	index('idx_page_visit_landing_page').on(table.landingPage),
+]);
 
 /**
  * Email conversions tracking
@@ -81,4 +88,9 @@ export const ctaClicks = pgTable('cta_clicks', {
 	clickedAt: timestamp('clicked_at', { withTimezone: true }).defaultNow().notNull(),
 	
 	metadata: jsonb('metadata'),
-});
+}, (table) => [
+	index('idx_cta_click_visitor_id').on(table.visitorId),
+	index('idx_cta_click_session_id').on(table.sessionId),
+	index('idx_cta_click_timestamp').on(table.clickedAt),
+	index('idx_cta_click_button').on(table.buttonLocation),
+]);

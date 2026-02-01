@@ -112,8 +112,6 @@ export interface PanelistPointsResponse {
 	lifetimeEarned: number;
 	lifetimeRedeemed: number;
 	pendingPoints: number;
-	tier: string;
-	nextTierPoints?: number;
 }
 
 /**
@@ -146,7 +144,7 @@ export interface SurveyTransactionItem {
 	pointsEarned: number;
 	timeSpentMinutes?: number;
 	completedAt?: Date | string;
-	invitedAt: Date | string;
+	startedAt: Date | string;
 }
 
 export interface SurveyTransactionsResponse {

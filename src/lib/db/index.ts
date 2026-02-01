@@ -71,6 +71,13 @@ export {
 	hasRecentGuestSession
 } from './repositories/guest-session.repository.server';
 
+// Guest upgrade OTP verification repository
+export {
+	createGuestUpgradeOtp,
+	verifyGuestUpgradeOtp,
+	consumeGuestUpgradeToken,
+} from './repositories/guest-upgrade-verification.repository.server';
+
 // Analytics repository
 export {
 	createPageVisit,

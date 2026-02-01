@@ -4,6 +4,7 @@ import { db } from '$lib/db';
 import { appSettings } from '$lib/db/schema/settings';
 import { eq } from 'drizzle-orm';
 import { requireAdmin } from '$lib/server/auth';
+import { Logger } from '$lib/utils/app-logger';
 
 export const GET: RequestHandler = async (event) => {
 	await requireAdmin(event);
@@ -21,7 +22,7 @@ export const GET: RequestHandler = async (event) => {
 		
 		return json({ success: true, settings: settingsObj });
 	} catch (error) {
-		console.error('Error fetching settings:', error);
+		Logger.root.error({ context: 'api', error }, 'Failed to fetch settings');
 		return json({ success: false, error: 'Failed to fetch settings' }, { status: 500 });
 	}
 };
@@ -56,7 +57,7 @@ export const POST: RequestHandler = async (event) => {
 		
 		return json({ success: true });
 	} catch (error) {
-		console.error('Error saving setting:', error);
+		Logger.root.error({ context: 'api', error }, 'Failed to save setting');
 		return json({ success: false, error: 'Failed to save setting' }, { status: 500 });
 	}
 };

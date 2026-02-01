@@ -4,7 +4,7 @@ import { db } from '../index';
 import { user, session, userTypeEnum } from '../schema/auth';
 import { randomBytes } from 'crypto';
 import { initializePanelistPoints } from './panelist-points.repository.server';
-import { celery } from '$lib/utils/celery';
+import { sendWelcomeEmail } from '../../server/email-service';
 
 export async function hashPassword(password: string): Promise<string> {
 	return await hash(password);
@@ -102,7 +102,7 @@ export async function createUser(data: {
 			email: data.email,
 			name: data.name || null,
 			password: data.password ? hashedPassword : null, // No password initially
-			isPasswordSet: false, // Flag indicating password needs to be set
+			isPasswordSet: data.password ? true : false, // Flag indicating password needs to be set
 			emailVerified: false,
 			userType: userTypeValue as typeof userTypeEnum.enumValues[number],
 			registrationSource: data.registrationSource || 'unknown',
@@ -124,7 +124,7 @@ export async function createUser(data: {
 		// Initialize points (welcome + bonus)
 		await initializePanelistPoints(newUser.id);
 		// send welcome email via celery
-		celery.sendTask('email.send.welcome', [newUser.email]);
+		await sendWelcomeEmail(newUser.email, newUser.name);
 	}
 
 

@@ -1,0 +1,1 @@
+ALTER TABLE "guest_upgrade_verifications" ADD COLUMN "otp_sent_at" timestamp DEFAULT now() NOT NULL;

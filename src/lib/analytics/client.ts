@@ -4,6 +4,8 @@
  * Only runs in browser environment
  */
 
+import { Logger } from '$lib/utils/app-logger';
+
 // Generate or retrieve persistent visitor ID (survives across sessions)
 export function getVisitorId(): string {
 	const VISITOR_KEY = 'analytics_visitor_id';
@@ -266,7 +268,10 @@ export async function trackPageVisit() {
 			body: JSON.stringify(visitData),
 		});
 	} catch (error) {
-		console.error('Failed to track visit:', error);
+		Logger.root.error(
+			{ context: 'analytics', error },
+			'Failed to track visit'
+		);
 	}
 }
 
@@ -282,7 +287,10 @@ export async function trackCtaClick(buttonLocation: string) {
 			body: JSON.stringify({ visitorId, sessionId, buttonLocation }),
 		});
 	} catch (error) {
-		console.error('Failed to track CTA click:', error);
+		Logger.root.error(
+			{ context: 'analytics', error, buttonLocation },
+			'Failed to track CTA click'
+		);
 	}
 }
 

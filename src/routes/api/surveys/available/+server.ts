@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { getAllAvailableSurveys } from '$lib/db/repositories/survey.repository.server';
 import type { AvailableSurveysResponse } from '$types/api-responses';
-import { requireAuth } from '$lib/server/auth/guards';
+import { requireAuth } from '$lib/server/auth';
 
 // Returns the list of active surveys available to the authenticated user.
 export const GET: RequestHandler = async (event) => {

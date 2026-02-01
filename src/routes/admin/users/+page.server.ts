@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/db';
 import { panelistPoint, user } from '$lib/db/schema';
 import { eq, desc, sql, like, or } from 'drizzle-orm';
+import { Logger } from '$lib/utils/app-logger';
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
@@ -90,7 +91,7 @@ export const load: PageServerLoad = async (event) => {
 			}
 		};
 	} catch (error) {
-		console.error('Error loading users:', error);
+		Logger.root.error({ context: 'admin', error }, 'Failed to load users page');
 		return {
 			users: [],
 			pagination: {

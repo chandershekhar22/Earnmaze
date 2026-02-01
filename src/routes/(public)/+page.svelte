@@ -138,8 +138,7 @@
 					</div>
 					<h3 class="text-xl font-semibold text-neutral-900 mb-4">Instant Payouts</h3>
 					<p class="text-neutral-600 leading-relaxed">
-						Cash out anytime with PayPal, gift cards, or bank transfer. No waiting periods or
-						minimum amounts.
+						Cash out anytime with PayPal or gift cards. No waiting periods, no hassles.
 					</p>
 				</div>
 			</div>
@@ -199,7 +198,7 @@
 		<h2 class="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
 			Ready to Turn Your <br />
 			<span class="text-transparent bg-gradient-to-r from-amber-300 to-orange-300 bg-clip-text"
-				>Opinions Into Cash?</span
+				>Opinions Into Rewards?</span
 			>
 		</h2>
 		<p class="text-xl text-violet-100 mb-10 max-w-2xl mx-auto leading-relaxed">

@@ -26,8 +26,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 			surveyTitle: txn.survey?.title ?? 'Survey',
 			status: txn.status as SurveyTransactionItem['status'],
 			pointsEarned: txn.awardedPoints ?? txn.survey?.points ?? 0,
-			timeSpentMinutes: txn.timeSpentSeconds != null ? Math.round(txn.timeSpentSeconds / 60) : undefined,
-			invitedAt: txn.startedAt,
+			startedAt: txn.startedAt,
 			completedAt: txn.completedAt ?? undefined
 		}));
 

@@ -236,7 +236,7 @@
 								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
 									{#if user.panelistStats}
 										<div>
-											<div class="font-medium">{(user.panelistStats.lifetimePoints || 0).toLocaleString()}</div>
+											<div class="font-medium">{((user.panelistStats.currentPoints + user.panelistStats.pendingPoints) || 0).toLocaleString()}</div>
 											<div class="text-xs text-gray-500">
 												{(user.panelistStats.currentPoints || 0).toLocaleString()} available
 											</div>

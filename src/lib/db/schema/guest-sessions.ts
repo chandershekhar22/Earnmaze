@@ -59,6 +59,12 @@ export const guestSession = pgTable("guest_sessions", {
 		.$defaultFn(() => new Date())
 		.notNull(),
 }, (table) => [
+	index("idx_guest_session_token").on(table.token),
+	index("idx_guest_session_email").on(table.email),
+	index("idx_guest_session_expires_at").on(table.expiresAt),
+	index("idx_guest_session_status").on(table.status),
+	index("idx_guest_session_fingerprint").on(table.fingerprint),
+	index("idx_guest_session_email_expires").on(table.email, table.expiresAt),
 	index("guest_sessions_email_idx").on(table.email),
 	index("guest_sessions_token_idx").on(table.token),
 	index("guest_sessions_status_idx").on(table.status),

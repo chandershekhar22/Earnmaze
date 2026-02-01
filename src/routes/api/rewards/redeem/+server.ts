@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { requirePanelist } from '$lib/server/auth/guards';
+import { Logger } from '$lib/utils/app-logger';
 
 export const POST: RequestHandler = async (event) => {
 	try {
@@ -22,7 +23,7 @@ export const POST: RequestHandler = async (event) => {
 		// Mock successful redemption
 		return json({ success: true, message: 'Reward redeemed successfully!' });
 	} catch (error) {
-		console.error('Reward redemption error:', error);
+		Logger.root.error({ context: 'api', error }, 'Reward redemption error');
 		return json({ error: 'Failed to redeem reward' }, { status: 500 });
 	}
 };

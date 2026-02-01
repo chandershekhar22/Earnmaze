@@ -8,6 +8,34 @@
       "when": 1765141517753,
       "tag": "0000_ancient_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766288947836,
+      "tag": "0001_overconfident_toad",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766298492604,
+      "tag": "0002_productive_leo",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766342779977,
+      "tag": "0003_pretty_forge",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769936248115,
+      "tag": "0004_abandoned_hammerhead",
+      "breakpoints": true
     }
   ]
 }

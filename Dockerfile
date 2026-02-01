@@ -11,11 +11,13 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p ./logs
 RUN npm run build
 
 # Stage 3: Production server
 FROM base AS runner
 WORKDIR /app
+RUN mkdir -p logs
 ENV NODE_ENV=production
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/node_modules ./node_modules

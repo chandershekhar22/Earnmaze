@@ -5,6 +5,7 @@
 
 import { validateSession } from '$lib/db';
 import type { RequestEvent } from '@sveltejs/kit';
+import { Logger } from '$lib/utils/app-logger';
 
 export type UserType = 'admin' | 'panelist' | 'client' | 'moderator';
 
@@ -45,7 +46,10 @@ export async function getAuthUser(event: RequestEvent): Promise<AuthUser | null>
 			image: userData.image,
 		};
 	} catch (e) {
-		console.error('Auth error:', e);
+		Logger.root.error(
+			{ context: 'auth', error: e },
+			'Session validation error'
+		);
 		return null;
 	}
 }

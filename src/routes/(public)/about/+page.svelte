@@ -38,7 +38,7 @@
 				</svg>
 			</div>
 			<h3 class="text-lg font-semibold text-neutral-900 mb-2">Secure & Private</h3>
-			<p class="text-neutral-600">Your data is protected with enterprise-grade security and full GDPR compliance.</p>
+			<p class="text-neutral-600">Your data is protected with enterprise-grade security and industry-standard privacy practices.</p>
 		</div>
 		
 		<div class="text-center">

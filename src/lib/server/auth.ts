@@ -4,12 +4,13 @@ import { user } from '$lib/db/schema/auth';
 import { eq, sql } from 'drizzle-orm';
 import type { RequestEvent } from '@sveltejs/kit';
 import { error, redirect } from '@sveltejs/kit';
+import { Logger } from '$lib/utils/app-logger';
 
 export type UserType = 'admin' | 'panelist' | 'client' | 'moderator';
 
 export interface AuthUser {
 	id: string;
-	name: string;
+	name?: string;
 	email: string;
 	userType: UserType;
 	emailVerified: boolean;
@@ -36,14 +37,14 @@ export async function getAuthUser(event: RequestEvent): Promise<AuthUser | null>
 
 		return {
 			id: userData.id,
-			name: userData.name,
+			name: userData.name ? userData.name : "",
 			email: userData.email,
 			userType: userData.userType as UserType,
 			emailVerified: userData.emailVerified,
 			image: userData.image,
 		};
 	} catch (e) {
-		console.error('Auth error:', e);
+		Logger.root.error({ context: 'auth', error: e }, 'Auth error during session validation');
 		return null;
 	}
 }

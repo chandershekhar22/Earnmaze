@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getPanelistPoints } from '$lib/db';
+import { getLifetimePoints, getPanelistPoints, getTotalRedeemedPoints } from '$lib/db';
 import type { PanelistPointsResponse } from '$lib/types/api-responses';
+import { Logger } from '$lib/utils/app-logger';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	try {
@@ -18,20 +19,23 @@ export const GET: RequestHandler = async ({ locals }) => {
 		}
 
 		const pointsData = await getPanelistPoints(user.id);
+		const lifeTimeEarned = await getLifetimePoints(user.id);
+		const redeemedPoints = await getTotalRedeemedPoints(user.id)
 
 		// Construct typed response with only allowed fields
 		const response: PanelistPointsResponse = {
-			currentBalance: pointsData.availablePoints,
-			lifetimeEarned: pointsData.lifetimeEarned,
-			lifetimeRedeemed: 0, // TODO: Add redeemedPoints to response when available
+			currentBalance: pointsData.currentPoints,
+			lifetimeEarned: lifeTimeEarned,
+			lifetimeRedeemed: redeemedPoints,
 			pendingPoints: pointsData.pendingPoints,
-			tier: 'bronze', // TODO: Get tier from panelist data
-			nextTierPoints: undefined,
 		};
 
 		return json(response);
 	} catch (error) {
-		console.error('Points API error:', error);
+		Logger.root.error(
+			{ context: 'api', error, userId: locals.user?.id },
+			'Failed to fetch points data'
+		);
 		return json({ error: 'Failed to fetch points data' }, { status: 500 });
 	}
 };

@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { Logger } from '$lib/utils/app-logger';
 
 /**
  * GET /api/admin/geo-analytics
@@ -125,7 +126,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		});
 		
 	} catch (error) {
-		console.error('Error fetching geo analytics:', error);
+		Logger.root.error({ context: 'admin', error }, 'Error fetching geo analytics');
 		return json(
 			{
 				success: false,

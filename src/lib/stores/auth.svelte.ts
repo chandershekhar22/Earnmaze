@@ -161,12 +161,12 @@ class AuthStore {
 					return;
 				}
 
-				Logger.root.warn({ context: 'auth' }, 'Auth check returned null user');
+				Logger.root.debug({ context: 'auth' }, 'Auth check returned null user');
 				this.state = { ...this.state, user: null, isLoading: false };
 				return;
 			}
 
-			Logger.root.info({ context: 'auth', statusCode: response.status }, 'Auth check failed - user not authenticated');
+			Logger.root.debug({ context: 'auth', statusCode: response.status }, 'Auth check failed - user not authenticated');
 			this.state = { ...this.state, user: null, isLoading: false };
 		} catch (error) {
 			const duration = performance.now() - startTime;

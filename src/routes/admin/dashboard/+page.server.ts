@@ -5,6 +5,7 @@ import { user, session } from '$lib/db/schema/auth';
 import { surveyTransaction } from '$lib/db/schema/surveys';
 import { emailConversions } from '$lib/db/schema/analytics';
 import { eq, count, sql, desc, or } from 'drizzle-orm';
+import { Logger } from '$lib/utils/app-logger';
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
@@ -114,7 +115,7 @@ export const load: PageServerLoad = async (event) => {
 			recentConversions
 		};
 	} catch (error) {
-		console.error('Error loading admin dashboard:', error);
+		Logger.root.error({ context: 'admin', error }, 'Failed to load admin dashboard');
 		return {
 			stats: {
 				totalUsers: 0,

@@ -19,8 +19,17 @@
 		// Clear any previous errors
 		authStore.clearError();
 
-		// Redirect if already logged in
-		if (authStore.state.user) {
+		// Check if already logged in and redirect
+		// Wait for auth check to complete if still loading
+		if (!authStore.state.isLoading && authStore.state.user) {
+			const targetUrl = redirectUrl || getDashboardUrl(authStore.state.user.userType);
+			goto(targetUrl);
+		}
+	});
+
+	// Watch for auth state changes and redirect if user logs in
+	$effect(() => {
+		if (authStore.state.user && !authStore.state.isLoading) {
 			const targetUrl = redirectUrl || getDashboardUrl(authStore.state.user.userType);
 			goto(targetUrl);
 		}
@@ -212,6 +221,15 @@
 		<div class="relative text-center pt-6">
 			<div class="text-sm text-neutral-600">
 				Don't have an account? <a href="/register" class="font-medium text-violet-600 hover:text-violet-700 transition-colors">Sign up for free →</a>
+			</div>
+		</div>
+
+		<!-- Legal Links Footer -->
+		<div class="relative text-center pt-8 mt-8 border-t border-neutral-200">
+			<div class="text-xs text-neutral-500 space-x-4">
+				<a href="/privacy-policy" class="hover:text-violet-600 transition-colors">Privacy Policy</a>
+				<span>•</span>
+				<a href="/terms-of-service" class="hover:text-violet-600 transition-colors">Terms of Service</a>
 			</div>
 		</div>
 	</div>

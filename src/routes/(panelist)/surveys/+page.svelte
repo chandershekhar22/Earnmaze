@@ -8,9 +8,10 @@
 		surveyTransactions: SurveyTransactionsResponse;
 	}} = $props();
 
-	const { availableSurveyData, surveyTransactions } = data;
+	const availableSurveyData = $derived(data.availableSurveyData);
+	const surveyTransactions = $derived(data.surveyTransactions);
 
-	const transactions = surveyTransactions.transactions ?? [];
+	const transactions = $derived(surveyTransactions?.transactions ?? []);
 
 	let activeTab = $state('available'); // 'available' or 'history'
 
@@ -210,7 +211,7 @@
 											{formatMinutes(transaction.timeSpentMinutes)}
 										</td>
 										<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
-											{formatDate(transaction.invitedAt)}
+											{formatDate(transaction.startedAt)}
 										</td>
 										<td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
 											{#if transaction.completedAt}

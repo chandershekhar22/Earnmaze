@@ -5,6 +5,7 @@ import { db } from '$lib/db';
 import { survey } from '$lib/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { Logger } from '$lib/utils/app-logger';
 
 // Schema for updating a survey
 const updateSurveySchema = z.object({
@@ -42,7 +43,10 @@ export const GET: RequestHandler = async (event) => {
 
 		return json({ success: true, data: surveyData });
 	} catch (error) {
-		console.error('Failed to fetch survey:', error);
+		Logger.root.error(
+			{ context: 'api', error, surveyId },
+			'Failed to fetch survey'
+		);
 		return json(
 			{ success: false, error: 'FETCH_FAILED', message: 'Failed to fetch survey' },
 			{ status: 500 }
@@ -97,7 +101,10 @@ export const PATCH: RequestHandler = async (event) => {
 				{ status: 400 }
 			);
 		}
-		console.error('Failed to update survey:', error);
+		Logger.root.error(
+			{ context: 'api', error, surveyId, adminId: admin.id },
+			'Failed to update survey'
+		);
 		return json(
 			{ success: false, error: 'UPDATE_FAILED', message: 'Failed to update survey' },
 			{ status: 500 }
@@ -143,7 +150,10 @@ export const DELETE: RequestHandler = async (event) => {
 
 		return json({ success: true, message: 'Survey deleted successfully' });
 	} catch (error) {
-		console.error('Failed to delete survey:', error);
+		Logger.root.error(
+			{ context: 'api', error, surveyId, adminId: admin.id },
+			'Failed to delete survey'
+		);
 		return json(
 			{ success: false, error: 'DELETE_FAILED', message: 'Failed to delete survey' },
 			{ status: 500 }

@@ -31,7 +31,9 @@
 	let isAuthPage = $derived(
 		$page.url.pathname.includes('/auth') ||
 		$page.url.pathname === '/login' ||
-		$page.url.pathname === '/register'
+		$page.url.pathname === '/register' ||
+		$page.url.pathname === '/forgot-password' ||
+		$page.url.pathname === '/reset-password'
 	);
 	
 	let isEarnMoneyPage = $derived($page.url.pathname === '/earn-money');
@@ -78,6 +80,44 @@
 			<main>
 				{@render children()}
 			</main>
+			<footer class="bg-neutral-50 border-t border-neutral-200 mt-16">
+				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+						<!-- Brand -->
+						<div>
+							<a href="/" class="text-lg font-bold text-violet-600 flex items-center mb-2">
+								<img src="/favicon.svg" alt="EarnMaze Logo" class="w-6 h-6 mr-2" />
+								EarnMaze
+							</a>
+							<p class="text-sm text-neutral-600">Earn rewards by participating in surveys and research studies</p>
+						</div>
+
+						<!-- Quick Links -->
+						<div>
+							<h3 class="font-semibold text-neutral-900 mb-4">Quick Links</h3>
+							<ul class="space-y-2 text-sm">
+								<li><a href="/" class="text-neutral-600 hover:text-violet-600 transition-colors">Home</a></li>
+								<li><a href="/about" class="text-neutral-600 hover:text-violet-600 transition-colors">About</a></li>
+								<li><a href="/login" class="text-neutral-600 hover:text-violet-600 transition-colors">Sign In</a></li>
+							</ul>
+						</div>
+
+						<!-- Legal -->
+						<div>
+							<h3 class="font-semibold text-neutral-900 mb-4">Legal</h3>
+							<ul class="space-y-2 text-sm">
+								<li><a href="/privacy-policy" class="text-neutral-600 hover:text-violet-600 transition-colors">Privacy Policy</a></li>
+								<li><a href="/terms-of-service" class="text-neutral-600 hover:text-violet-600 transition-colors">Terms of Service</a></li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Bottom -->
+					<div class="mt-8 pt-8 border-t border-neutral-200 text-center text-sm text-neutral-500">
+						<p>&copy; 2025 EarnMaze. All rights reserved.</p>
+					</div>
+				</div>
+			</footer>
 		</div>
 	{/if}
 {:else}

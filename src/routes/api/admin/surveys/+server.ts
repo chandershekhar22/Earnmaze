@@ -5,6 +5,7 @@ import { db } from '$lib/db';
 import { survey } from '$lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { Logger } from '$lib/utils/app-logger';
 
 // Schema for creating/updating a survey
 const surveySchema = z.object({
@@ -28,7 +29,10 @@ export const GET: RequestHandler = async (event) => {
 
 		return json({ success: true, data: surveys });
 	} catch (error) {
-		console.error('Failed to fetch surveys:', error);
+		Logger.root.error(
+			{ context: 'api', error, adminId: admin.id },
+			'Failed to fetch surveys'
+		);
 		return json(
 			{ success: false, error: 'FETCH_FAILED', message: 'Failed to fetch surveys' },
 			{ status: 500 }
@@ -65,7 +69,7 @@ export const POST: RequestHandler = async (event) => {
 				{ status: 400 }
 			);
 		}
-		console.error('Failed to create survey:', error);
+		Logger.root.error({ context: 'admin', error, adminId: admin.id }, 'Failed to create survey');
 		return json(
 			{ success: false, error: 'CREATE_FAILED', message: 'Failed to create survey' },
 			{ status: 500 }

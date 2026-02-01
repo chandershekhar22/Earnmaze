@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { Logger } from '$lib/utils/app-logger';
 
 export async function GET() {
 	try {
@@ -62,7 +63,7 @@ export async function GET() {
 
 		return json(mockRewards);
 	} catch (error) {
-		console.error('Rewards API error:', error);
+		Logger.root.error({ context: 'api', error }, 'Rewards API error');
 		return json({ error: 'Failed to fetch rewards' }, { status: 500 });
 	}
 }
@@ -81,7 +82,7 @@ export async function POST({ request }) {
 		// Mock successful redemption
 		return json({ success: true, message: 'Reward redeemed successfully!' });
 	} catch (error) {
-		console.error('Reward redemption error:', error);
+		Logger.root.error({ context: 'api', error }, 'Reward redemption error');
 		return json({ error: 'Failed to redeem reward' }, { status: 500 });
 	}
 }

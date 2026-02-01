@@ -3,6 +3,7 @@ import { pointsTransactions } from "../schema/panelist-points";
 import { survey, surveyTransaction } from "../schema/surveys";
 import { db } from "..";
 import { nanoid } from 'nanoid';
+import { Logger } from '$lib/utils/app-logger';
 
 
 /**
@@ -18,7 +19,6 @@ export async function getPanelistSurveyTransactions(panelistId: string, limit: n
             surveyId: surveyTransaction.surveyId,
             status: surveyTransaction.status,
             awardedPoints: surveyTransaction.awardedPoints,
-            timeSpentSeconds: surveyTransaction.timeSpentSeconds,
             startedAt: surveyTransaction.startedAt,
             completedAt: surveyTransaction.completedAt,
             survey: {
@@ -37,7 +37,10 @@ export async function getPanelistSurveyTransactions(panelistId: string, limit: n
 
 export async function getOrCreateStartedSurveyTransaction(params: { panelistId: string; surveyId: string; fallbackRespondentId?: string }) {
     const { panelistId, surveyId, fallbackRespondentId } = params;
-    console.log('getOrCreateStartedSurveyTransaction', params);
+    Logger.root.debug(
+        { context: 'surveys', panelistId, surveyId },
+        'Get or create started survey transaction'
+    );
     const [existing] = await db
         .select()
         .from(surveyTransaction)

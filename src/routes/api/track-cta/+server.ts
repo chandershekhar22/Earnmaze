@@ -1,8 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/db';
-import { ctaClicks, pageVisits } from '$lib/db/schema/analytics';
-import { eq } from 'drizzle-orm';
+import { ctaClicks, pageVisits } from '$lib/db/schema/analytics';import { Logger } from '$lib/utils/app-logger';import { eq } from 'drizzle-orm';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -30,7 +29,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		return json({ success: true });
 	} catch (error) {
-		console.error('Error tracking CTA click:', error);
+		Logger.root.error({ context: 'analytics', error }, 'Error tracking CTA click');
 		return json({ error: 'Failed to track CTA click' }, { status: 500 });
 	}
 };

@@ -4,6 +4,7 @@
  */
 
 import type { RequestEvent } from '@sveltejs/kit';
+import { Logger } from '$lib/utils/app-logger';
 
 // Configuration for allowed/blocked countries
 export const GEO_CONFIG = {
@@ -56,9 +57,11 @@ export function getCountryFromCloudflare(event: RequestEvent): string | null {
 	const country = event.request.headers.get('cf-ipcountry') || 
 	                event.request.headers.get('CF-IPCountry');
 	
-	// Debug logging (remove after testing)
 	if (!country) {
-		console.log('Available headers:', Array.from(event.request.headers.keys()));
+		Logger.root.debug(
+			{ context: 'security', headers: Array.from(event.request.headers.keys()) },
+			'CF-IPCountry header not found'
+		);
 	}
 	
 	return country;
@@ -119,7 +122,10 @@ export async function checkGeoRestriction(event: RequestEvent): Promise<{
 	if (!cfCountry || cfCountry === 'XX') {
 		// Cloudflare header not present or unknown country
 		// In production behind Cloudflare, this should never happen
-		console.warn('CF-IPCountry header missing or unknown for IP:', ipAddress);
+		Logger.root.warn(
+			{ context: 'security', ipAddress, cfCountry },
+			'CF-IPCountry header missing or unknown'
+		);
 		// Block access if Cloudflare headers are missing (production security)
 		// This ensures geo-restriction can't be bypassed by direct server access
 		return {
@@ -159,15 +165,19 @@ export async function logGeoRestrictionEvent(
 	reason: string | undefined,
 	pathname: string
 ) {
-	// You can implement this to log to your database or monitoring service
-	console.log('Geo-Restriction Event:', {
-		timestamp: new Date().toISOString(),
-		ipAddress,
-		country: location?.countryCode,
-		allowed,
-		reason,
-		pathname,
-	});
+	// Log to monitoring service
+	Logger.root.info(
+		{
+			context: 'security',
+			timestamp: new Date().toISOString(),
+			ipAddress,
+			country: location?.countryCode,
+			allowed,
+			reason,
+			pathname,
+		},
+		'Geo-restriction event'
+	);
 	
 	// TODO: Store in database for analytics
 	// await db.insert(geoRestrictionLogs).values({...})

@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { Logger } from '$lib/utils/app-logger';
 
 /**
  * GET /api/admin/geo-settings
@@ -146,7 +147,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		});
 		
 	} catch (error) {
-		console.error('Error updating geo-settings:', error);
+		Logger.root.error({ context: 'admin', error }, 'Error updating geo-settings');
 		return json(
 			{
 				success: false,

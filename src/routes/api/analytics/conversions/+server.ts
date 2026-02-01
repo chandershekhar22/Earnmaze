@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { Logger } from '$lib/utils/app-logger';
 import { db } from '$lib/db';
 import { pageVisits, emailConversions, ctaClicks } from '$lib/db/schema/analytics';
 import { sql, and, gte, lte, desc } from 'drizzle-orm';
@@ -164,7 +165,7 @@ export const GET: RequestHandler = async (event) => {
 		});
 
 	} catch (error) {
-		console.error('Error fetching analytics:', error);
+		Logger.root.error({ context: 'analytics', error }, 'Error fetching analytics');
 		return json({ error: 'Failed to fetch analytics' }, { status: 500 });
 	}
 };

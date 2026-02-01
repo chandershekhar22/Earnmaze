@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getAuthUser } from '$lib/server/auth/session';
+import { getAuthUser } from '$lib/server/auth';
 import { validateGuestSession } from '$lib/db/repositories/guest-session.repository.server';
 import { Logger } from '$lib/utils/app-logger';
 

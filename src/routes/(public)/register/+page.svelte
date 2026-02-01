@@ -18,7 +18,15 @@
 	onMount(() => {
 		authStore.clearError();
 
-		if (authStore.state.user) {
+		if (!authStore.state.isLoading && authStore.state.user) {
+			const targetUrl = getDashboardUrl(authStore.state.user.userType);
+			goto(targetUrl);
+		}
+	});
+
+	// Watch for auth state changes and redirect if user logs in
+	$effect(() => {
+		if (authStore.state.user && !authStore.state.isLoading) {
 			const targetUrl = getDashboardUrl(authStore.state.user.userType);
 			goto(targetUrl);
 		}
@@ -176,9 +184,9 @@
 					/>
 					<span class="text-sm text-neutral-600 leading-relaxed">
 						I agree to the
-						<a href="/terms" class="link">Terms of Service</a>
+						<a href="/terms-of-service" class="link">Terms of Service</a>
 						and
-						<a href="/privacy" class="link">Privacy Policy</a>
+						<a href="/privacy-policy" class="link">Privacy Policy</a>
 					</span>
 				</label>
 			</div>
@@ -221,6 +229,15 @@
 				Already have an account?
 				<a href="/login" class="link ml-1">Sign in here →</a>
 			</p>
+		</div>
+
+		<!-- Legal Links Footer -->
+		<div class="relative text-center pt-4 mt-4">
+			<div class="text-xs text-neutral-500 space-x-4">
+				<a href="/privacy-policy" class="hover:text-violet-600 transition-colors">Privacy Policy</a>
+				<span>•</span>
+				<a href="/terms-of-service" class="hover:text-violet-600 transition-colors">Terms of Service</a>
+			</div>
 		</div>
 	</div>
 </div>

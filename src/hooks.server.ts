@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import { validateSession } from '$lib/db';
 import { getDashboardUrl, canAccessRoute } from '$lib/utils/dashboard-routing';
 import { checkGeoRestriction, logGeoRestrictionEvent } from '$lib/server/geo-restriction';
-import { generateRayId } from '$lib/utils/app-logger';
+import { generateRayId, Logger } from '$lib/utils/app-logger';
 
 // Simple rate limiting store (in-memory)
 // For production, use Redis or a proper rate limiting service
@@ -34,12 +34,21 @@ const ROUTE_CONFIG = {
     '/login',
     '/register',
     '/about',
-    '/geo-blocked'
+    '/geo-blocked',
+    '/earn-money',
+    '/guest/dashboard',
+    '/guest/upgrade',
+    '/privacy-policy',
+    '/terms-of-service',
+    '/forgot-password',
+    '/reset-password'
   ],
   rateLimitExempt: [
     '/api/analytics',
     '/api/track-visit',
-    '/api/track-cta'
+    '/api/track-cta',
+    '/api/guest/*',
+    '/api/save-email'
   ]
 };
 
@@ -198,7 +207,10 @@ export const handle: Handle = async ({ event, resolve }) => {
       }
     } catch (error) {
       // Log error without exposing details
-      console.error('Session verification failed');
+      Logger.root.error(
+        { context: 'auth', error },
+        'Session verification failed'
+      );
       // Clear invalid session cookie
       event.cookies.delete('session', { path: '/' });
     }

@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('guest_session');
 
 	if (!token) {
-		throw redirect(302, '/guest/login');
+		throw redirect(302, '/');
 	}
 
 	// Verify guest session
@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	if (!session) {
 		// Clear invalid cookie
 		cookies.delete('guest_session', { path: '/' });
-		throw redirect(302, '/guest/login');
+		throw redirect(302, '/');
 	}
 
 	// Return session data

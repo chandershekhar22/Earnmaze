@@ -2,33 +2,26 @@ import pino, { type Logger as PinoLogger, type LoggerOptions, multistream } from
 import { browser, dev } from '$app/environment';
 import type { ClientLogLevel, ClientLogPayload } from '$types/logging';
 
+// Log file path (server-side only, mapped to host volume)
+const logFilePath = './logs/app.log';
+
 export type LogData = Record<string, unknown> | string | number | boolean | null | undefined;
 
 const isDev = dev;
 const logLevel = browser ? 'error' : isDev ? 'debug' : 'info';
-const transport = !browser && isDev
-	? {
-		target: 'pino-pretty',
-		options: {
-			colorize: true,
-			singleLine: true,
-			translateTime: 'SYS:standard'
-		}
-	}
-	: undefined;
 
 const enableRabbit = !browser && typeof process !== 'undefined' && Boolean(process.env.RABBITMQ_URL);
 const rabbitQueue = !browser && typeof process !== 'undefined' ? (process.env.RABBITMQ_LOG_QUEUE || 'app-logs') : 'app-logs';
 
 const baseOptions: LoggerOptions = {
 	level: logLevel,
-	base: { app: 'em-panel' },
-	transport
+	base: { app: 'em-panel' }
 };
 
 // Lightweight RabbitMQ publisher (fire-and-forget). Only active server-side when RABBITMQ_URL is set.
 let rabbitInit: Promise<any> | null = null;
 let rabbitChannel: any = null;
+let rabbitConnection: any = null;
 
 const ensureRabbit = async () => {
 	if (rabbitChannel) return rabbitChannel;
@@ -39,13 +32,46 @@ const ensureRabbit = async () => {
 				// @ts-ignore optional dependency; runtime-only when configured
 				const amqp = await import('amqplib');
 				const connection = await amqp.connect((typeof process !== 'undefined' ? process.env.RABBITMQ_URL : '') as string);
+				rabbitConnection = connection;
+				
+				// Handle connection close events
+				connection.on('close', () => {
+					console.warn('RabbitMQ connection closed, will reconnect on next log');
+					rabbitChannel = null;
+					rabbitConnection = null;
+					rabbitInit = null;
+				});
+				
+				connection.on('error', (err: Error) => {
+					console.error('RabbitMQ connection error', err);
+					rabbitChannel = null;
+					rabbitConnection = null;
+					rabbitInit = null;
+				});
+				
 				const channel = await connection.createChannel();
 				await channel.assertQueue(rabbitQueue, { durable: true });
 				rabbitChannel = channel;
+				
+				// Handle channel close events
+				channel.on('close', () => {
+					console.warn('RabbitMQ channel closed');
+					rabbitChannel = null;
+					rabbitInit = null;
+				});
+				
+				channel.on('error', (err: Error) => {
+					console.error('RabbitMQ channel error', err);
+					rabbitChannel = null;
+					rabbitInit = null;
+				});
+				
 				return channel;
 			} catch (err) {
 				console.error('RabbitMQ log transport init failed', err);
 				rabbitChannel = null;
+				rabbitConnection = null;
+				rabbitInit = null;
 				return null;
 			}
 		})();
@@ -67,10 +93,12 @@ const rabbitStream = {
 	}
 };
 
+// Create multiple streams: stdout/pretty + file + rabbitmq
 const streams = browser
 	? undefined
 	: multistream([
 		{ stream: process.stdout },
+		{ stream: pino.destination(logFilePath) },
 		...(enableRabbit ? [{ stream: rabbitStream }] : [])
 	]);
 

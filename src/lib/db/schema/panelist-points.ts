@@ -17,6 +17,9 @@ export const panelistPoint = pgTable("panelist_points", {
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).$onUpdateFn(() => new Date()).notNull(),
 }, (table) => [
   uniqueIndex("panelist_points_panelist_id_idx").on(table.panelistId),
+  index("idx_panelist_point_panelist_id").on(table.panelistId),
+  index("idx_panelist_point_current_points").on(table.currentPoints),
+  index("idx_panelist_point_pending_points").on(table.pendingPoints),
   index("panelist_points_current_idx").on(table.currentPoints),
   sql`CHECK (current_points >= 0)`,
   sql`CHECK (pending_points >= 0)`
@@ -32,7 +35,7 @@ export const pointsTransactions = pgTable("points_transactions", {
   currentBalance: integer("current_balance").notNull(), // snapshot of current points balance after this transaction
   pendingBalance: integer("pending_balance").notNull(), // snapshot of pending points balance after this transaction
   description: varchar("description", { length: 255 }).notNull(),
-  referenceId: uuid("reference_id"), // survey completion id, redemption id, etc
+  referenceId: varchar("reference_id", { length: 36 }), // survey completion id, redemption id, etc
   referenceType: varchar("reference_type", { length: 32 }), // survey_completion, redemption, bonus, etc
   metadata: jsonb("metadata"), // JSON for additional details
   adminNotes: text("admin_notes"), // internal notes for admins
@@ -40,6 +43,11 @@ export const pointsTransactions = pgTable("points_transactions", {
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
   
 }, (table) => [
+  index("idx_points_transaction_panelist_id").on(table.panelistId),
+  index("idx_points_transaction_type").on(table.type),
+  index("idx_points_transaction_created_at").on(table.createdAt),
+  index("idx_points_transaction_reference").on(table.referenceType, table.referenceId),
+  index("idx_points_transaction_panelist_type").on(table.panelistId, table.type),
   index("points_transactions_panelist_id_idx").on(table.panelistId),
   index("points_transactions_type_idx").on(table.type),
   index("points_transactions_reference_idx").on(table.referenceType, table.referenceId),
