@@ -1,9 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { requireAdmin } from '$lib/server/auth';
-import { db } from '$lib/db';
-import { survey } from '$lib/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { getSurveyById, updateSurveyAdmin, deleteSurveyAdmin } from '$lib/db/repositories';
 import { z } from 'zod';
 import { Logger } from '$lib/utils/app-logger';
 
@@ -12,8 +10,11 @@ const updateSurveySchema = z.object({
 	title: z.string().min(1, 'Title is required').max(255).optional(),
 	description: z.string().optional().nullable(),
 	points: z.number().int().min(1, 'Points must be at least 1').optional(),
+	terminatedPoints: z.number().int().min(0).optional(),
+	quotaFullPoints: z.number().int().min(0).optional(),
 	link: z.string().url('Must be a valid URL').optional(),
-	isActive: z.boolean().optional()
+	isActive: z.boolean().optional(),
+	priority: z.enum(['low', 'medium', 'high']).optional()
 });
 
 // GET - Get a single survey by ID
@@ -29,10 +30,7 @@ export const GET: RequestHandler = async (event) => {
 	}
 
 	try {
-		const [surveyData] = await db
-			.select()
-			.from(survey)
-			.where(and(eq(survey.id, surveyId), eq(survey.isDeleted, false)));
+		const surveyData = await getSurveyById(surveyId);
 
 		if (!surveyData) {
 			return json(
@@ -71,10 +69,7 @@ export const PATCH: RequestHandler = async (event) => {
 		const validated = updateSurveySchema.parse(body);
 
 		// Check if survey exists
-		const [existing] = await db
-			.select({ id: survey.id })
-			.from(survey)
-			.where(and(eq(survey.id, surveyId), eq(survey.isDeleted, false)));
+		const existing = await getSurveyById(surveyId, 	true, false);
 
 		if (!existing) {
 			return json(
@@ -83,15 +78,7 @@ export const PATCH: RequestHandler = async (event) => {
 			);
 		}
 
-		const [updated] = await db
-			.update(survey)
-			.set({
-				...validated,
-				updatedBy: admin.id,
-				updatedAt: sql`CURRENT_TIMESTAMP`
-			})
-			.where(eq(survey.id, surveyId))
-			.returning();
+		const updated = await updateSurveyAdmin(surveyId, validated, admin.id);
 
 		return json({ success: true, data: updated });
 	} catch (error) {
@@ -126,10 +113,7 @@ export const DELETE: RequestHandler = async (event) => {
 
 	try {
 		// Check if survey exists
-		const [existing] = await db
-			.select({ id: survey.id })
-			.from(survey)
-			.where(and(eq(survey.id, surveyId), eq(survey.isDeleted, false)));
+		const existing = await getSurveyById(surveyId);
 
 		if (!existing) {
 			return json(
@@ -139,14 +123,7 @@ export const DELETE: RequestHandler = async (event) => {
 		}
 
 		// Soft delete
-		await db
-			.update(survey)
-			.set({
-				isDeleted: true,
-				deletedBy: admin.id,
-				deletedAt: sql`CURRENT_TIMESTAMP`
-			})
-			.where(eq(survey.id, surveyId));
+		await deleteSurveyAdmin(surveyId, admin.id);
 
 		return json({ success: true, message: 'Survey deleted successfully' });
 	} catch (error) {

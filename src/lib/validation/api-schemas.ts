@@ -42,7 +42,11 @@ export const registerSchema = z.object({
 	password: passwordSchema,
 	name: z.string().min(1, 'Name required').max(255, 'Name too long').trim(),
 	turnstileToken: turnstileTokenSchema,
-	referralCode: z.string().max(50).optional()
+	referralCode: z.string().max(50).optional(),
+	utmSource: z.string().max(255).optional(),
+	utmMedium: z.string().max(255).optional(),
+	utmCampaign: z.string().max(255).optional(),
+	registrationSource: z.string().max(100).optional(),
 });
 
 export const forgotPasswordSchema = z.object({
@@ -138,12 +142,36 @@ export const trackCtaSchema = z.object({
 
 export const saveEmailSchema = z.object({
 	email: emailSchema,
-	referralCode: z.string().max(50).optional(),
+	visitorId: z.string().max(100).optional(),
+	sessionId: z.string().max(100).optional(),
+	utmParams: z.object({
+		utm_source: z.string().max(100).optional().nullable(),
+		utm_medium: z.string().max(100).optional().nullable(),
+		utm_campaign: z.string().max(100).optional().nullable(),
+		utm_term: z.string().max(100).optional().nullable(),
+		utm_content: z.string().max(100).optional().nullable(),
+	}).optional().nullable(),
+	timeToConvert: z.number().min(0).max(86400).optional(),
 	turnstileToken: turnstileTokenSchema,
-	source: z.string().max(100).optional(),
-	utmSource: z.string().max(100).optional(),
-	utmMedium: z.string().max(100).optional(),
-	utmCampaign: z.string().max(100).optional()
+});
+
+// ==================== Profile Endpoints ====================
+
+export const profileUpdateSchema = z.object({
+	name: z.string().min(1).max(100).optional(),
+	demographics: z.object({
+		age: z.string().max(20).optional(),
+		gender: z.string().max(20).optional(),
+		country: z.string().max(100).optional(),
+		education: z.string().max(100).optional(),
+		employment: z.string().max(100).optional(),
+		income: z.string().max(50).optional(),
+	}).optional(),
+	preferences: z.object({
+		emailNotifications: z.boolean().optional(),
+		smsNotifications: z.boolean().optional(),
+		surveyCategories: z.array(z.string().max(50)).max(20).optional(),
+	}).optional(),
 });
 
 // ==================== Rewards Endpoints ====================

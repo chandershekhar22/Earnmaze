@@ -1,8 +1,9 @@
-import { eq, and, or, gte, lte, desc, sql, count, inArray, isNull } from "drizzle-orm";
+import { eq, and, or, gte, lte, desc, sql, count, inArray, isNull, like } from "drizzle-orm";
 import { db } from "..";
 import { panelistQuality } from "../schema/panelist-profile";
 import { survey, surveyTransaction, user } from "../schema";
-import { addPendingPoints } from "./panelist-points.repository.server";
+import { referrals } from "../schema/transactions";
+import { addPoints } from "./panelist-points.repository.server";
 import { Logger } from "$lib/utils/app-logger";
 
 /**
@@ -55,11 +56,11 @@ export async function getFirstAvailableSurvey() {
  * @returns Array of available surveys (empty array if none found)
  * @throws Error if database query fails
  */
-export async function getAllAvailableSurveys() {
+export async function getAllAvailableSurveys(limit?: number) {
 	try {
 		Logger.root.debug({ context: 'surveys' }, 'Fetching all available surveys');
-		
-		const result = await db
+
+		let query = db
 			.select()
 			.from(survey)
 			.where(
@@ -67,7 +68,13 @@ export async function getAllAvailableSurveys() {
 					eq(survey.isActive, true),
 					eq(survey.isDeleted, false)
 				)
+			)
+			.orderBy(
+				sql`CASE ${survey.priority} WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 END`,
+				desc(survey.createdAt)
 			);
+
+		const result = limit ? await query.limit(limit) : await query;
 		
 		Logger.root.debug(
 			{ context: 'surveys', count: result.length },
@@ -91,7 +98,7 @@ export async function getAllAvailableSurveys() {
  * @returns Survey object or null if not found/inactive/deleted
  * @throws Error if surveyId is invalid or database query fails
  */
-export async function getSurveyById(surveyId: string) {
+export async function getSurveyById(surveyId: string, getInActive: boolean = false, getDeleted: boolean = false) {
 	if (!surveyId || typeof surveyId !== 'string' || surveyId.trim().length === 0) {
 		Logger.root.warn(
 			{ context: 'surveys', surveyId },
@@ -103,16 +110,14 @@ export async function getSurveyById(surveyId: string) {
 	try {
 		Logger.root.debug({ context: 'surveys', surveyId }, 'Fetching survey by ID');
 		
+		const conditions = [eq(survey.id, surveyId)];
+		if (!getInActive) conditions.push(eq(survey.isActive, true));
+		if (!getDeleted) conditions.push(eq(survey.isDeleted, false));
+		
 		const query = db
 			.select()
 			.from(survey)
-			.where(
-				and(
-					eq(survey.id, surveyId),
-					eq(survey.isActive, true),
-					eq(survey.isDeleted, false)
-				)
-			)
+			.where(and(...conditions))
 			.limit(1);
 		
 		const compiledQuery = query.toSQL();
@@ -211,6 +216,78 @@ export async function getSurveyTransactionByRespondentId(respondentId: string) {
  * @returns Updated transaction object or null if not found
  * @throws Error if validation fails or database operation fails
  */
+/**
+ * Qualify a referral and award bonus points when referred user completes their first survey.
+ */
+async function qualifyReferralIfFirst(panelistId: string) {
+	await db.transaction(async (tx) => {
+		// Lock the referral row to prevent concurrent qualification
+		const [pendingReferral] = await tx
+			.select()
+			.from(referrals)
+			.where(and(eq(referrals.referredId, panelistId), eq(referrals.status, 'pending')))
+			.for('update')
+			.limit(1);
+
+		if (!pendingReferral) return;
+
+		// Count completed surveys (inside transaction for consistency)
+		const [completedCount] = await tx
+			.select({ count: count() })
+			.from(surveyTransaction)
+			.where(and(eq(surveyTransaction.panelistId, panelistId), eq(surveyTransaction.status, 'completed')));
+
+		// Current survey is already marked completed, so first completion = count of 1
+		if ((completedCount?.count ?? 0) > 1) return;
+
+		// Qualify and mark as paid atomically
+		await tx
+			.update(referrals)
+			.set({ status: 'paid', qualifiedAt: new Date(), paidAt: new Date() })
+			.where(eq(referrals.id, pendingReferral.id));
+
+		// Award referrer bonus
+		const referrerBonus = pendingReferral.referrerBonus ?? 0;
+		if (referrerBonus > 0) {
+			await addPoints(
+				pendingReferral.referrerId,
+				referrerBonus,
+				`Referral bonus — referred user completed first survey`,
+				'bonus',
+				'referral',
+				pendingReferral.id,
+				{ referredId: panelistId }
+			);
+		}
+
+		// Award referred user bonus
+		const referredBonus = pendingReferral.referredBonus ?? 0;
+		if (referredBonus > 0) {
+			await addPoints(
+				panelistId,
+				referredBonus,
+				`Welcome bonus — completed first survey via referral`,
+				'bonus',
+				'referral',
+				pendingReferral.id,
+				{ referrerId: pendingReferral.referrerId }
+			);
+		}
+
+		Logger.root.info(
+			{
+				context: 'referral',
+				referralId: pendingReferral.id,
+				referrerId: pendingReferral.referrerId,
+				referredId: panelistId,
+				referrerBonus,
+				referredBonus,
+			},
+			'Referral qualified and bonuses awarded'
+		);
+	});
+}
+
 export async function completeSurveyTransaction(
 	respondentId: string,
 	status: 'completed' | 'terminated' | 'quota_full' | 'disqualified',
@@ -274,16 +351,17 @@ export async function completeSurveyTransaction(
 			return null;
 		}
 
-		// Add pending points if survey was completed and points were awarded
-		if (status === 'completed' && awardedPoints > 0 && transactionId) {
+		// Add points if survey awarded any points
+		if (awardedPoints > 0 && transactionId) {
 			try {
-				await addPendingPoints(
+				await addPoints(
 					panelistId,
 					awardedPoints,
-					'Survey completed',
-					transactionId.toString(),
+					`Survey ${status}`,
+					status,
 					'survey_completion',
-					{ surveyId }
+					transactionId.toString(),
+					{ surveyId, status }
 				);
 				
 				Logger.root.info(
@@ -309,6 +387,15 @@ export async function completeSurveyTransaction(
 				);
 				// Don't throw - transaction was already updated successfully
 				// This needs manual intervention to credit points
+			}
+		}
+
+		// Qualify referral on first completed survey
+		if (status === 'completed') {
+			try {
+				await qualifyReferralIfFirst(panelistId);
+			} catch (refError) {
+				Logger.root.error({ context: 'referral', panelistId, error: refError }, 'Failed to process referral qualification');
 			}
 		}
 
@@ -489,22 +576,22 @@ export async function getSurveyDashboard(surveyId: string) {
 			'Fetching survey dashboard data'
 		);
 		
-		const [surveyData, completionStats] = await Promise.all([
-			// Survey basic data
+		const [activeSurveysCount, completionStats] = await Promise.all([
+			// Count of active surveys
 			db
 				.select({
-					survey: survey,
 					totalActiveSurveys: count(),
 				})
 				.from(survey)
 				.where(eq(survey.isActive, true)),
-			
-			// Completion statistics
+
+			// Completion statistics from survey_transactions
 			db
 				.select({
 					totalCompletions: count(),
 				})
-				.from(sql`survey_completions`)
+				.from(surveyTransaction)
+				.where(eq(surveyTransaction.status, 'completed'))
 		]);
 
 		Logger.root.debug(
@@ -513,8 +600,8 @@ export async function getSurveyDashboard(surveyId: string) {
 		);
 
 		return {
-			survey: surveyData[0],
-			completionStats: completionStats[0],
+			totalActiveSurveys: activeSurveysCount[0]?.totalActiveSurveys ?? 0,
+			totalCompletions: completionStats[0]?.totalCompletions ?? 0,
 		};
 	} catch (error) {
 		Logger.root.error(
@@ -523,4 +610,192 @@ export async function getSurveyDashboard(surveyId: string) {
 		);
 		throw error;
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Admin Survey CRUD
+// ---------------------------------------------------------------------------
+
+export type SurveyCreateInput = {
+	title: string;
+	description?: string | null;
+	points: number;
+	terminatedPoints?: number;
+	quotaFullPoints?: number;
+	link: string;
+	isActive?: boolean;
+	priority?: 'low' | 'medium' | 'high';
+};
+
+export type SurveyUpdateInput = Partial<SurveyCreateInput>;
+
+export type AdminSurveysFilter = {
+	search?: string;
+	status?: string;
+	priority?: string;
+	page?: number;
+	limit?: number;
+};
+
+/**
+ * Get all non-deleted surveys for admin (no pagination)
+ */
+export async function getAllSurveysAdmin() {
+	return db
+		.select()
+		.from(survey)
+		.where(eq(survey.isDeleted, false))
+		.orderBy(sql`${survey.createdAt} DESC`);
+}
+
+/**
+ * Create a new survey
+ */
+export async function createSurveyAdmin(data: SurveyCreateInput, adminId: string) {
+	const [created] = await db
+		.insert(survey)
+		.values({
+			title: data.title,
+			description: data.description || null,
+			points: data.points,
+			terminatedPoints: data.terminatedPoints ?? 0,
+			quotaFullPoints: data.quotaFullPoints ?? 0,
+			link: data.link,
+			isActive: data.isActive ?? true,
+			priority: data.priority ?? 'medium',
+			createdBy: adminId,
+		})
+		.returning();
+	return created;
+}
+
+/**
+ * Update a survey
+ */
+export async function updateSurveyAdmin(
+	surveyId: string,
+	data: SurveyUpdateInput,
+	adminId: string
+) {
+	const [updated] = await db
+		.update(survey)
+		.set({
+			...data,
+			updatedBy: adminId,
+			updatedAt: sql`CURRENT_TIMESTAMP`,
+		})
+		.where(eq(survey.id, surveyId))
+		.returning();
+	return updated ?? null;
+}
+
+/**
+ * Soft-delete a survey
+ */
+export async function deleteSurveyAdmin(surveyId: string, adminId: string) {
+	await db
+		.update(survey)
+		.set({ isDeleted: true, deletedBy: adminId, deletedAt: sql`CURRENT_TIMESTAMP` })
+		.where(eq(survey.id, surveyId));
+}
+
+/**
+ * Get paginated surveys for admin with filters and stats
+ */
+export async function getAdminSurveys(filters: AdminSurveysFilter = {}) {
+	const { search = '', status = 'all', priority = 'all', page = 1, limit = 20 } = filters;
+	const offset = (page - 1) * limit;
+
+	const whereConditions = [or(eq(survey.isDeleted, false), isNull(survey.isDeleted))];
+
+	if (search) {
+		whereConditions.push(
+			or(like(survey.title, `%${search}%`), like(survey.description, `%${search}%`))
+		);
+	}
+	if (status === 'active') whereConditions.push(eq(survey.isActive, true));
+	else if (status === 'inactive') whereConditions.push(eq(survey.isActive, false));
+	if (priority !== 'all') whereConditions.push(eq(survey.priority, priority as 'low' | 'medium' | 'high'));
+
+	const whereClause = and(...whereConditions);
+
+	const [totalCount] = await db
+		.select({ count: sql<number>`count(*)::int` })
+		.from(survey)
+		.where(whereClause);
+
+	const surveys = await db
+		.select({
+			id: survey.id,
+			title: survey.title,
+			description: survey.description,
+			points: survey.points,
+			terminatedPoints: survey.terminatedPoints,
+			quotaFullPoints: survey.quotaFullPoints,
+			link: survey.link,
+			isActive: survey.isActive,
+			priority: survey.priority,
+			createdAt: survey.createdAt,
+			updatedAt: survey.updatedAt,
+		})
+		.from(survey)
+		.where(whereClause)
+		.orderBy(desc(survey.createdAt))
+		.limit(limit)
+		.offset(offset);
+
+	const surveyIds = surveys.map((s) => s.id);
+
+	const completionStats =
+		surveyIds.length > 0
+			? await db
+					.select({
+						surveyId: surveyTransaction.surveyId,
+						totalStarted: sql<number>`count(*)::int`,
+						totalCompleted: sql<number>`count(case when ${surveyTransaction.status} = 'completed' then 1 end)::int`,
+					})
+					.from(surveyTransaction)
+					.where(
+						sql`${surveyTransaction.surveyId} IN (${sql.join(
+							surveyIds.map((id) => sql`${id}`),
+							sql`, `
+						)})`
+					)
+					.groupBy(surveyTransaction.surveyId)
+			: [];
+
+	const statsMap = new Map(completionStats.map((c) => [c.surveyId, c]));
+	const surveysWithStats = surveys.map((s) => {
+		const stats = statsMap.get(s.id);
+		return {
+			...s,
+			totalStarted: stats?.totalStarted || 0,
+			totalCompleted: stats?.totalCompleted || 0,
+		};
+	});
+
+	const [summaryStats] = await db
+		.select({
+			totalSurveys: sql<number>`count(*)::int`,
+			activeSurveys: sql<number>`count(case when ${survey.isActive} = true then 1 end)::int`,
+			inactiveSurveys: sql<number>`count(case when ${survey.isActive} = false then 1 end)::int`,
+		})
+		.from(survey)
+		.where(or(eq(survey.isDeleted, false), isNull(survey.isDeleted)));
+
+	return {
+		surveys: surveysWithStats,
+		pagination: {
+			page,
+			limit,
+			total: totalCount?.count || 0,
+			totalPages: Math.ceil((totalCount?.count || 0) / limit),
+		},
+		filters: { search, status },
+		stats: {
+			totalSurveys: summaryStats?.totalSurveys || 0,
+			activeSurveys: summaryStats?.activeSurveys || 0,
+			inactiveSurveys: summaryStats?.inactiveSurveys || 0,
+		},
+	};
 }

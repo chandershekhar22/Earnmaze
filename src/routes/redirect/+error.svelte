@@ -36,7 +36,7 @@
 		title: 'Error',
 		icon: '❌',
 		description: 'An unexpected error occurred. Please try again.',
-		color: 'from-slate-500 to-slate-600'
+		color: 'from-neutral-500 to-neutral-600'
 	};
 
 	function handleDashboard() {
@@ -48,10 +48,10 @@
 	}
 </script>
 
-<div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+<div class="flex items-center justify-center min-h-screen bg-surface p-4">
 	<div class="max-w-md w-full">
 		<!-- Error Card -->
-		<div class="bg-slate-800/50 backdrop-blur-lg border border-slate-700/50 rounded-2xl shadow-2xl p-8 text-center">
+		<div class="bg-surface-100/90 backdrop-blur-xl border border-white/[0.06] rounded-2xl shadow-2xl p-8 text-center">
 			<!-- Icon -->
 			<div class="mb-6 text-6xl animate-bounce" style="animation-duration: 2s;">
 				{errorInfo.icon}
@@ -70,14 +70,14 @@
 			</h1>
 
 			<!-- Description -->
-			<p class="text-slate-300 mb-8 leading-relaxed">
+			<p class="text-neutral-400 mb-8 leading-relaxed">
 				{errorInfo.description}
 			</p>
 
 			<!-- Error Details -->
 			{#if error?.message}
-				<div class="bg-slate-900/50 border border-slate-700/30 rounded-lg p-4 mb-8 text-left">
-					<p class="text-xs font-mono text-slate-400 break-words">
+				<div class="bg-surface-200 border border-white/[0.06] rounded-lg p-4 mb-8 text-left">
+					<p class="text-xs font-mono text-neutral-500 break-words">
 						{error.message}
 					</p>
 				</div>
@@ -87,23 +87,23 @@
 			<div class="space-y-3">
 				<button
 					onclick={handleDashboard}
-					class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+					class="w-full bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
 				>
 					Go to Dashboard
 				</button>
 
 				<button
 					onclick={handleHome}
-					class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+					class="w-full bg-surface-200 hover:bg-white/[0.03] text-neutral-400 font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
 				>
 					Return Home
 				</button>
 			</div>
 
 			<!-- Support Link -->
-			<p class="text-sm text-slate-400 mt-6 pt-6 border-t border-slate-700/30">
+			<p class="text-sm text-neutral-500 mt-6 pt-6 border-t border-white/[0.06]">
 				Still having issues?{' '}
-				<a href="/contact" class="text-blue-400 hover:text-blue-300 font-semibold transition-colors">
+				<a href="/contact" class="text-primary-400 hover:text-primary-300 font-semibold transition-colors">
 					Contact Support
 				</a>
 			</p>
@@ -111,15 +111,15 @@
 
 		<!-- Background Decoration -->
 		<div class="mt-8 text-center">
-			<p class="text-slate-500 text-sm">
-				Status Code: <span class="font-mono text-slate-400">{status}</span>
+			<p class="text-neutral-600 text-sm">
+				Status Code: <span class="font-mono text-neutral-500">{status}</span>
 			</p>
 		</div>
 	</div>
 
 	<!-- Animated Background Elements -->
 	<div class="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
-		<div class="absolute top-20 right-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-		<div class="absolute bottom-20 left-20 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+		<div class="absolute top-20 right-20 w-72 h-72 bg-primary-500/5 rounded-full blur-3xl animate-pulse"></div>
+		<div class="absolute bottom-20 left-20 w-72 h-72 bg-indigo-500/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
 	</div>
 </div>

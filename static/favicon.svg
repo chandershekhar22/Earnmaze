@@ -1,4 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#2563eb"/>
-  <text x="16" y="23" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">EM</text>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#d946ef"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square bg -->
+  <rect width="32" height="32" rx="8" fill="url(#bg)"/>
+  <!-- Maze-inspired E shape -->
+  <path d="M8 8h10v3H11v3h6v3h-6v3h7v3H8z" fill="white" opacity="0.95"/>
+  <!-- Spark/star accent -->
+  <path d="M22 6l1.2 2.4L26 9.5l-2.8 1.1L22 13l-1.2-2.4L18 9.5l2.8-1.1z" fill="url(#spark)"/>
+  <circle cx="22" cy="9.5" r="1" fill="white" opacity="0.6"/>
 </svg>

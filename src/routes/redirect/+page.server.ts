@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'crypto';
 import { redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { Logger } from '$lib/utils/app-logger';
@@ -5,8 +6,8 @@ import {
 	getSurveyById,
 	getSurveyTransactionByRespondentId,
 	completeSurveyTransaction,
-	getUserById
 } from '$lib/db/repositories/survey.repository.server';
+import { getGuestActivityByTransactionId } from '$lib/db/repositories';
 
 type CompletionStatus = 'completed' | 'terminated' | 'quota_full' | 'disqualified';
 
@@ -37,17 +38,39 @@ function parseStatusCode(code: string | null): CompletionStatus | null {
  */
 export const load: PageServerLoad = async ({ url, locals }) => {
 	try {
-		const respondentId = url.searchParams.get('rid');
-		const statusCode = url.searchParams.get('status');
-
-		// Validate required parameters
-		if (!respondentId) {
-			Logger.root.warn(
-				{ context: 'surveys', reason: 'missing_respondent_id' },
-				'Survey redirect: missing respondentId'
-			);
-			throw error(400, 'respondentId is required');
+		// If no query params at all, this is a direct visit — redirect to dashboard
+		const hash = url.searchParams.get('hash');
+		const rid = url.searchParams.get('rid');
+		if (!hash && !rid) {
+			throw redirect(302, locals.user ? '/surveys' : locals.guestSession ? '/guest/dashboard' : '/login');
 		}
+
+		// verify url hash — qs-service computes sha3-256 over the raw redirect URL string (before appending &hash=)
+		// We must strip the hash param from the raw URL string to match, NOT parse/re-serialize with new URL()
+		const privateKey = process.env.HASH_KEY;
+		if (!privateKey) throw error(500, 'Server configuration error');
+
+		if (!rid || !hash) {
+			throw error(400, 'Missing required parameters');
+		}
+
+		const rawUrl = url.toString();
+		const urlWithoutHash = rawUrl.replace(/[&?]hash=[^&]*/, '');
+		const expectedHash = createHash('sha3-256').update(urlWithoutHash + privateKey).digest('hex');
+
+		const hashValid = hash.length === expectedHash.length
+			&& timingSafeEqual(Buffer.from(hash), Buffer.from(expectedHash));
+
+		if (!hashValid) {
+			Logger.root.warn(
+				{ context: 'surveys', reason: 'invalid_hash' },
+				'Survey redirect: invalid or missing hash'
+			);
+			throw error(403, 'Invalid request signature');
+		}
+
+		const respondentId = rid;
+		const statusCode = url.searchParams.get('status');
 
 		const status = parseStatusCode(statusCode);
 		if (!status) {
@@ -69,7 +92,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		}
 
 		// Get survey to determine points
-		const surveyData = await getSurveyById(transaction.surveyId);
+		const surveyData = await getSurveyById(transaction.surveyId, true);
 		if (!surveyData) {
 			Logger.root.warn(
 				{ context: 'surveys', surveyId: transaction.surveyId, reason: 'survey_not_found' },
@@ -79,7 +102,21 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		}
 
 		// Determine awarded points based on completion status
-		const awardedPoints = status === 'completed' ? surveyData.points : 0;
+		let  awardedPoints =  0
+		switch (status) {
+			case 'completed':
+				awardedPoints = surveyData.points;
+				break;
+			case 'terminated':
+				awardedPoints = surveyData.terminatedPoints || 0; // Example: half points for terminated surveys
+				break;
+			case 'quota_full':
+				awardedPoints = surveyData.quotaFullPoints || 0; // Example: some points for quota full
+				break;
+			case 'disqualified':
+				awardedPoints = 0;
+				break;	
+		}
 
 		// Update transaction with completion data and add pending points if applicable
 		const completedTransaction = await completeSurveyTransaction(
@@ -94,19 +131,31 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 			throw error(500, 'Failed to update survey completion');
 		}
 
-		// Validate session exists
-		if (!locals.user) {
-			Logger.root.warn(
-				{ context: 'surveys', respondentId, reason: 'no_session' },
-				'Survey completed but user has no active session'
-			);
-			throw error(401, 'Please log in to view your survey completion status');
-		}
+		// Determine where to redirect the user.
+		// hooks.server.ts resolves both session types:
+		//   locals.user        → regular panelist/admin session
+		//   locals.guestSession → guest session
+		let dashboardUrl: string;
 
-		// Determine redirect destination based on user type
-		const dashboardUrl = locals.user.userType === 'guest'
-			? '/guest/dashboard'
-			: '/surveys';
+		if (locals.user) {
+			dashboardUrl = '/surveys';
+		} else if (locals.guestSession) {
+			dashboardUrl = '/guest/dashboard';
+		} else {
+			// No active session — look up whether this was a guest via
+			// the guest_survey_activity link table, then redirect to
+			// the appropriate login page.
+			const guestActivity = await getGuestActivityByTransactionId(transaction.id);
+
+			const loginPath = guestActivity ? '/guest/login' : '/login';
+			const returnTo = guestActivity ? '/guest/dashboard' : '/surveys';
+
+			Logger.root.info(
+				{ context: 'surveys', respondentId, status, reason: 'no_session', isGuest: !!guestActivity },
+				'Survey completed but no session found — redirecting to login'
+			);
+			throw redirect(302, `${loginPath}?redirect=${encodeURIComponent(returnTo)}`);
+		}
 
 		Logger.root.info(
 			{
@@ -120,7 +169,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 			'Survey completion processed and redirecting'
 		);
 
-		throw redirect(302, dashboardUrl);
+		const sep = dashboardUrl.includes('?') ? '&' : '?';
+		throw redirect(302, `${dashboardUrl}${sep}completed=${status}&pts=${awardedPoints}`);
 
 	} catch (err) {
 		// Re-throw HTTP and redirect errors

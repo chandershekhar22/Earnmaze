@@ -3,298 +3,413 @@
 	import type { PanelistDashboardData } from '$lib/types/panelist';
 	import SkeletonStats from '$lib/components/SkeletonStats.svelte';
 	import SkeletonActivity from '$lib/components/SkeletonActivity.svelte';
-	import { page } from '$app/stores';
+	import {
+		Coins, ClipboardList, CircleCheckBig, CircleX, Gift, ChevronRight,
+		TrendingUp, Target, Flame, ArrowRight, Sparkles, Zap,
+		Rocket, ArrowUpRight, FileText, Users, Copy, Check
+	} from '@lucide/svelte';
+	import { onMount } from 'svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
+	import { Logger } from '$lib/utils/app-logger';
+	import InfoBanner from '$lib/components/InfoBanner.svelte';
 
-	let { data }: { data: { dashboardData: PanelistDashboardData } } = $props();
+	let { data }: { data: {
+		dashboardData: PanelistDashboardData;
+		availableSurveyCards: { id: string; title: string; points: number }[];
+	} } = $props();
 
-	const { dashboardData } = data;
+	let dd = $derived(data.dashboardData);
+	let surveys = $derived(data.availableSurveyCards ?? []);
 
-	// Use real data from the API
-	let availableSurveys = $derived(dashboardData?.availableSurveys || 0);
-	let completedSurveys = $derived(dashboardData?.engagement?.completedSurveys || 0);
-	let pendingRewards = $derived(dashboardData?.points?.pendingPoints || 0);
-	let currentPoints = $derived(dashboardData?.points?.currentPoints || 0);
-	let lifetimePoints = $derived(dashboardData?.points?.lifetimePoints || 0);
-	let qualityScore = $derived(dashboardData?.quality?.qualityScore || 0);
-	let streakDays = $derived(dashboardData?.engagement?.streakDays || 0);
-	let tier = $derived(dashboardData?.panelist?.tier || 'bronze');
-	let completionRate = $derived(dashboardData?.engagement?.completionRate || 0);
+	let totalAvailable = $derived(dd?.availableSurveys || 0);
+	let completedSurveys = $derived(dd?.engagement?.completedSurveys || 0);
+	let currentPoints = $derived(dd?.points?.currentPoints || 0);
+	let lifetimePoints = $derived(dd?.points?.lifetimePoints || 0);
+	let redeemedPoints = $derived(dd?.points?.redeemedPoints || 0);
+	let streakDays = $derived(dd?.engagement?.streakDays || 0);
+	let completionRate = $derived(dd?.engagement?.completionRate || 0);
+	let isLoaded = $derived(!!dd);
+	let isNewUser = $derived(isLoaded && completedSurveys === 0 && lifetimePoints === 0);
+	let firstName = $derived(authStore.state.user?.name?.split(' ')[0] || 'there');
+	let referralCode = $derived(dd?.panelist?.referralCode || '');
+	let referralLink = $derived(referralCode ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${referralCode}` : '');
+	let copied = $state(false);
 
-	// Simulate loading state for demo
-	let isLoading = $state(false);
-
-	let isDataLoaded = $derived(dashboardData && !isLoading);
-
-	// Helper function to format relative time
-	function formatRelativeTime(date: Date): string {
-		const now = new Date();
-		const diffInMs = now.getTime() - date.getTime();
-		const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-		const diffInDays = Math.floor(diffInHours / 24);
-
-		if (diffInHours < 1) {
-			return 'Just now';
-		} else if (diffInHours < 24) {
-			return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-		} else {
-			return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-		}
+	function copyReferral() {
+		if (!referralLink) return;
+		navigator.clipboard.writeText(referralLink);
+		copied = true;
+		setTimeout(() => copied = false, 2000);
 	}
 
-	// Helper function to get activity icon
-	function getActivityIcon(type: string): string {
-		switch (type) {
-			case 'earned':
-			case 'bonus':
-				return '💰';
-			case 'redeemed':
-				return '🎁';
-			case 'survey':
-				return '✨';
-			default:
-				return '📊';
-		}
+	let greeting = $derived(() => {
+		const h = new Date().getHours();
+		if (h < 12) return 'Good morning';
+		if (h < 17) return 'Good afternoon';
+		return 'Good evening';
+	});
+
+	// Animated counters
+	let dPoints = $state(0);
+	let dLifetime = $state(0);
+	let dCompleted = $state(0);
+	let ready = $state(false);
+
+	function ease(from: number, to: number, ms: number, set: (v: number) => void) {
+		const t0 = performance.now();
+		(function tick(now: number) {
+			const p = Math.min((now - t0) / ms, 1);
+			set(Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))));
+			if (p < 1) requestAnimationFrame(tick);
+		})(t0);
 	}
 
-	// Helper function to get activity color
-	function getActivityColor(type: string): string {
-		switch (type) {
-			case 'earned':
-			case 'bonus':
-			case 'survey':
-				return 'text-green-600';
-			case 'redeemed':
-				return 'text-red-600';
-			default:
-				return 'text-gray-600';
+	onMount(() => { ready = true; });
+
+	$effect(() => {
+		if (ready && isLoaded) {
+			ease(0, currentPoints, 1000, v => dPoints = v);
+			ease(0, lifetimePoints, 1200, v => dLifetime = v);
+			ease(0, completedSurveys, 700, v => dCompleted = v);
 		}
+	});
+
+	function startSurvey(id: string, title: string) {
+		toastStore.info('Starting', `Loading ${title}...`);
+		window.location.href = `/start-survey?surveyId=${id}`;
+	}
+
+	function relTime(date: Date | string): string {
+		const ms = Date.now() - new Date(date).getTime();
+		const m = Math.floor(ms / 60000);
+		if (m < 1) return 'just now';
+		if (m < 60) return `${m}m ago`;
+		const h = Math.floor(m / 60);
+		if (h < 24) return `${h}h ago`;
+		const d = Math.floor(h / 24);
+		if (d < 7) return `${d}d ago`;
+		return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+	}
+
+	function actStyle(type: string) {
+		if (['completed', 'bonus', 'refund'].includes(type)) return { icon: CircleCheckBig, color: 'text-emerald-400', bg: 'bg-emerald-500/10' };
+		if (['terminated', 'quota_full'].includes(type)) return { icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10' };
+		if (type === 'redeemed') return { icon: Gift, color: 'text-pink-400', bg: 'bg-pink-500/10' };
+		if (['rejected', 'penalty', 'expired', 'disqualified'].includes(type)) return { icon: CircleX, color: 'text-red-400', bg: 'bg-red-500/10' };
+		return { icon: ClipboardList, color: 'text-violet-400', bg: 'bg-violet-500/10' };
 	}
 </script>
 
 <svelte:head>
-	<title>Dashboard - EarnMaze Panel</title>
-	<meta name="description" content="Your EarnMaze dashboard - manage surveys, points, and rewards." />
+	<title>Dashboard - EarnMaze</title>
 </svelte:head>
 
-<!-- Modern Minimal Hero -->
-<div class="relative overflow-hidden bg-gradient-to-br from-neutral-50 via-white to-neutral-50 rounded-2xl p-5 md:p-6 mb-5 border border-neutral-200/50">
-	<!-- Subtle gradient orbs -->
-	<div class="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/5 rounded-full blur-3xl"></div>
-	<div class="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
-	
-	<div class="relative">
-		<div class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200/50 rounded-full mb-4">
-			<div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-			<span class="text-xs font-medium text-emerald-700">Active</span>
-		</div>
-		
-		<h1 class="text-3xl md:text-5xl font-bold text-neutral-900 mb-3 tracking-tight">
-			Welcome back,
-			<span class="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
-				{authStore.state.user?.name?.split(' ')[0] || 'Earner'}
-			</span>
-		</h1>
-		
-		<!-- <p class="text-base md:text-lg text-neutral-600 mb-8 max-w-2xl">
-			{#if streakDays > 0}
-				<span class="inline-flex items-center gap-2 font-semibold text-orange-600">
-					<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/></svg>
-					{streakDays} day streak
-				</span>
-				— {availableSurveys} surveys ready
-			{:else}
-				{availableSurveys} surveys waiting for you
-			{/if}
-		</p> -->
-		
-		<!-- <div class="flex flex-wrap items-center gap-3">
-			<div class="flex items-center gap-3 px-5 py-3 bg-white border border-neutral-200 rounded-2xl shadow-sm">
-				<div class="text-2xl">💎</div>
-				<div>
-					<div class="text-sm text-neutral-500 font-medium">Balance</div>
-					<div class="text-xl font-bold text-neutral-900">{currentPoints.toLocaleString()}</div>
-				</div>
-			</div>
-			
-			<div class="inline-flex items-center gap-2 px-4 py-3 bg-white border border-neutral-200 rounded-2xl shadow-sm">
-				{#if tier === 'platinum'}
-					<svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-					<span class="text-sm font-semibold text-purple-600">Platinum</span>
-				{:else if tier === 'gold'}
-					<svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-					<span class="text-sm font-semibold text-amber-600">Gold</span>
-				{:else if tier === 'silver'}
-					<svg class="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-					<span class="text-sm font-semibold text-slate-600">Silver</span>
-				{:else}
-					<svg class="w-5 h-5 text-orange-700" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-					<span class="text-sm font-semibold text-orange-700">Bronze</span>
+<style>
+	@keyframes float    { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+	@keyframes float-x  { 0%,100% { transform: translateX(0) } 50% { transform: translateX(8px) } }
+	@keyframes glow-p   { 0%,100% { opacity:.35; transform:scale(1) } 50% { opacity:.7; transform:scale(1.04) } }
+	@keyframes fade-up  { 0% { opacity:0; transform:translateY(12px) } 100% { opacity:1; transform:translateY(0) } }
+	@keyframes slide-r  { 0% { opacity:0; transform:translateX(16px) } 100% { opacity:1; transform:translateX(0) } }
+	@keyframes pop      { 0% { opacity:0; transform:scale(.85) } 60% { transform:scale(1.04) } 100% { opacity:1; transform:scale(1) } }
+	@keyframes row-in   { 0% { opacity:0; transform:translateX(-8px) } 100% { opacity:1; transform:translateX(0) } }
+
+	.fl-s  { animation: float   7s ease-in-out infinite }
+	.fl-m  { animation: float   5s ease-in-out infinite .4s }
+	.fl-f  { animation: float   3.5s ease-in-out infinite .9s }
+	.fl-x  { animation: float-x 9s ease-in-out infinite }
+	.glow  { animation: glow-p  4s ease-in-out infinite }
+
+	.in-1 { animation: fade-up .45s ease-out .05s both }
+	.in-2 { animation: fade-up .45s ease-out .12s both }
+	.in-3 { animation: fade-up .45s ease-out .19s both }
+	.in-4 { animation: fade-up .45s ease-out .26s both }
+	.in-5 { animation: fade-up .45s ease-out .33s both }
+	.in-6 { animation: fade-up .45s ease-out .40s both }
+	.in-7 { animation: fade-up .45s ease-out .47s both }
+	.sl-r { animation: slide-r .5s ease-out .2s both }
+	.pop  { animation: pop .35s ease-out both }
+	.row  { animation: row-in .35s ease-out both }
+</style>
+
+<!-- ─── Hero: compact greeting + balance ─── -->
+<div class="relative overflow-hidden rounded-2xl mb-5 bg-gradient-to-br from-surface-50 to-surface-100 border border-white/[0.04] in-1">
+	<div class="absolute top-0 left-0 w-80 h-80 bg-violet-500/25 rounded-full blur-[80px] fl-s"></div>
+	<div class="absolute bottom-0 right-0 w-64 h-64 bg-fuchsia-500/20 rounded-full blur-[70px] fl-m"></div>
+	<div class="absolute top-1/2 left-1/2 w-48 h-48 bg-sky-500/12 rounded-full blur-[50px] fl-f -translate-x-1/2 -translate-y-1/2"></div>
+	<div class="absolute bottom-0 left-1/4 w-40 h-40 bg-amber-500/12 rounded-full blur-[50px] fl-x"></div>
+
+	<div class="relative px-5 py-6 md:px-7 md:py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+		<!-- Left: greeting -->
+		<div class="in-2">
+			<div class="flex items-center gap-2 mb-2">
+				<div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50"></div>
+				<span class="text-[10px] font-bold text-emerald-300/80 uppercase tracking-widest">Online</span>
+				{#if streakDays > 0}
+					<span class="mx-1 text-white/10">|</span>
+					<Flame class="w-3 h-3 text-orange-400" />
+					<span class="text-[10px] font-bold text-orange-300">{streakDays}d streak</span>
 				{/if}
 			</div>
-			
-			{#if qualityScore > 0}
-				<div class="inline-flex items-center gap-2 px-4 py-3 bg-white border border-neutral-200 rounded-2xl shadow-sm">
-					<svg class="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
-					<span class="text-sm font-semibold text-neutral-900">{qualityScore.toFixed(1)}</span>
-					<span class="text-xs text-neutral-500">quality</span>
+			<h1 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
+				{greeting()}, {firstName}
+			</h1>
+			<p class="text-sm text-white/40 mt-1">
+				{#if totalAvailable > 0}
+					<span class="text-white/70 font-semibold">{totalAvailable}</span> survey{totalAvailable !== 1 ? 's' : ''} ready to earn
+				{:else}
+					We'll let you know when new surveys drop
+				{/if}
+			</p>
+		</div>
+
+		<!-- Right: balance -->
+		{#if isLoaded}
+			<div class="relative group sl-r flex-shrink-0">
+				<div class="absolute -inset-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-sky-400 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity glow"></div>
+				<div class="relative bg-surface-100/80 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-4">
+					<div class="flex items-center gap-1.5 mb-1">
+						<Coins class="w-3.5 h-3.5 text-yellow-400" />
+						<span class="text-[9px] font-bold text-white/35 uppercase tracking-[0.15em]">Balance</span>
+					</div>
+					<div class="text-3xl font-black text-white tracking-tighter tabular-nums">
+						{dPoints.toLocaleString()}
+					</div>
+					<div class="flex items-center gap-2 mt-1">
+						<span class="text-[10px] text-white/25 font-medium">pts</span>
+						{#if currentPoints > 0}
+							<a href="/rewards" class="text-[10px] font-bold text-fuchsia-400 hover:text-fuchsia-300 transition-colors uppercase tracking-wider flex items-center gap-0.5">
+								Redeem <ArrowUpRight class="w-2.5 h-2.5" />
+							</a>
+						{/if}
+					</div>
 				</div>
-			{/if}
-		</div> -->
+			</div>
+		{/if}
 	</div>
 </div>
 
-<div class="space-y-5">
-	<!-- Modern Stats Grid -->
-	{#if isDataLoaded}
-		<div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-			<!-- Current Points -->
-			<div class="group bg-white border border-neutral-200 rounded-xl p-4 hover:shadow-md hover:border-violet-200 transition-all duration-200">
-				<div class="flex items-center justify-between mb-2">
-					<div class="p-2 bg-violet-50 rounded-lg">
-						<svg class="w-4 h-4 text-violet-600" fill="currentColor" viewBox="0 0 20 20"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/></svg>
-					</div>
-				</div>
-				<div class="text-xs font-medium text-neutral-500 mb-0.5">Current Points</div>
-				<div class="text-2xl font-bold text-neutral-900">{currentPoints.toLocaleString()}</div>
-			</div>
+<!-- Info tips -->
+{#if isLoaded}
+	<div class="space-y-2 mb-3 in-2">
+		<InfoBanner id="dash-how" message="Complete surveys to earn points. Redeem your points for gift cards from top brands. Check available surveys below!" color="primary" />
+		{#if currentPoints > 0 && currentPoints < 500}
+			<InfoBanner id="dash-redeem" message="You're earning great! Keep going — most gift cards start at 500 points." color="amber" />
+		{/if}
+	</div>
+{/if}
 
-			<!-- Available Surveys -->
-			<div class="group bg-white border border-neutral-200 rounded-xl p-4 hover:shadow-md hover:border-blue-200 transition-all duration-200">
-				<div class="flex items-center justify-between mb-2">
-					<div class="p-2 bg-blue-50 rounded-lg">
-						<svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
-					</div>
-					{#if availableSurveys > 0}
-						<span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded">New</span>
-					{/if}
-				</div>
-				<div class="text-xs font-medium text-neutral-500 mb-0.5">Available Surveys</div>
-				<div class="text-2xl font-bold text-neutral-900">{availableSurveys}</div>
+<!-- ─── New User Welcome ─── -->
+{#if isNewUser}
+	<div class="relative overflow-hidden bg-gradient-to-br from-violet-600/15 via-fuchsia-600/10 to-surface-100 border border-violet-500/15 rounded-2xl p-5 md:p-6 mb-5 in-3">
+		<div class="absolute -top-16 -right-16 w-40 h-40 bg-violet-500/10 rounded-full blur-3xl"></div>
+		<div class="relative flex flex-col sm:flex-row sm:items-center gap-4">
+			<div class="p-3 bg-violet-500/15 rounded-xl flex-shrink-0 w-fit">
+				<Rocket class="w-6 h-6 text-violet-400" />
 			</div>
-
-			<!-- Completed -->
-			<div class="group bg-white border border-neutral-200 rounded-xl p-4 hover:shadow-md hover:border-emerald-200 transition-all duration-200">
-				<div class="flex items-center justify-between mb-2">
-					<div class="p-2 bg-emerald-50 rounded-lg">
-						<svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-					</div>
-				</div>
-				<div class="text-xs font-medium text-neutral-500 mb-0.5">Completed Surveys</div>
-				<div class="text-2xl font-bold text-neutral-900">{completedSurveys}</div>
-				{#if completionRate > 0}
-					<div class="text-xs text-emerald-600 font-medium mt-1">{completionRate.toFixed(0)}% rate</div>
-				{/if}
+			<div class="flex-1">
+				<h3 class="text-base font-bold text-white mb-1">Welcome to EarnMaze!</h3>
+				<p class="text-sm text-neutral-400">Complete your first survey to start earning points. It only takes a few minutes.</p>
 			</div>
-
-			<!-- Pending -->
-			<div class="group bg-white border border-neutral-200 rounded-xl p-4 hover:shadow-md hover:border-amber-200 transition-all duration-200">
-				<div class="flex items-center justify-between mb-2">
-					<div class="p-2 bg-amber-50 rounded-lg">
-						<svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
-					</div>
-					{#if pendingRewards > 0}
-						<span class="px-1.5 py-0.5 bg-amber-50 text-amber-700 text-xs font-medium rounded">Pending</span>
-					{/if}
-				</div>
-				<div class="text-xs font-medium text-neutral-500 mb-0.5">Pending Rewards</div>
-				<div class="text-2xl font-bold text-neutral-900">{pendingRewards}</div>
-			</div>
-		</div>
-	{:else}
-		<SkeletonStats />
-	{/if}
-
-	<!-- Quick Actions -->
-	<div class="bg-white border border-neutral-200 rounded-xl p-4 md:p-5">
-		<h2 class="text-base font-bold text-neutral-900 mb-3">Quick Actions</h2>
-		
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-			<!-- Take Surveys -->
-			<a href="/surveys" class="group flex items-center gap-3 p-4 bg-neutral-50 hover:bg-violet-50 border border-neutral-200 hover:border-violet-300 rounded-xl transition-all duration-200">
-				<div class="p-2.5 bg-white border border-neutral-200 group-hover:border-violet-300 rounded-lg transition-colors">
-					<svg class="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
-				</div>
-				<div class="flex-1">
-					<div class="font-semibold text-neutral-900 mb-1">Take Surveys</div>
-					<div class="text-sm text-neutral-600">Complete surveys and earn rewards</div>
-				</div>
-				<svg class="w-5 h-5 text-neutral-400 group-hover:text-violet-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-			</a>
-			
-			<!-- View Points -->
-			<a href="/points" class="group flex items-center gap-3 p-4 bg-neutral-50 hover:bg-emerald-50 border border-neutral-200 hover:border-emerald-300 rounded-xl transition-all duration-200">
-				<div class="p-2.5 bg-white border border-neutral-200 group-hover:border-emerald-300 rounded-lg transition-colors">
-					<svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/></svg>
-				</div>
-				<div class="flex-1">
-					<div class="font-semibold text-neutral-900 mb-1">View Points</div>
-					<div class="text-sm text-neutral-600">Check balance and transactions</div>
-				</div>
-				<svg class="w-5 h-5 text-neutral-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-			</a>
-			
-			<!-- Redeem Rewards -->
-			<a href="/rewards" class="group flex items-center gap-3 p-4 bg-neutral-50 hover:bg-blue-50 border border-neutral-200 hover:border-blue-300 rounded-xl transition-all duration-200">
-				<div class="p-2.5 bg-white border border-neutral-200 group-hover:border-blue-300 rounded-lg transition-colors">
-					<svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clip-rule="evenodd"/><path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z"/></svg>
-				</div>
-				<div class="flex-1">
-					<div class="font-semibold text-neutral-900 mb-1">Redeem Rewards</div>
-					<div class="text-sm text-neutral-600">Exchange points for prizes</div>
-				</div>
-				<svg class="w-5 h-5 text-neutral-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+			<a href="/surveys" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-violet-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all flex-shrink-0">
+				Start Earning <ArrowRight class="w-4 h-4" />
 			</a>
 		</div>
 	</div>
+{/if}
 
-	<!-- Recent Activity -->
-	{#if isDataLoaded}
-		<div class="bg-white border border-neutral-200 rounded-xl p-4 md:p-5">
-			<div class="flex items-center justify-between mb-3">
-				<h2 class="text-base font-bold text-neutral-900">Recent Activity</h2>
-				<a href="/history" class="group inline-flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors">
-					View all
-					<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+<!-- ─── Available Surveys (the #1 action) ─── -->
+{#if surveys.length > 0}
+	<div class="mb-5 in-3">
+		<div class="flex items-center justify-between mb-3">
+			<h2 class="text-xs font-bold text-white/40 uppercase tracking-widest">Ready to earn</h2>
+			<a href="/surveys" class="group flex items-center gap-1 text-[10px] font-bold text-primary-400/70 hover:text-primary-400 uppercase tracking-wider transition-colors">
+				See all <ChevronRight class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+			</a>
+		</div>
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+			{#each surveys as s, i}
+				<button
+					onclick={() => startSurvey(s.id, s.title)}
+					class="group text-left bg-surface-100 border border-white/[0.06] rounded-xl p-4 hover:border-primary-500/25 hover:bg-surface-200 transition-all duration-200 active:scale-[0.98]"
+					style="animation: fade-up .4s ease-out {0.25 + i * 0.07}s both"
+				>
+					<div class="flex items-center gap-3">
+						<div class="p-2 bg-primary-500/10 rounded-lg group-hover:bg-primary-500/15 group-hover:scale-105 transition-all flex-shrink-0">
+							<FileText class="w-4 h-4 text-primary-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<div class="text-sm font-semibold text-white/80 truncate group-hover:text-white transition-colors">{s.title}</div>
+							<div class="text-xs font-bold text-emerald-400 mt-0.5">+{s.points} pts</div>
+						</div>
+						<ArrowRight class="w-4 h-4 text-white/15 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+					</div>
+				</button>
+			{/each}
+		</div>
+	</div>
+{/if}
+
+<!-- ─── Stats ─── -->
+{#if isLoaded}
+	<div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-5">
+		<div class="group relative overflow-hidden bg-gradient-to-br from-violet-500/[0.08] to-surface-100 rounded-xl p-4 border border-violet-500/10 hover:border-violet-500/25 hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 in-3">
+			<div class="absolute -top-6 -right-6 w-16 h-16 bg-violet-500/10 rounded-full blur-xl group-hover:bg-violet-500/20 transition-colors"></div>
+			<div class="relative">
+				<div class="flex items-center gap-2.5 mb-2.5">
+					<div class="p-1.5 bg-violet-500/15 rounded-lg group-hover:scale-110 transition-transform">
+						<TrendingUp class="w-3.5 h-3.5 text-violet-400" />
+					</div>
+					<span class="text-[10px] font-bold text-violet-300/40 uppercase tracking-widest">Lifetime</span>
+				</div>
+				<div class="text-xl font-black text-white tracking-tight tabular-nums">{dLifetime.toLocaleString()}</div>
+			</div>
+		</div>
+
+		<div class="group relative overflow-hidden bg-gradient-to-br from-sky-500/[0.08] to-surface-100 rounded-xl p-4 border border-sky-500/10 hover:border-sky-500/25 hover:shadow-lg hover:shadow-sky-500/5 transition-all duration-300 in-4">
+			<div class="absolute -top-6 -right-6 w-16 h-16 bg-sky-500/10 rounded-full blur-xl group-hover:bg-sky-500/20 transition-colors"></div>
+			<div class="relative">
+				<div class="flex items-center gap-2.5 mb-2.5">
+					<div class="p-1.5 bg-sky-500/15 rounded-lg group-hover:scale-110 transition-transform">
+						<Target class="w-3.5 h-3.5 text-sky-400" />
+					</div>
+					<span class="text-[10px] font-bold text-sky-300/40 uppercase tracking-widest">Available</span>
+					{#if totalAvailable > 0}
+						<span class="relative flex h-2 w-2 ml-auto">
+							<span class="animate-ping absolute h-full w-full rounded-full bg-sky-400 opacity-50"></span>
+							<span class="relative rounded-full h-2 w-2 bg-sky-400 shadow-sm shadow-sky-400/50"></span>
+						</span>
+					{/if}
+				</div>
+				<div class="text-xl font-black text-white tracking-tight">{totalAvailable}</div>
+			</div>
+		</div>
+
+		<div class="group relative overflow-hidden bg-gradient-to-br from-emerald-500/[0.08] to-surface-100 rounded-xl p-4 border border-emerald-500/10 hover:border-emerald-500/25 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 in-5">
+			<div class="absolute -top-6 -right-6 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-colors"></div>
+			<div class="relative">
+				<div class="flex items-center gap-2.5 mb-2.5">
+					<div class="p-1.5 bg-emerald-500/15 rounded-lg group-hover:scale-110 transition-transform">
+						<CircleCheckBig class="w-3.5 h-3.5 text-emerald-400" />
+					</div>
+					<span class="text-[10px] font-bold text-emerald-300/40 uppercase tracking-widest">Done</span>
+				</div>
+				<div class="text-xl font-black text-white tracking-tight tabular-nums">{dCompleted}</div>
+				{#if completionRate > 0}
+					<div class="text-[10px] font-bold text-emerald-400/70 mt-0.5">{completionRate.toFixed(0)}% rate</div>
+				{/if}
+			</div>
+		</div>
+
+		<div class="group relative overflow-hidden bg-gradient-to-br from-rose-500/[0.08] to-surface-100 rounded-xl p-4 border border-rose-500/10 hover:border-rose-500/25 hover:shadow-lg hover:shadow-rose-500/5 transition-all duration-300 in-6">
+			<div class="absolute -top-6 -right-6 w-16 h-16 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-colors"></div>
+			<div class="relative">
+				<div class="flex items-center gap-2.5 mb-2.5">
+					<div class="p-1.5 bg-rose-500/15 rounded-lg group-hover:scale-110 transition-transform">
+						<Gift class="w-3.5 h-3.5 text-rose-400" />
+					</div>
+					<span class="text-[10px] font-bold text-rose-300/40 uppercase tracking-widest">Redeemed</span>
+				</div>
+				<div class="text-xl font-black text-white tracking-tight tabular-nums">{Math.abs(redeemedPoints).toLocaleString()}</div>
+			</div>
+		</div>
+	</div>
+{:else}
+	<div class="mb-5"><SkeletonStats /></div>
+{/if}
+
+<!-- ─── Quick Nav ─── -->
+<div class="grid grid-cols-3 gap-2.5 mb-5">
+	<a href="/surveys" class="group relative overflow-hidden bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl p-4 text-white hover:shadow-xl hover:shadow-violet-500/20 hover:-translate-y-1 transition-all duration-300 in-5">
+		<div class="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full blur-xl group-hover:bg-white/15 transition-colors"></div>
+		<Rocket class="w-5 h-5 mb-3 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all relative" />
+		<div class="text-sm font-bold relative">Surveys</div>
+		<div class="text-[10px] text-white/60 mt-0.5 relative">Earn points</div>
+	</a>
+	<a href="/points" class="group relative overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl p-4 text-white hover:shadow-xl hover:shadow-emerald-500/20 hover:-translate-y-1 transition-all duration-300 in-6">
+		<div class="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full blur-xl group-hover:bg-white/15 transition-colors"></div>
+		<Coins class="w-5 h-5 mb-3 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all relative" />
+		<div class="text-sm font-bold relative">Points</div>
+		<div class="text-[10px] text-white/60 mt-0.5 relative">Track balance</div>
+	</a>
+	<a href="/rewards" class="group relative overflow-hidden bg-gradient-to-br from-rose-600 to-pink-600 rounded-xl p-4 text-white hover:shadow-xl hover:shadow-rose-500/20 hover:-translate-y-1 transition-all duration-300 in-7">
+		<div class="absolute -top-4 -right-4 w-20 h-20 bg-white/10 rounded-full blur-xl group-hover:bg-white/15 transition-colors"></div>
+		<Gift class="w-5 h-5 mb-3 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all relative" />
+		<div class="text-sm font-bold relative">Rewards</div>
+		<div class="text-[10px] text-white/60 mt-0.5 relative">Gift cards</div>
+	</a>
+</div>
+
+<!-- ─── Referral Card ─── -->
+{#if referralCode}
+	<div class="bg-surface-100 border border-white/[0.06] rounded-xl p-4 mb-5 in-7">
+		<div class="flex items-center gap-3 mb-3">
+			<div class="p-1.5 bg-fuchsia-500/10 rounded-lg">
+				<Users class="w-3.5 h-3.5 text-fuchsia-400" />
+			</div>
+			<div>
+				<h3 class="text-xs font-bold text-white">Invite friends, earn bonus points</h3>
+				<p class="text-[10px] text-neutral-600">Share your link and earn when they sign up</p>
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<div class="flex-1 bg-surface-200 border border-white/[0.04] rounded-lg px-3 py-2 text-xs text-neutral-400 font-mono truncate">
+				{referralLink}
+			</div>
+			<button onclick={copyReferral} class="btn-secondary !px-3 !py-2 !text-xs flex-shrink-0">
+				{#if copied}
+					<Check class="w-3.5 h-3.5 text-emerald-400" />
+				{:else}
+					<Copy class="w-3.5 h-3.5" />
+				{/if}
+			</button>
+		</div>
+	</div>
+{/if}
+
+<!-- ─── Recent Activity ─── -->
+{#if isLoaded}
+	<div class="bg-surface-100 border border-white/[0.06] rounded-xl overflow-hidden in-7">
+		<div class="flex items-center justify-between px-4 pt-4 pb-2">
+			<div class="flex items-center gap-2">
+				<Sparkles class="w-3.5 h-3.5 text-violet-400/60" />
+				<h2 class="text-xs font-bold text-white/40 uppercase tracking-widest">Activity</h2>
+			</div>
+			<a href="/history" class="group flex items-center gap-1 text-[10px] font-bold text-white/25 hover:text-violet-400 uppercase tracking-wider transition-colors">
+				All <ChevronRight class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+			</a>
+		</div>
+
+		{#if dd?.recentActivity && dd.recentActivity.length > 0}
+			<div class="divide-y divide-white/[0.04]">
+				{#each dd.recentActivity as a, i}
+					{@const s = actStyle(a.type)}
+					<div class="flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.02] transition-colors row" style="animation-delay: {0.5 + i * 0.05}s">
+						<div class="p-1.5 {s.bg} rounded-lg flex-shrink-0">
+							<s.icon class="w-3.5 h-3.5 {s.color}" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<div class="text-[13px] font-medium text-white/70 truncate">{a.description}</div>
+							<div class="text-[10px] text-white/20 mt-0.5">{relTime(a.createdAt)}</div>
+						</div>
+						<span class="text-sm font-black tabular-nums flex-shrink-0 {a.amount > 0 ? 'text-emerald-400' : a.amount < 0 ? 'text-red-400' : 'text-white/30'}">
+							{a.amount > 0 ? '+' : ''}{a.amount.toLocaleString()}
+						</span>
+					</div>
+				{/each}
+			</div>
+		{:else}
+			<div class="text-center py-12 px-6">
+				<div class="w-12 h-12 bg-white/[0.03] rounded-xl flex items-center justify-center mx-auto mb-3 pop">
+					<ClipboardList class="w-6 h-6 text-white/10" />
+				</div>
+				<p class="text-xs font-semibold text-white/30 mb-1">No activity yet</p>
+				<p class="text-[10px] text-white/15 mb-4">Complete a survey to get started</p>
+				<a href="/surveys" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white text-[11px] font-bold rounded-lg hover:bg-primary-500 transition-colors">
+					<Rocket class="w-3 h-3" /> Start earning
 				</a>
 			</div>
-			
-			<div class="space-y-3">
-				{#if dashboardData?.recentActivity && dashboardData.recentActivity.length > 0}
-					{#each dashboardData.recentActivity as activity}
-						<div class="flex items-center gap-4 p-4 bg-neutral-50 hover:bg-neutral-100 rounded-2xl transition-colors">
-							<div class="p-2.5 bg-white border border-neutral-200 rounded-xl flex-shrink-0">
-								<svg class="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
-									{#if activity.type === 'earned' || activity.type === 'bonus'}
-										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-									{:else if activity.type === 'redeemed'}
-										<path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clip-rule="evenodd"/><path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z"/>
-									{:else}
-										<path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
-									{/if}
-								</svg>
-							</div>
-							<div class="flex-1 min-w-0">
-								<div class="font-medium text-neutral-900 mb-0.5 truncate">{activity.description}</div>
-								<div class="text-sm text-neutral-500">{formatRelativeTime(activity.createdAt)}</div>
-							</div>
-							<div class="flex-shrink-0">
-								<span class="inline-flex items-center px-3 py-1.5 bg-white border border-neutral-200 rounded-xl text-sm font-semibold {activity.amount > 0 ? 'text-emerald-700' : 'text-neutral-700'}">
-									{activity.amount > 0 ? '+' : ''}{activity.amount.toLocaleString()}
-								</span>
-							</div>
-						</div>
-					{/each}
-				{:else}
-					<div class="text-center py-12">
-						<div class="w-16 h-16 bg-neutral-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-							<svg class="w-8 h-8 text-neutral-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
-						</div>
-						<p class="text-neutral-600 text-sm">No recent activity yet. Start completing surveys to see your progress!</p>
-					</div>
-				{/if}
-			</div>
-		</div>
-	{:else}
-		<SkeletonActivity />
-	{/if}
-</div>
+		{/if}
+	</div>
+{:else}
+	<SkeletonActivity />
+{/if}

@@ -4,6 +4,7 @@
  */
 
 import type { RequestEvent } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { Logger } from '$lib/utils/app-logger';
 
 // Configuration for allowed/blocked countries
@@ -103,6 +104,11 @@ export async function checkGeoRestriction(event: RequestEvent): Promise<{
 }> {
 	const pathname = event.url.pathname;
 	
+	// Skip geo-restriction entirely in development
+	if (dev) {
+		return { allowed: true };
+	}
+
 	// Only check restricted paths
 	if (!isPathRestricted(pathname)) {
 		return { allowed: true };

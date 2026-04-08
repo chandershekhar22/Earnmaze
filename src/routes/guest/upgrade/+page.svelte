@@ -6,14 +6,15 @@
 	import Turnstile from '$lib/components/Turnstile.svelte';
 	import { Logger, Features } from '$lib/utils/app-logger';
 	import type { GuestUpgradeStartResponse, GuestUpgradeVerifyResponse } from '$lib/types/guest-session';
+	import { AlertTriangle, Check } from '@lucide/svelte';
 
 	// Step tracking
 	let currentStep = $state<1 | 2 | 3>(1);
-	
+
 	// Step 1: Send OTP
 	let turnstileToken = $state('');
 	let otpExpiresAt = $state<string | null>(null);
-	
+
 	// Step 2: Verify OTP
 	let otp = $state('');
 	let upgradeToken = $state('');
@@ -21,11 +22,11 @@
 	let otpAttempts = $state(0);
 	let resendCountdown = $state(60);
 	let resendInterval: ReturnType<typeof setInterval> | null = null;
-	
+
 	// Step 3: Set password
 	let password = $state('');
 	let confirmPassword = $state('');
-	
+
 	// Common
 	let isLoading = $state(false);
 	let error = $state('');
@@ -37,7 +38,7 @@
 	onMount(() => {
 		mounted = true;
 		Features.trackPageView('/guest/upgrade');
-		
+
 		// Check if coming from guest session
 		checkGuestSession();
 	});
@@ -115,10 +116,10 @@
 				error = '';
 				// Set rate limit timer
 				resendCountdown = 60;
-				
+
 				// Clear existing interval if any
 				if (resendInterval) clearInterval(resendInterval);
-				
+
 				// Countdown timer
 				resendInterval = setInterval(() => {
 					resendCountdown--;
@@ -165,7 +166,7 @@
 				upgradeToken = result.data.upgradeToken;
 				upgradeTokenExpiresAt = result.data.expiresAt;
 				currentStep = 3;
-				error = '';				
+				error = '';
 			} else {
 				otpAttempts++;
 				error = result.message || 'Invalid verification code';
@@ -207,13 +208,13 @@
 				otp = '';
 				otpAttempts = 0;
 				error = '';
-				
+
 				// Set rate limit timer
 				resendCountdown = 60;
-				
+
 				// Clear existing interval if any
 				if (resendInterval) clearInterval(resendInterval);
-				
+
 				// Countdown timer
 				resendInterval = setInterval(() => {
 					resendCountdown--;
@@ -226,7 +227,7 @@
 				// Backend rate limiting - set countdown based on response
 				error = result.message || 'Please wait before requesting another code';
 				resendCountdown = 60;
-				
+
 				if (resendInterval) clearInterval(resendInterval);
 				resendInterval = setInterval(() => {
 					resendCountdown--;
@@ -280,7 +281,7 @@
 			if (result.success) {
 				Logger.root.info({ context: 'security' }, 'Guest account upgraded successfully');
 				Features.trackUserAction('guest-upgrade-success', 'guest-upgrade');
-				
+
 				// Update auth store with upgraded user data
 				if (result.user) {
 					authStore.state = {
@@ -290,7 +291,7 @@
 						error: null
 					};
 				}
-				
+
 				// Redirect to surveys dashboard
 				goto('/surveys');
 			} else {
@@ -342,13 +343,13 @@
 	<meta name="description" content="Complete your registration to unlock all features" />
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-surface flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
 	<div class="max-w-md w-full space-y-8">
 		{#if !showPasswordSetWarning}
 			<!-- Header -->
 			<div class="text-center">
-				<h1 class="text-4xl font-bold text-gray-900 mb-2">Create Your Account</h1>
-				<p class="text-gray-600">
+				<h1 class="text-4xl font-bold text-white mb-2">Create Your Account</h1>
+				<p class="text-neutral-400">
 					{#if currentStep === 1}
 						Verify your email to get started
 					{:else if currentStep === 2}
@@ -363,86 +364,68 @@
 			<div class="flex justify-between items-center">
 				<div class="flex-1 flex flex-col items-center">
 					<div class={`w-12 h-12 rounded-full flex items-center justify-center font-semibold transition-colors ${
-						currentStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+						currentStep >= 1 ? 'bg-primary-600 text-white' : 'bg-surface-200 text-neutral-500'
 					}`}>
 						1
 					</div>
-					<p class="text-xs mt-2 text-gray-600">Email</p>
+					<p class="text-xs mt-2 text-neutral-500">Email</p>
 				</div>
-				<div class={`flex-1 h-1 mx-2 transition-colors ${currentStep >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+				<div class={`flex-1 h-1 mx-2 transition-colors ${currentStep >= 2 ? 'bg-primary-600' : 'bg-surface-200'}`}></div>
 				<div class="flex-1 flex flex-col items-center">
 					<div class={`w-12 h-12 rounded-full flex items-center justify-center font-semibold transition-colors ${
-						currentStep >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+						currentStep >= 2 ? 'bg-primary-600 text-white' : 'bg-surface-200 text-neutral-500'
 					}`}>
 						2
 					</div>
-					<p class="text-xs mt-2 text-gray-600">Verify</p>
+					<p class="text-xs mt-2 text-neutral-500">Verify</p>
 				</div>
-				<div class={`flex-1 h-1 mx-2 transition-colors ${currentStep >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+				<div class={`flex-1 h-1 mx-2 transition-colors ${currentStep >= 3 ? 'bg-primary-600' : 'bg-surface-200'}`}></div>
 				<div class="flex-1 flex flex-col items-center">
 					<div class={`w-12 h-12 rounded-full flex items-center justify-center font-semibold transition-colors ${
-						currentStep >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+						currentStep >= 3 ? 'bg-primary-600 text-white' : 'bg-surface-200 text-neutral-500'
 					}`}>
 						3
 					</div>
-					<p class="text-xs mt-2 text-gray-600">Password</p>
+					<p class="text-xs mt-2 text-neutral-500">Password</p>
 				</div>
 			</div>
 
 			<!-- Benefits Banner -->
-			<div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+			<div class="bg-gradient-to-r from-primary-600 to-violet-600 rounded-2xl p-6 text-white">
 				<h3 class="font-bold text-lg mb-3">Full Account Benefits:</h3>
 				<ul class="space-y-2 text-sm">
 				<li class="flex items-start">
-					<svg class="h-5 w-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-					</svg>
+					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
 					Save and track all your points permanently
 				</li>
 				<li class="flex items-start">
-					<svg class="h-5 w-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-					</svg>
+					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
 					Redeem rewards and gift cards
 				</li>
 				<li class="flex items-start">
-					<svg class="h-5 w-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-					</svg>
+					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
 					Access complete survey history
 				</li>
 				<li class="flex items-start">
-					<svg class="h-5 w-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-					</svg>
+					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
 					Unlock tier rewards and bonuses
 				</li>
 			</ul>
 		</div>
 		{/if}
 
-		<!-- {#if guestEmail}
-			<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-				<p class="text-sm text-blue-700">
-					<strong>Email:</strong> {guestEmail}
-				</p>
-			</div>
-		{/if} -->
-
 		<!-- Form Container -->
-		<div class="bg-white rounded-lg shadow-lg p-8">
+		<div class="bg-surface-100 rounded-2xl border border-white/[0.06] p-8">
 			{#if showPasswordSetWarning}
-				<div class="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6">
+				<div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
 					<div class="flex items-start">
 						<div class="flex-shrink-0">
-							<svg class="h-5 w-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-							</svg>
+							<AlertTriangle class="h-5 w-5 text-amber-400" />
 						</div>
 						<div class="ml-3">
-							<h3 class="text-sm font-medium text-amber-800">Account Already Exists</h3>
-							<p class="text-sm text-amber-700 mt-1">
-								An account with this email already has a password set. Please <a href="/login" class="underline font-semibold hover:text-amber-900">log in with your password</a> instead.
+							<h3 class="text-sm font-medium text-amber-300">Account Already Exists</h3>
+							<p class="text-sm text-amber-400/80 mt-1">
+								An account with this email already has a password set. Please <a href="/login" class="underline font-semibold hover:text-amber-200">log in with your password</a> instead.
 							</p>
 						</div>
 					</div>
@@ -452,30 +435,33 @@
 					<button
 						type="button"
 						onclick={handleCancel}
-						class="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+						class="flex-1 bg-surface-200 text-neutral-400 py-3 px-4 rounded-lg font-semibold hover:bg-white/[0.03] transition-colors"
 					>
 						Back
 					</button>
 					<a
 						href="/login"
-						class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
+						class="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-500 transition-colors text-center"
 					>
 						Go to Login
 					</a>
 				</div>
 			{:else}
 				{#if error}
-					<div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-						<p class="text-sm text-red-800">{error}</p>
+					<div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 mb-6">
+						<p class="text-sm text-rose-400">{error}</p>
 					</div>
 				{/if}
 
 			<!-- Step 1: Send OTP -->
 			{#if currentStep === 1}
 				<div class="space-y-6">
-					<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-						<p class="text-sm text-blue-700">
-							We'll send a verification code to <strong>{guestEmail}</strong>
+					<div class="bg-primary-500/10 border border-primary-500/20 rounded-xl p-4 space-y-2">
+						<p class="text-sm text-primary-300">
+							We'll send a 6-digit verification code to <strong>{guestEmail}</strong>. Please check your inbox (and spam folder) for the code.
+						</p>
+						<p class="text-xs text-primary-400/60">
+							This will also be the email where you receive your gift cards and account notifications.
 						</p>
 					</div>
 
@@ -488,7 +474,7 @@
 							type="button"
 							onclick={handleCancel}
 							disabled={isLoading || isPasswordAlreadySet}
-							class="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+							class="flex-1 bg-surface-200 text-neutral-400 py-3 px-4 rounded-lg font-semibold hover:bg-white/[0.03] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							Cancel
 						</button>
@@ -496,7 +482,7 @@
 							type="button"
 							onclick={handleSendOtp}
 							disabled={isLoading || !turnstileToken || isPasswordAlreadySet}
-							class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+							class="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{isLoading ? 'Sending...' : 'Send Code'}
 						</button>
@@ -508,7 +494,7 @@
 			{#if currentStep === 2}
 				<div class="space-y-6">
 					<div>
-						<label for="otp" class="block text-sm font-medium text-gray-700 mb-2">
+						<label for="otp" class="block text-sm font-medium text-neutral-400 mb-2">
 							Verification Code
 						</label>
 						<input
@@ -518,22 +504,22 @@
 							placeholder="000000"
 							maxlength="6"
 							inputmode="numeric"
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-widest"
+							class="input w-full text-center text-2xl tracking-widest"
 							disabled={isLoading || isOtpExpired()}
 						/>
-						<p class="text-xs text-gray-500 mt-2">Enter the 6-digit code sent to your email</p>
+						<p class="text-xs text-neutral-500 mt-2">Enter the 6-digit code sent to your email</p>
 					</div>
 
 					{#if isOtpExpired()}
-						<div class="bg-red-50 border border-red-200 rounded-lg p-4">
-							<p class="text-sm text-red-800 mb-3">
+						<div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4">
+							<p class="text-sm text-rose-400 mb-3">
 								Your verification code has expired.
 							</p>
 							<button
 								type="button"
 								onclick={handleResendOtp}
 								disabled={isLoading || resendCountdown > 0}
-								class="w-full bg-red-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+								class="w-full bg-rose-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-rose-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 							>
 								{isLoading ? 'Sending...' : resendCountdown > 0 ? `Resend Code (${resendCountdown}s)` : 'Resend Code'}
 							</button>
@@ -541,23 +527,23 @@
 					{/if}
 
 					{#if otpAttempts > 0 && otpAttempts < 5}
-						<div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-							<p class="text-sm text-amber-800">
+						<div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+							<p class="text-sm text-amber-400">
 								Attempt {otpAttempts} of 5. Please check your code and try again.
 							</p>
 						</div>
 					{/if}
 
 					{#if otpAttempts >= 5}
-						<div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-							<p class="text-sm text-amber-800 mb-3">
+						<div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+							<p class="text-sm text-amber-400 mb-3">
 								Too many failed attempts. Request a new code to continue.
 							</p>
 							<button
 								type="button"
 								onclick={handleResendOtp}
 								disabled={isLoading || resendCountdown > 0}
-								class="w-full bg-amber-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-amber-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+								class="w-full bg-amber-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 							>
 								{isLoading ? 'Sending...' : resendCountdown > 0 ? `Request New Code (${resendCountdown}s)` : 'Request New Code'}
 							</button>
@@ -569,7 +555,7 @@
 							type="button"
 							onclick={handleBack}
 							disabled={isLoading || isOtpExpired()}
-							class="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+							class="flex-1 bg-surface-200 text-neutral-400 py-3 px-4 rounded-lg font-semibold hover:bg-white/[0.03] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							Back
 						</button>
@@ -577,7 +563,7 @@
 							type="button"
 							onclick={handleVerifyOtp}
 							disabled={isLoading || !otp || otp.length !== 6 || isOtpExpired() || otpAttempts >= 5}
-							class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+							class="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{isLoading ? 'Verifying...' : 'Verify Code'}
 						</button>
@@ -589,7 +575,7 @@
 								type="button"
 								onclick={handleResendOtp}
 								disabled={isLoading || resendCountdown > 0}
-								class="text-blue-600 hover:text-blue-800 underline disabled:text-gray-400"
+								class="text-primary-400 hover:text-primary-300 underline disabled:text-neutral-600"
 							>
 								{isLoading ? 'Sending...' : resendCountdown > 0 ? `Resend Code (${resendCountdown}s)` : 'Resend Code'}
 							</button>
@@ -602,15 +588,15 @@
 			{#if currentStep === 3}
 				<div class="space-y-6">
 					{#if isUpgradeTokenExpired()}
-						<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-							<p class="text-sm text-yellow-800">
+						<div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+							<p class="text-sm text-amber-400">
 								Your session has expired. Please go back and start over.
 							</p>
 						</div>
 					{/if}
 
 					<div>
-						<label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+						<label for="password" class="block text-sm font-medium text-neutral-400 mb-2">
 							Password
 						</label>
 						<input
@@ -620,14 +606,14 @@
 							required
 							minlength="8"
 							placeholder="At least 8 characters"
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							class="input w-full"
 							disabled={isLoading || isUpgradeTokenExpired()}
 						/>
-						<p class="text-xs text-gray-500 mt-2">Must be at least 8 characters</p>
+						<p class="text-xs text-neutral-500 mt-2">Must be at least 8 characters</p>
 					</div>
 
 					<div>
-						<label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+						<label for="confirmPassword" class="block text-sm font-medium text-neutral-400 mb-2">
 							Confirm Password
 						</label>
 						<input
@@ -637,7 +623,7 @@
 							required
 							minlength="8"
 							placeholder="Re-enter password"
-							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							class="input w-full"
 							disabled={isLoading || isUpgradeTokenExpired()}
 						/>
 					</div>
@@ -647,7 +633,7 @@
 							type="button"
 							onclick={handleBack}
 							disabled={isLoading || isUpgradeTokenExpired()}
-							class="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+							class="flex-1 bg-surface-200 text-neutral-400 py-3 px-4 rounded-lg font-semibold hover:bg-white/[0.03] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							Back
 						</button>
@@ -655,7 +641,7 @@
 							type="button"
 							onclick={handleSetPassword}
 							disabled={isLoading || !password || !confirmPassword || isUpgradeTokenExpired()}
-							class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+							class="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{isLoading ? 'Creating Account...' : 'Create Account'}
 						</button>
@@ -666,7 +652,7 @@
 		</div>
 
 		<!-- Security Notice -->
-		<div class="text-center text-xs text-gray-500">
+		<div class="text-center text-xs text-neutral-600">
 			<p>
 				By creating an account, you agree to our Terms of Service and Privacy Policy.
 				Your guest session data will be transferred to your new account.

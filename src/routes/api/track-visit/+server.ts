@@ -1,12 +1,19 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { Logger } from '$lib/utils/app-logger';
-import { db } from '$lib/db';
-import { pageVisits } from '$lib/db/schema/analytics';
+import { createPageVisit } from '$lib/db/repositories';
+import { trackVisitSchema, validateInput } from '$lib/validation/api-schemas';
 
 export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 	try {
 		const body = await request.json();
+
+		// Validate and sanitize input
+		const validation = await validateInput(trackVisitSchema, body);
+		if (!validation.success) {
+			return json({ error: validation.error }, { status: 400 });
+		}
+
 		const {
 			visitorId,
 			sessionId,
@@ -25,13 +32,13 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 			screenResolution,
 			timezone,
 			language,
-		} = body;
+		} = validation.data;
 
 		// Get client IP address
-		const ipAddress = getClientAddress();
+		const ipAddress = getClientAddress() ?? null;
 
 		// Insert visit tracking
-		await db.insert(pageVisits).values({
+		await createPageVisit({
 			visitorId,
 			sessionId,
 			fingerprint,
@@ -50,7 +57,6 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 			timezone,
 			language,
 			ipAddress,
-			visitedAt: new Date(),
 		});
 
 		return json({ success: true });

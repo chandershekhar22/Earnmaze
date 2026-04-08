@@ -1,386 +1,267 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { User, Users, ClipboardList, Star, Mail, BarChart2, Settings, Coins, HelpCircle, Gift, ArrowRight, MessageSquareText, ArrowLeftRight, Globe, Share2 } from '@lucide/svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	function formatDate(dateString: string | Date | null) {
 		if (!dateString) return 'N/A';
 		const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-		return date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		});
+		return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 	}
 
 	function getUserTypeColor(userType: string) {
 		switch (userType) {
-			case 'admin':
-				return 'bg-violet-100 text-violet-700';
-			case 'panelist':
-				return 'bg-blue-100 text-blue-700';
-			default:
-				return 'bg-neutral-100 text-neutral-700';
+			case 'admin': return 'badge-primary';
+			case 'panelist': return 'bg-blue-500/15 text-blue-400 ring-1 ring-blue-500/20';
+			default: return 'badge-neutral';
 		}
 	}
 
 	function getStatusColor(status: string) {
 		switch (status) {
-			case 'completed':
-				return 'bg-emerald-100 text-emerald-700';
-			case 'in-progress':
-				return 'bg-amber-100 text-amber-700';
-			case 'abandoned':
-				return 'bg-rose-100 text-rose-700';
-			default:
-				return 'bg-neutral-100 text-neutral-700';
+			case 'completed': return 'badge-success';
+			case 'started': return 'badge-primary';
+			case 'terminated': return 'badge-warning';
+			case 'disqualified': case 'quota_full': return 'badge-danger';
+			default: return 'badge-neutral';
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Admin Dashboard - QSurvey Panel</title>
+	<title>Admin Dashboard - EarnMaze</title>
 </svelte:head>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-	<!-- Page Header -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
 	<div class="mb-8">
-		<h1 class="text-3xl font-bold text-neutral-900">Admin Dashboard</h1>
-		<p class="text-neutral-600 mt-2">System overview and statistics</p>
+		<h1 class="text-2xl font-bold text-white">Dashboard</h1>
+		<p class="text-sm text-neutral-500 mt-1">System overview</p>
 	</div>
 
-	<!-- Stats Grid -->
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-		<!-- Total Users -->
-		<div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+	<!-- Stats Grid — all clickable -->
+	<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+		<a href="/admin/users" class="card group hover:border-blue-500/20 transition-all">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-sm font-medium text-neutral-600">Total Users</p>
-					<p class="text-3xl font-bold text-neutral-900 mt-2">{data.stats.totalUsers}</p>
+					<p class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Users</p>
+					<p class="text-2xl font-black text-white mt-1">{data.stats.totalUsers}</p>
+					<p class="text-[10px] text-emerald-400 font-semibold mt-1">+{data.stats.newUsersLast30Days} last 30d</p>
 				</div>
-				<div class="bg-blue-100 rounded-xl p-3">
-					<svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-						<path
-							d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-						/>
-					</svg>
+				<div class="p-2.5 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
+					<User class="w-5 h-5 text-blue-400" />
 				</div>
 			</div>
-			<p class="text-sm text-emerald-600 mt-2">
-				+{data.stats.newUsersLast30Days} in last 30 days
-			</p>
-		</div>
+		</a>
 
-		<!-- Total Panelists -->
-		<div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+		<a href="/admin/users?type=panelist" class="card group hover:border-emerald-500/20 transition-all">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-sm font-medium text-neutral-600">Panelists</p>
-					<p class="text-3xl font-bold text-neutral-900 mt-2">{data.stats.totalPanelists}</p>
+					<p class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Panelists</p>
+					<p class="text-2xl font-black text-white mt-1">{data.stats.totalPanelists}</p>
+					<p class="text-[10px] text-neutral-600 mt-1">{data.stats.totalUsers > 0 ? ((data.stats.totalPanelists / data.stats.totalUsers) * 100).toFixed(0) : 0}% of users</p>
 				</div>
-				<div class="bg-emerald-100 rounded-xl p-3">
-					<svg class="w-6 h-6 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
-						<path
-							d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
-						/>
-					</svg>
+				<div class="p-2.5 bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform">
+					<Users class="w-5 h-5 text-emerald-400" />
 				</div>
 			</div>
-			<p class="text-sm text-neutral-500 mt-2">
-				{((data.stats.totalPanelists / data.stats.totalUsers) * 100).toFixed(1)}% of users
-			</p>
-		</div>
+		</a>
 
-		<!-- Survey Responses -->
-		<div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+		<a href="/admin/responses" class="card group hover:border-violet-500/20 transition-all">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-sm font-medium text-neutral-600">Survey Responses</p>
-					<p class="text-3xl font-bold text-neutral-900 mt-2">{data.stats.totalResponses}</p>
-				</div>
-				<div class="bg-violet-100 rounded-xl p-3">
-					<svg class="w-6 h-6 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
-						<path
-							d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
-						/>
-					</svg>
-				</div>
-			</div>
-			<p class="text-sm text-neutral-500 mt-2">
-				Avg {data.stats.totalPanelists > 0
-					? (data.stats.totalResponses / data.stats.totalPanelists).toFixed(1)
-					: '0'} per panelist
-			</p>
-		</div>
-
-		<!-- Points Awarded -->
-		<div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="text-sm font-medium text-neutral-600">Points Awarded</p>
-					<p class="text-3xl font-bold text-neutral-900 mt-2">
-						{data.stats.totalPointsAwarded.toLocaleString()}
+					<p class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Responses</p>
+					<p class="text-2xl font-black text-white mt-1">{data.stats.totalResponses}</p>
+					<p class="text-[10px] text-neutral-600 mt-1">
+						Avg {data.stats.totalPanelists > 0 ? (data.stats.totalResponses / data.stats.totalPanelists).toFixed(1) : '0'}/user
 					</p>
 				</div>
-				<div class="bg-amber-100 rounded-xl p-3">
-					<svg class="w-6 h-6 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
-						<path
-							d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-						/>
-					</svg>
+				<div class="p-2.5 bg-violet-500/10 rounded-xl group-hover:scale-110 transition-transform">
+					<ClipboardList class="w-5 h-5 text-violet-400" />
 				</div>
 			</div>
-			<p class="text-sm text-neutral-500 mt-2">
-				Active sessions: {data.stats.activeSessions}
-			</p>
-		</div>
+		</a>
+
+		<a href="/admin/transactions" class="card group hover:border-amber-500/20 transition-all">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Points</p>
+					<p class="text-2xl font-black text-white mt-1">{data.stats.totalPointsAwarded.toLocaleString()}</p>
+					<p class="text-[10px] text-neutral-600 mt-1">{data.stats.activeSessions} active sessions</p>
+				</div>
+				<div class="p-2.5 bg-amber-500/10 rounded-xl group-hover:scale-110 transition-transform">
+					<Star class="w-5 h-5 text-amber-400" />
+				</div>
+			</div>
+		</a>
 	</div>
 
-	<!-- Email Conversions Stats -->
-	<div
-		class="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl shadow-lg p-6 mb-8 text-white"
-	>
+	<!-- Email Conversions Banner — clickable -->
+	<a href="/admin/analytics" class="block bg-gradient-to-r from-violet-600/80 to-indigo-600/80 rounded-2xl p-5 mb-6 group hover:from-violet-600 hover:to-indigo-600 transition-all">
 		<div class="flex items-center justify-between">
 			<div>
-				<p class="text-sm font-medium text-white/80">Email Conversions</p>
-				<p class="text-4xl font-bold mt-2">{data.stats.totalConversions}</p>
-				<p class="text-sm text-white/80 mt-2">Visitors who submitted their email</p>
+				<p class="text-xs font-bold text-white/60 uppercase tracking-widest">Email Conversions</p>
+				<p class="text-3xl font-black text-white mt-1">{data.stats.totalConversions}</p>
+				<p class="text-xs text-white/50 mt-1">Visitors who submitted email</p>
 			</div>
-			<div class="bg-white/20 rounded-xl p-4">
-				<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-					<path
-						d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-					/>
-				</svg>
+			<div class="p-3 bg-white/15 rounded-xl group-hover:scale-110 transition-transform">
+				<Mail class="w-6 h-6 text-white" />
+			</div>
+		</div>
+	</a>
+
+	<!-- Referral Stats -->
+	<div class="card mb-6">
+		<div class="flex items-center justify-between mb-4">
+			<div class="flex items-center gap-2">
+				<Share2 class="w-4 h-4 text-fuchsia-400" />
+				<h2 class="text-sm font-bold text-white">Referral Program</h2>
+			</div>
+		</div>
+		<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+			<div class="bg-surface-200 rounded-xl p-3">
+				<div class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Total</div>
+				<div class="text-xl font-black text-white mt-1">{data.stats.totalReferrals}</div>
+			</div>
+			<div class="bg-surface-200 rounded-xl p-3">
+				<div class="text-[10px] font-bold text-amber-400/50 uppercase tracking-widest">Pending</div>
+				<div class="text-xl font-black text-amber-400 mt-1">{data.stats.pendingReferrals}</div>
+			</div>
+			<div class="bg-surface-200 rounded-xl p-3">
+				<div class="text-[10px] font-bold text-sky-400/50 uppercase tracking-widest">Qualified</div>
+				<div class="text-xl font-black text-sky-400 mt-1">{data.stats.qualifiedReferrals}</div>
+			</div>
+			<div class="bg-surface-200 rounded-xl p-3">
+				<div class="text-[10px] font-bold text-emerald-400/50 uppercase tracking-widest">Paid</div>
+				<div class="text-xl font-black text-emerald-400 mt-1">{data.stats.paidReferrals}</div>
+			</div>
+			<div class="bg-surface-200 rounded-xl p-3">
+				<div class="text-[10px] font-bold text-violet-400/50 uppercase tracking-widest">Bonus Paid</div>
+				<div class="text-xl font-black text-violet-400 mt-1">{data.stats.referralBonusPaid.toLocaleString()}</div>
+				<div class="text-[10px] text-neutral-600 mt-0.5">pts</div>
 			</div>
 		</div>
 	</div>
 
-	<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-		<!-- Recent Users -->
-		<div class="bg-white rounded-xl shadow-sm border border-neutral-200">
-			<div class="px-6 py-4 border-b border-neutral-200">
-				<h2 class="text-lg font-semibold text-neutral-900">Recent Users</h2>
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+		<!-- Recent Users — rows clickable -->
+		<div class="card !p-0 overflow-hidden">
+			<div class="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
+				<h2 class="text-sm font-bold text-white">Recent Users</h2>
+				<a href="/admin/users" class="text-[10px] font-bold text-primary-400 hover:text-primary-300 uppercase tracking-wider flex items-center gap-1 transition-colors">
+					All <ArrowRight class="w-3 h-3" />
+				</a>
 			</div>
-			<div class="p-6">
-				{#if data.recentUsers.length > 0}
-					<div class="space-y-4">
-						{#each data.recentUsers as user}
-							<div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
-								<div class="flex-1">
-									<div class="flex items-center gap-2">
-										<p class="font-semibold text-neutral-900">{user.name}</p>
-										<span
-											class="px-2 py-1 text-xs font-medium rounded-full {getUserTypeColor(
-												user.userType
-											)}"
-										>
-											{user.userType}
-										</span>
-									</div>
-									<p class="text-sm text-neutral-600 mt-1">{user.email}</p>
-									<p class="text-xs text-neutral-500 mt-1">{formatDate(user.createdAt)}</p>
+			{#if data.recentUsers.length > 0}
+				<div class="divide-y divide-white/[0.04]">
+					{#each data.recentUsers as user}
+						<a href="/admin/users/{user.id}" class="flex items-center justify-between px-5 py-3 hover:bg-white/[0.02] transition-colors">
+							<div class="flex-1 min-w-0">
+								<div class="flex items-center gap-2">
+									<span class="text-sm font-semibold text-white truncate">{user.name || '--'}</span>
+									<span class="badge {getUserTypeColor(user.userType)} text-[10px]">{user.userType}</span>
 								</div>
+								<p class="text-[10px] text-neutral-600 mt-0.5">{user.email}</p>
 							</div>
-						{/each}
-					</div>
-				{:else}
-					<p class="text-center text-neutral-500 py-8">No users yet</p>
-				{/if}
-			</div>
+							<span class="text-[10px] text-neutral-600 flex-shrink-0">{formatDate(user.createdAt)}</span>
+						</a>
+					{/each}
+				</div>
+			{:else}
+				<p class="text-center text-neutral-600 py-8 text-sm">No users yet</p>
+			{/if}
 		</div>
 
-		<!-- Recent Survey Responses -->
-		<div class="bg-white rounded-xl shadow-sm border border-neutral-200">
-			<div class="px-6 py-4 border-b border-neutral-200">
-				<h2 class="text-lg font-semibold text-neutral-900">Recent Survey Responses</h2>
+		<!-- Recent Survey Responses — rows clickable -->
+		<div class="card !p-0 overflow-hidden">
+			<div class="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
+				<h2 class="text-sm font-bold text-white">Recent Responses</h2>
+				<a href="/admin/responses" class="text-[10px] font-bold text-primary-400 hover:text-primary-300 uppercase tracking-wider flex items-center gap-1 transition-colors">
+					All <ArrowRight class="w-3 h-3" />
+				</a>
 			</div>
-			<div class="p-6">
-				{#if data.recentResponses.length > 0}
-					<div class="space-y-4">
-						{#each data.recentResponses as response}
-							<div class="flex items-center justify-between p-4 bg-neutral-50 rounded-xl">
-								<div class="flex-1">
-									<div class="flex items-center gap-2">
-										<p class="font-semibold text-neutral-900">Survey #{response.surveyId}</p>
-										<span
-											class="px-2 py-1 text-xs font-medium rounded-full {getStatusColor(
-												response.status
-											)}"
-										>
-											{response.status}
-										</span>
-									</div>
-									<p class="text-sm text-neutral-600 mt-1">Panelist: {response.panelistId}</p>
-									<p class="text-xs text-neutral-500 mt-1">
-										{response.completedAt
-											? `Completed: ${formatDate(response.completedAt)}`
-											: `Started: ${formatDate(response.createdAt)}`}
-									</p>
+			{#if data.recentResponses.length > 0}
+				<div class="divide-y divide-white/[0.04]">
+					{#each data.recentResponses as response}
+						<a href="/admin/users/{response.panelistId}" class="flex items-center justify-between px-5 py-3 hover:bg-white/[0.02] transition-colors">
+							<div class="flex-1 min-w-0">
+								<div class="flex items-center gap-2">
+									<span class="text-sm font-medium text-white">Survey {response.surveyId?.slice(0, 8)}...</span>
+									<span class="badge {getStatusColor(response.status)} text-[10px]">{response.status}</span>
 								</div>
+								<p class="text-[10px] text-neutral-600 mt-0.5">
+									{response.completedAt ? `Completed ${formatDate(response.completedAt)}` : `Started ${formatDate(response.createdAt)}`}
+								</p>
 							</div>
-						{/each}
-					</div>
-				{:else}
-					<p class="text-center text-neutral-500 py-8">No survey responses yet</p>
-				{/if}
-			</div>
+						</a>
+					{/each}
+				</div>
+			{:else}
+				<p class="text-center text-neutral-600 py-8 text-sm">No responses yet</p>
+			{/if}
 		</div>
 	</div>
 
-	<!-- Recent Email Conversions -->
-	<div class="mt-8 bg-white rounded-xl shadow-sm border border-neutral-200">
-	<div class="px-6 py-4 border-b border-neutral-200">
-		<h2 class="text-lg font-semibold text-neutral-900">Recent Email Conversions</h2>
-	</div>
-	<div class="p-6">
-		{#if data.recentConversions && data.recentConversions.length > 0}
+	<!-- Recent Conversions -->
+	{#if data.recentConversions && data.recentConversions.length > 0}
+		<div class="card !p-0 overflow-hidden mb-6">
+			<div class="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
+				<h2 class="text-sm font-bold text-white">Recent Conversions</h2>
+				<a href="/admin/analytics" class="text-[10px] font-bold text-primary-400 hover:text-primary-300 uppercase tracking-wider flex items-center gap-1 transition-colors">
+					All <ArrowRight class="w-3 h-3" />
+				</a>
+			</div>
 			<div class="overflow-x-auto">
-				<table class="min-w-full divide-y divide-neutral-200">
-					<thead>
-						<tr>
-							<th
-								class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
-								>Email</th
-							>
-							<th
-								class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
-								>Source</th
-							>
-							<th
-								class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
-								>Time to Convert</th
-							>
-							<th
-								class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
-								>Converted At</th
-							>
-						</tr>
-					</thead>
-					<tbody class="bg-white divide-y divide-neutral-200">
-						{#each data.recentConversions || [] as conversion}
-							<tr class="hover:bg-neutral-50">
-								<td class="px-4 py-4 whitespace-nowrap">
-									<div class="flex items-center">
-										<div
-											class="flex-shrink-0 h-8 w-8 bg-violet-100 rounded-full flex items-center justify-center"
-										>
-											<svg class="h-4 w-4 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
-												<path
-													d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-												/>
-											</svg>
-										</div>
-										<div class="ml-3">
-											<p class="text-sm font-medium text-neutral-900">{conversion.email}</p>
-											<p class="text-xs text-neutral-500">
-												Visitor: {conversion.visitorId.substring(0, 12)}...
-											</p>
-										</div>
-									</div>
+				<table class="min-w-full">
+					<thead><tr class="table-header">
+						<th class="table-th">Email</th>
+						<th class="table-th">Source</th>
+						<th class="table-th">Time</th>
+						<th class="table-th">Date</th>
+					</tr></thead>
+					<tbody>
+						{#each data.recentConversions as c}
+							<tr class="table-row">
+								<td class="table-td text-sm text-white">{c.email}</td>
+								<td class="table-td text-xs text-neutral-500">{c.utmSource || 'Direct'}{c.utmMedium ? ` / ${c.utmMedium}` : ''}</td>
+								<td class="table-td text-xs text-neutral-500">
+									{c.timeToConvertSeconds != null ? `${Math.floor(c.timeToConvertSeconds / 60)}m ${c.timeToConvertSeconds % 60}s` : '--'}
 								</td>
-								<td class="px-4 py-4 whitespace-nowrap">
-									{#if conversion.utmSource || conversion.utmMedium}
-										<div class="text-sm text-neutral-900">
-											{conversion.utmSource || 'Direct'}
-											{conversion.utmMedium ? `/ ${conversion.utmMedium}` : ''}
-										</div>
-										{#if conversion.utmCampaign}
-											<div class="text-xs text-neutral-500">{conversion.utmCampaign}</div>
-										{/if}
-									{:else}
-										<span class="text-sm text-neutral-500">Direct</span>
-									{/if}
-								</td>
-								<td class="px-4 py-4 whitespace-nowrap">
-									{#if conversion.timeToConvertSeconds !== null}
-										<span class="text-sm text-neutral-900">
-											{Math.floor(conversion.timeToConvertSeconds / 60)}m {conversion.timeToConvertSeconds %
-												60}s
-										</span>
-									{:else}
-										<span class="text-sm text-neutral-500">N/A</span>
-									{/if}
-								</td>
-								<td class="px-4 py-4 whitespace-nowrap text-sm text-neutral-500">
-									{formatDate(conversion.convertedAt)}
-								</td>
+								<td class="table-td text-xs text-neutral-600">{formatDate(c.convertedAt)}</td>
 							</tr>
 						{/each}
 					</tbody>
 				</table>
 			</div>
-		{:else}
-			<p class="text-center text-neutral-500 py-8">No email conversions yet</p>
-		{/if}
+		</div>
+	{/if}
+
+	<!-- Quick Actions Grid -->
+	<div>
+		<h2 class="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">Quick Actions</h2>
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+			{#each [
+				{ href: '/admin/users', icon: User, label: 'Users', color: 'blue' },
+				{ href: '/admin/surveys', icon: ClipboardList, label: 'Surveys', color: 'violet' },
+				{ href: '/admin/responses', icon: MessageSquareText, label: 'Responses', color: 'emerald' },
+				{ href: '/admin/rewards', icon: Gift, label: 'Rewards', color: 'pink' },
+				{ href: '/admin/points', icon: Coins, label: 'Points', color: 'amber' },
+				{ href: '/admin/transactions', icon: ArrowLeftRight, label: 'Transactions', color: 'cyan' },
+				{ href: '/admin/support', icon: HelpCircle, label: 'Support', color: 'fuchsia' },
+				{ href: '/admin/analytics', icon: BarChart2, label: 'Analytics', color: 'indigo' },
+				{ href: '/admin/geo-settings', icon: Globe, label: 'Geo Settings', color: 'teal' },
+				{ href: '/admin/settings', icon: Settings, label: 'Settings', color: 'neutral' },
+			] as item}
+				<a
+					href={item.href}
+					class="group flex items-center gap-3 p-3 bg-surface-100 border border-white/[0.06] rounded-xl hover:border-{item.color}-500/20 hover:bg-surface-200 transition-all"
+				>
+					<div class="p-2 bg-{item.color}-500/10 rounded-lg group-hover:scale-110 transition-transform">
+						<item.icon class="w-4 h-4 text-{item.color}-400" />
+					</div>
+					<span class="text-sm font-semibold text-white">{item.label}</span>
+				</a>
+			{/each}
+		</div>
 	</div>
-</div>
-
-<!-- Quick Actions -->
-<div class="mt-8 bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-	<h2 class="text-lg font-semibold text-neutral-900 mb-4">Quick Actions</h2>
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-		<a
-			href="/admin/users"
-			class="flex items-center gap-3 p-4 border-2 border-neutral-200 rounded-xl hover:border-violet-500 hover:bg-violet-50 transition-colors"
-		>
-			<svg class="w-6 h-6 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
-				<path
-					d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-				/>
-			</svg>
-			<div>
-				<p class="font-semibold text-neutral-900">Manage Users</p>
-				<p class="text-sm text-neutral-600">View and manage all users</p>
-			</div>
-		</a>
-
-		<a
-			href="/admin/surveys"
-			class="flex items-center gap-3 p-4 border-2 border-neutral-200 rounded-xl hover:border-violet-500 hover:bg-violet-50 transition-colors"
-		>
-			<svg class="w-6 h-6 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
-				<path
-					d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
-				/>
-			</svg>
-			<div>
-				<p class="font-semibold text-neutral-900">Manage Surveys</p>
-				<p class="text-sm text-neutral-600">Create and manage surveys</p>
-			</div>
-		</a>
-
-		<a
-			href="/admin/analytics"
-			class="flex items-center gap-3 p-4 border-2 border-neutral-200 rounded-xl hover:border-violet-500 hover:bg-violet-50 transition-colors"
-		>
-			<svg class="w-6 h-6 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
-				<path
-					d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
-				/>
-			</svg>
-			<div>
-				<p class="font-semibold text-neutral-900">View Analytics</p>
-				<p class="text-sm text-neutral-600">Traffic and conversion data</p>
-			</div>
-		</a>
-
-		<a
-			href="/admin/settings"
-			class="flex items-center gap-3 p-4 border-2 border-neutral-200 rounded-xl hover:border-violet-500 hover:bg-violet-50 transition-colors"
-		>
-			<svg class="w-6 h-6 text-violet-600" fill="currentColor" viewBox="0 0 24 24">
-				<path
-					d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"
-				/>
-			</svg>
-			<div>
-				<p class="font-semibold text-neutral-900">Settings</p>
-				<p class="text-sm text-neutral-600">Configure landing page redirects</p>
-			</div>
-		</a>
-	</div>
-</div>
 </div>

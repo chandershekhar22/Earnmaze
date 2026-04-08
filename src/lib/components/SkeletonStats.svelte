@@ -1,14 +1,9 @@
-<!-- SkeletonStats.svelte -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
 	{#each Array(4) as _}
-		<div class="bg-white border border-neutral-200 rounded-2xl p-6 animate-pulse">
-			<div class="flex items-center justify-between mb-4">
-				<div class="p-2.5 bg-neutral-100 rounded-xl">
-					<div class="w-5 h-5 bg-neutral-200 rounded"></div>
-				</div>
-			</div>
-			<div class="h-3.5 bg-neutral-100 rounded w-24 mb-3"></div>
-			<div class="h-8 bg-neutral-100 rounded w-20"></div>
+		<div class="bg-surface-100 border border-white/[0.06] rounded-2xl p-4 md:p-5 animate-pulse">
+			<div class="w-9 h-9 bg-white/[0.06] rounded-xl mb-3"></div>
+			<div class="h-3 bg-white/[0.06] rounded w-16 mb-2"></div>
+			<div class="h-7 bg-white/[0.06] rounded w-20"></div>
 		</div>
 	{/each}
 </div>

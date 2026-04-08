@@ -1,22 +1,28 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getUserByEmail } from '$lib/db';
-import { db } from '$lib/db';
-import { passwordReset } from '$lib/db/schema/auth';
+import { getUserByEmail, createPasswordResetToken } from '$lib/db/repositories';
 import { randomUUID } from 'crypto';
 import { Logger } from '$lib/utils/app-logger';
+import { sendPasswordResetEmail } from '$lib/server/email-service';
+import { authRateLimit } from '$lib/server/rate-limit';
+import { forgotPasswordSchema, validateInput } from '$lib/validation/api-schemas';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async (event) => {
+	const rateLimited = await authRateLimit(event);
+	if (rateLimited) return rateLimited;
+
+	const { request } = event;
 	try {
-		const body = (await request.json()) as { email?: string };
-		const email = (body.email || '').trim().toLowerCase();
-
-		if (!email) {
+		const body = await request.json();
+		const validation = await validateInput(forgotPasswordSchema, body);
+		if (!validation.success) {
 			return json(
-				{ success: false, error: 'INVALID_EMAIL', message: 'Email is required' },
+				{ success: false, error: 'INVALID_EMAIL', message: validation.error },
 				{ status: 400 }
 			);
 		}
+
+		const email = validation.data.email;
 
 		// Check if user exists
 		const user = await getUserByEmail(email);
@@ -37,14 +43,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
 		// Store reset token in database
-		await db.insert(passwordReset).values({
-			userId: user.id,
-			token: resetToken,
-			expiresAt,
-		});
-
+				await createPasswordResetToken(user.id, resetToken, expiresAt);
 		// Send email with reset link
-		const { sendPasswordResetEmail } = await import('$lib/server/email-service');
+	
 		await sendPasswordResetEmail(user.email, resetToken);
 
 		Logger.root.info(

@@ -17,11 +17,6 @@ export function json(data: any, init?: ResponseInit) {
 	// Add API version header
 	headers.set('X-API-Version', API_VERSION);
 	
-	// Add CORS headers if needed
-	if (!headers.has('Access-Control-Allow-Origin')) {
-		headers.set('Access-Control-Allow-Origin', '*');
-	}
-	
 	return svelteJson(data, {
 		...init,
 		headers

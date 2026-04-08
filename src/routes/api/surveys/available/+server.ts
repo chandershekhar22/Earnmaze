@@ -14,8 +14,9 @@ export const GET: RequestHandler = async (event) => {
 		title: s.title,
 		description: s.description ?? '',
 		points: s.points,
+		priority: s.priority,
 		link: s.link
 	}));
 
-	return json(payload);
+	return json({ success: true, data: payload });
 };

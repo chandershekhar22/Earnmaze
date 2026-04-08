@@ -1,30 +1,31 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/db';
-import { ctaClicks, pageVisits } from '$lib/db/schema/analytics';import { Logger } from '$lib/utils/app-logger';import { eq } from 'drizzle-orm';
+import { getVisitBySessionId, createCtaClick } from '$lib/db/repositories';
+import { Logger } from '$lib/utils/app-logger';
+import { trackCtaSchema, validateInput } from '$lib/validation/api-schemas';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const body = await request.json();
-		const { visitorId, sessionId, buttonLocation } = body;
+
+		// Validate and sanitize input
+		const validation = await validateInput(trackCtaSchema, body);
+		if (!validation.success) {
+			return json({ error: validation.error }, { status: 400 });
+		}
+
+		const { visitorId, sessionId, buttonLocation } = validation.data;
 
 		// Find the visit ID for this session
-		const visit = await db
-			.select({ id: pageVisits.id })
-			.from(pageVisits)
-			.where(eq(pageVisits.sessionId, sessionId))
-			.orderBy(pageVisits.visitedAt)
-			.limit(1);
-
-		const visitId = visit.length > 0 ? visit[0].id : null;
+		const visitData = await getVisitBySessionId(sessionId);
+		const visitId = visitData?.id ?? null;
 
 		// Insert CTA click tracking
-		await db.insert(ctaClicks).values({
+		await createCtaClick({
 			visitorId,
 			sessionId,
 			visitId,
 			buttonLocation,
-			clickedAt: new Date(),
 		});
 
 		return json({ success: true });

@@ -1,0 +1,17 @@
+{
+	"name": "EarnMaze",
+	"short_name": "EarnMaze",
+	"description": "Earn rewards by completing surveys",
+	"start_url": "/dashboard",
+	"display": "standalone",
+	"background_color": "#0c0c0f",
+	"theme_color": "#7c3aed",
+	"icons": [
+		{
+			"src": "/favicon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any maskable"
+		}
+	]
+}

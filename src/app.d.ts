@@ -1,9 +1,12 @@
 
 
+import type { GuestSessionInfo } from '$types/guest-session';
+
 declare global {
 	namespace App {
 		interface Locals {
 			user?: typeof user.$inferSelect | null;
+			guestSession?: GuestSessionInfo | null;
 			session?: {
 				id: string;
 				userId: string;

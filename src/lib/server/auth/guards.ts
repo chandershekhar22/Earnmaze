@@ -16,11 +16,15 @@ import { eq, sql } from 'drizzle-orm';
  */
 export async function requireAuth(event: RequestEvent): Promise<AuthUser> {
 	const authUser = await getAuthUser(event);
-	
+
 	if (!authUser) {
+		// API routes get JSON 401, page routes get redirect
+		if (event.url.pathname.startsWith('/api/')) {
+			throw error(401, { message: 'Authentication required' });
+		}
 		throw redirect(303, '/login?redirect=' + encodeURIComponent(event.url.pathname));
 	}
-	
+
 	return authUser;
 }
 

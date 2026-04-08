@@ -15,13 +15,13 @@ import { db } from "..";
 export async function getLifetimePoints(panelistId: string): Promise<number> {
     const result = await db
         .select({
-            total: sql<number>`COALESCE(SUM(CASE 
-                WHEN ${pointsTransactions.type} IN ('earned', 'bonus') 
+            total: sql<number>`COALESCE(SUM(CASE
+                WHEN ${pointsTransactions.type} IN ('completed', 'terminated', 'quota_full', 'bonus', 'adjustment', 'refund')
                 THEN ${pointsTransactions.points}
-                WHEN ${pointsTransactions.type} IN ('rejected', 'adjustment') 
+                WHEN ${pointsTransactions.type} = 'rejected'
                 THEN -${pointsTransactions.points}
                 ELSE 0
-            END), 0)`,
+            END), 0)`.as('total'),
         })
         .from(pointsTransactions)
         .where(eq(pointsTransactions.panelistId, panelistId));
@@ -35,7 +35,7 @@ export async function getLifetimePoints(panelistId: string): Promise<number> {
 export async function getTotalBonusPoints(panelistId: string): Promise<number> {
     const result = await db
         .select({
-            total: sql<number>`COALESCE(SUM(${pointsTransactions.points}), 0)`,
+            total: sql<number>`COALESCE(SUM(${pointsTransactions.points}), 0)`.as('total'),
         })
         .from(pointsTransactions)
         .where(
@@ -54,7 +54,7 @@ export async function getTotalBonusPoints(panelistId: string): Promise<number> {
 export async function getTotalRedeemedPoints(panelistId: string): Promise<number> {
    const result = await db
         .select({
-            total: sql<number>`COALESCE(SUM(${pointsTransactions.points}), 0)`,
+            total: sql<number>`COALESCE(SUM(${pointsTransactions.points}), 0)`.as('total'),
         })
         .from(pointsTransactions)
         .where(
@@ -73,7 +73,7 @@ export async function getTotalRedeemedPoints(panelistId: string): Promise<number
 export async function getTotalRejectedPoints(panelistId: string): Promise<number> {
    const result = await db
         .select({
-            total: sql<number>`COALESCE(SUM(${pointsTransactions.points}), 0)`,
+            total: sql<number>`COALESCE(SUM(${pointsTransactions.points}), 0)`.as('total'),
         })
         .from(pointsTransactions)
         .where(
@@ -93,28 +93,28 @@ export async function getTotalRejectedPoints(panelistId: string): Promise<number
 export async function getPointsSummary(panelistId: string) {
     const result = await db
         .select({
-            lifetimePoints: sql<number>`COALESCE(SUM(CASE 
-                WHEN ${pointsTransactions.type} IN ('earned', 'bonus') 
+            lifetimePoints: sql<number>`COALESCE(SUM(CASE
+                WHEN ${pointsTransactions.type} IN ('completed', 'terminated', 'quota_full', 'bonus', 'adjustment', 'refund')
                 THEN ${pointsTransactions.points}
-                WHEN ${pointsTransactions.type} IN ('rejected', 'adjustment') 
+                WHEN ${pointsTransactions.type} = 'rejected'
                 THEN -${pointsTransactions.points}
                 ELSE 0
-            END), 0)`,
-            bonusPoints: sql<number>`COALESCE(SUM(CASE 
-                WHEN ${pointsTransactions.type} = 'bonus' 
-                THEN ${pointsTransactions.points} 
-                ELSE 0 
-            END), 0)`,
-            redeemedPoints: sql<number>`COALESCE(SUM(CASE 
-                WHEN ${pointsTransactions.type} = 'redeemed' 
+            END), 0)`.as('lifetime_points'),
+            bonusPoints: sql<number>`COALESCE(SUM(CASE
+                WHEN ${pointsTransactions.type} = 'bonus'
                 THEN ${pointsTransactions.points}
-                ELSE 0 
-            END), 0)`,
-            rejectedPoints: sql<number>`COALESCE(SUM(CASE 
-                WHEN ${pointsTransactions.type} = 'rejected' 
+                ELSE 0
+            END), 0)`.as('bonus_points'),
+            redeemedPoints: sql<number>`COALESCE(SUM(CASE
+                WHEN ${pointsTransactions.type} = 'redeemed'
                 THEN ${pointsTransactions.points}
-                ELSE 0 
-            END), 0)`,
+                ELSE 0
+            END), 0)`.as('redeemed_points'),
+            rejectedPoints: sql<number>`COALESCE(SUM(CASE
+                WHEN ${pointsTransactions.type} = 'rejected'
+                THEN ${pointsTransactions.points}
+                ELSE 0
+            END), 0)`.as('rejected_points'),
         })
         .from(pointsTransactions)
         .where(eq(pointsTransactions.panelistId, panelistId));

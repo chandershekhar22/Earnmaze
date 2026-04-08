@@ -4,6 +4,7 @@ import { user } from "./auth";
 import { pointsTransactionTypes } from "../../constants/constants";
 
 
+
 export const pointsTransactionTypeEnum = pgEnum("points_transaction_type_enum", pointsTransactionTypes);
 
 // Panelist points - Simplified (source of truth is points_transactions)
@@ -12,17 +13,17 @@ export const panelistPoint = pgTable("panelist_points", {
   panelistId: uuid("panelist_id").notNull().unique()
     .references(() => user.id, { onDelete: "cascade" }),
   currentPoints: integer("current_points").notNull().default(0), // Available balance for redemption
-  pendingPoints: integer("pending_points").notNull().default(0), // Awaiting admin approval
+  // pendingPoints: integer("pending_points").notNull().default(0), // Awaiting admin approval
   updatedBy: uuid("updated_by"),
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).$onUpdateFn(() => new Date()).notNull(),
 }, (table) => [
   uniqueIndex("panelist_points_panelist_id_idx").on(table.panelistId),
   index("idx_panelist_point_panelist_id").on(table.panelistId),
   index("idx_panelist_point_current_points").on(table.currentPoints),
-  index("idx_panelist_point_pending_points").on(table.pendingPoints),
+  // index("idx_panelist_point_pending_points").on(table.pendingPoints),
   index("panelist_points_current_idx").on(table.currentPoints),
   sql`CHECK (current_points >= 0)`,
-  sql`CHECK (pending_points >= 0)`
+  // sql`CHECK (pending_points >= 0)`
 ]);
 
 // Points transactions - Complete audit trail with dual balance tracking
@@ -33,7 +34,7 @@ export const pointsTransactions = pgTable("points_transactions", {
   type: pointsTransactionTypeEnum("type").notNull(), // earned, redeemed, bonus, penalty, adjustment, refund, expired
   points: integer("points").notNull(), // positive for earnings, negative for redemptions/penalties
   currentBalance: integer("current_balance").notNull(), // snapshot of current points balance after this transaction
-  pendingBalance: integer("pending_balance").notNull(), // snapshot of pending points balance after this transaction
+  // pendingBalance: integer("pending_balance").notNull(), // snapshot of pending points balance after this transaction
   description: varchar("description", { length: 255 }).notNull(),
   referenceId: varchar("reference_id", { length: 36 }), // survey completion id, redemption id, etc
   referenceType: varchar("reference_type", { length: 32 }), // survey_completion, redemption, bonus, etc

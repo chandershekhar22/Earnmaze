@@ -95,7 +95,6 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 		return json({
 			success: true,
 			sessionId,
-			email: normalizedEmail,
 			expiresAt: expiresAt.toISOString(),
 			message: 'Welcome! You can now view surveys and start earning points.',
 		});

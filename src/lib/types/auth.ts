@@ -25,4 +25,9 @@ export interface RegisterData {
 	password: string;
 	name?: string;
 	turnstileToken?: string;
+	referralCode?: string;
+	utmSource?: string;
+	utmMedium?: string;
+	utmCampaign?: string;
+	registrationSource?: string;
 }

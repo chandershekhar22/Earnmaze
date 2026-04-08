@@ -4,79 +4,111 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
-	
+	import { LayoutDashboard, BarChart3, Users, ClipboardList, Gift, Coins, Settings, HelpCircle, Globe, LogOut, Menu, X, ArrowLeftRight, MessageSquareText, Repeat, Share2 } from '@lucide/svelte';
+
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
-	// Navigation items
 	const navItems = [
-		{ href: '/admin/dashboard', label: 'Dashboard' },
-		{ href: '/admin/analytics', label: 'Analytics' },
-		{ href: '/admin/users', label: 'Users' },
-		{ href: '/admin/surveys', label: 'Surveys' },
-		{ href: '/admin/settings', label: 'Settings' }
+		{ href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+		{ href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+		{ href: '/admin/users', label: 'Users', icon: Users },
+		{ href: '/admin/surveys', label: 'Surveys', icon: ClipboardList },
+		{ href: '/admin/responses', label: 'Responses', icon: MessageSquareText },
+		{ href: '/admin/rewards', label: 'Rewards', icon: Gift },
+		{ href: '/admin/redemptions', label: 'Redeem', icon: Repeat },
+		{ href: '/admin/points', label: 'Points', icon: Coins },
+		{ href: '/admin/transactions', label: 'Txns', icon: ArrowLeftRight },
+		{ href: '/admin/referrals', label: 'Referrals', icon: Share2 },
+		{ href: '/admin/support', label: 'Support', icon: HelpCircle },
+		{ href: '/admin/geo-settings', label: 'Geo', icon: Globe },
+		{ href: '/admin/settings', label: 'Settings', icon: Settings },
 	];
+
+	let mobileMenuOpen = $state(false);
 
 	async function handleLogout() {
 		await authStore.logout();
 		goto('/login');
 	}
 
-	// Get current page name from path
 	let currentPageName = $derived.by(() => {
 		const path = $page.url.pathname;
 		const item = navItems.find(item => path.startsWith(item.href));
 		return item?.label || 'Admin';
 	});
 
-	// Check if link is active
-	let isActive = $derived.by(() => (href: string) => {
-		return $page.url.pathname.startsWith(href);
-	});
+	let isActive = $derived.by(() => (href: string) => $page.url.pathname.startsWith(href));
 </script>
 
-<div class="min-h-screen bg-neutral-50">
+<div class="min-h-screen bg-surface">
 	<!-- Admin Header -->
-	<header class="bg-white shadow-sm border-b border-neutral-200">
+	<header class="bg-surface-50/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-40">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-			<div class="flex justify-between items-center h-16">
-				<div class="flex items-center gap-8">
-					<h1 class="text-xl font-bold text-neutral-900">{currentPageName}</h1>
-					
-					<nav class="hidden md:flex gap-1">
+			<div class="flex justify-between items-center h-14">
+				<div class="flex items-center gap-6">
+					<!-- Mobile menu toggle -->
+					<button onclick={() => mobileMenuOpen = !mobileMenuOpen} class="md:hidden p-2 text-neutral-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+						{#if mobileMenuOpen}
+							<X class="w-5 h-5" />
+						{:else}
+							<Menu class="w-5 h-5" />
+						{/if}
+					</button>
+
+					<div class="flex items-center gap-2">
+						<span class="text-sm font-black text-white">Admin</span>
+						<span class="text-neutral-700">/</span>
+						<span class="text-sm font-semibold text-neutral-400">{currentPageName}</span>
+					</div>
+
+					<!-- Desktop nav -->
+					<nav class="hidden md:flex items-center gap-0.5">
 						{#each navItems as item}
-							<a 
+							<a
 								href={item.href}
-								class="px-3 py-2 rounded-lg text-sm font-medium transition-colors {isActive(item.href) 
-									? 'bg-violet-100 text-violet-700' 
-									: 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'}"
+								data-sveltekit-preload-data="hover"
+								class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors {isActive(item.href)
+									? 'bg-primary-500/15 text-primary-400'
+									: 'text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.04]'}"
 							>
+								<item.icon class="w-3.5 h-3.5" />
 								{item.label}
 							</a>
 						{/each}
 					</nav>
 				</div>
-				
-				<div class="flex items-center gap-4">
-					<span class="text-sm text-neutral-600">
-						<span class="font-semibold">{data.user.name}</span>
-						<span class="ml-2 px-2 py-1 bg-violet-100 text-violet-700 text-xs font-bold rounded">
-							ADMIN
-						</span>
+
+				<div class="flex items-center gap-3">
+					<span class="hidden sm:flex items-center gap-2 text-xs">
+						<span class="font-semibold text-white">{data.user.name}</span>
+						<span class="badge-primary text-[10px]">ADMIN</span>
 					</span>
-					
-					<button
-						onclick={handleLogout}
-						type="button"
-						class="px-4 py-2 text-sm text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
-					>
-						Logout
+					<button onclick={handleLogout} type="button" class="p-2 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors" title="Logout">
+						<LogOut class="w-4 h-4" />
 					</button>
 				</div>
 			</div>
 		</div>
+
+		<!-- Mobile nav dropdown -->
+		{#if mobileMenuOpen}
+			<div class="md:hidden border-t border-white/[0.06] bg-surface-50 px-4 py-3 space-y-1 animate-fade-in">
+				{#each navItems as item}
+					<a
+						href={item.href}
+						onclick={() => mobileMenuOpen = false}
+						class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {isActive(item.href)
+							? 'bg-primary-500/15 text-primary-400'
+							: 'text-neutral-500 hover:text-white hover:bg-white/[0.04]'}"
+					>
+						<item.icon class="w-4 h-4" />
+						{item.label}
+					</a>
+				{/each}
+			</div>
+		{/if}
 	</header>
-	
-	<!-- Admin Content -->
+
 	<main>
 		{@render children()}
 	</main>

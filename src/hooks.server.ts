@@ -1,9 +1,15 @@
 import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { validateSession } from '$lib/db';
+import { validateGuestSession } from '$lib/db/repositories/guest-session.repository.server';
 import { getDashboardUrl, canAccessRoute } from '$lib/utils/dashboard-routing';
 import { checkGeoRestriction, logGeoRestrictionEvent } from '$lib/server/geo-restriction';
 import { generateRayId, Logger } from '$lib/utils/app-logger';
+import { csrfMiddleware, generateCsrfToken } from '$lib/server/security';
+import { verifyToken } from '$lib/server/jwt';
+import { db } from '$lib/db';
+import { session as sessionTable, passwordReset } from '$lib/db/schema/auth';
+import { lt } from 'drizzle-orm';
 
 // Simple rate limiting store (in-memory)
 // For production, use Redis or a proper rate limiting service
@@ -82,9 +88,9 @@ function setSecurityHeaders(headers: Headers) {
     'Content-Security-Policy',
     "default-src 'self'; " +
     "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; " +
-    "style-src 'self' 'unsafe-inline'; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
     "img-src 'self' data:; " + // Removed https: wildcard
-    "font-src 'self' data:; " +
+    "font-src 'self' data: https://fonts.gstatic.com; " +
     "connect-src 'self' https://challenges.cloudflare.com; " +
     "frame-src https://challenges.cloudflare.com; " +
     "base-uri 'self'; " +
@@ -118,6 +124,27 @@ setInterval(() => {
   }
 }, 60000); // Clean up every minute
 
+// Cleanup expired sessions and password reset tokens periodically
+setInterval(async () => {
+  try {
+    const now = new Date();
+    const [sessionsResult, tokensResult] = await Promise.all([
+      db.delete(sessionTable).where(lt(sessionTable.expiresAt, now)),
+      db.delete(passwordReset).where(lt(passwordReset.expiresAt, now)),
+    ]);
+    const sessionsDeleted = sessionsResult.rowCount ?? 0;
+    const tokensDeleted = tokensResult.rowCount ?? 0;
+    if (sessionsDeleted > 0 || tokensDeleted > 0) {
+      Logger.root.info(
+        { context: 'database', sessionsDeleted, tokensDeleted },
+        'Cleaned up expired sessions and reset tokens'
+      );
+    }
+  } catch (error) {
+    Logger.root.error({ context: 'errors', error }, 'Failed to clean up expired sessions/tokens');
+  }
+}, 60 * 60 * 1000); // Clean up every hour
+
 export const handle: Handle = async ({ event, resolve }) => {
   const pathname = event.url.pathname;
   const ipAddress = event.getClientAddress();
@@ -132,22 +159,22 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   // ========== RATE LIMITING ==========
   // Skip rate limiting for exempt paths
-  if (!matchesAnyPath(pathname, ROUTE_CONFIG.rateLimitExempt)) {
-    const rateLimitKey = `${ipAddress}:${pathname}`;
-    if (!checkRateLimit(rateLimitKey, 100, 60000)) {
-      return withCorrelation(new Response(
-        JSON.stringify({
-          success: false,
-          error: 'RATE_LIMIT_EXCEEDED',
-          message: 'Too many requests. Please try again later.'
-        }),
-        {
-          status: 429,
-          headers: { 'Content-Type': 'application/json', 'Retry-After': '60' }
-        }
-      ));
-    }
-  }
+  // if (!matchesAnyPath(pathname, ROUTE_CONFIG.rateLimitExempt)) {
+  //   const rateLimitKey = `${ipAddress}:${pathname}`;
+  //   if (!checkRateLimit(rateLimitKey, 100, 60000)) {
+  //     return withCorrelation(new Response(
+  //       JSON.stringify({
+  //         success: false,
+  //         error: 'RATE_LIMIT_EXCEEDED',
+  //         message: 'Too many requests. Please try again later.'
+  //       }),
+  //       {
+  //         status: 429,
+  //         headers: { 'Content-Type': 'application/json', 'Retry-After': '60' }
+  //       }
+  //     ));
+  //   }
+  // }
 
   // ========== GEO-RESTRICTION CHECK ==========
   const geoCheck = await checkGeoRestriction(event);
@@ -189,30 +216,106 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
   }
   
-  // Get session from cookies
+  // ========== SESSION RESOLUTION ==========
+  // We support two session types:
+  //   1. Regular session ("session" cookie) → populates locals.user
+  //   2. Guest session ("guest_session" cookie) → populates locals.guestSession
+  // Both are resolved here so route handlers never need to validate cookies manually.
+
+  // --- Regular user session ---
   const sessionId = event.cookies.get('session');
 
-  // Verify session if token exists
   if (sessionId) {
     try {
       const user = await validateSession(sessionId);
       
       if (user) {
         event.locals.user = user;
-        // Note: validateSession already checks expiry against database
-        // Session will be null if expired
       } else {
-        // Clear invalid or expired session cookie
         event.cookies.delete('session', { path: '/' });
       }
     } catch (error) {
-      // Log error without exposing details
       Logger.root.error(
         { context: 'auth', error },
         'Session verification failed'
       );
-      // Clear invalid session cookie
       event.cookies.delete('session', { path: '/' });
+    }
+  }
+
+  // --- JWT Bearer token (mobile app) ---
+  if (!event.locals.user) {
+    const authHeader = event.request.headers.get('Authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      try {
+        const payload = await verifyToken(authHeader.slice(7));
+        if (payload && payload.type === 'access') {
+          // Set locals.user with JWT payload so existing guards work
+          event.locals.user = {
+            id: payload.sub,
+            email: '',
+            userType: payload.userType as any,
+            name: null,
+            isActive: true,
+            emailVerified: true,
+          } as any;
+        }
+      } catch {
+        // Invalid JWT — ignore, fall through to guest/no-auth
+      }
+    }
+  }
+
+  // --- Guest session (only if no regular user session) ---
+  if (!event.locals.user) {
+    const guestToken = event.cookies.get('guest_session');
+
+    if (guestToken) {
+      try {
+        const guestSessionData = await validateGuestSession(guestToken);
+        
+        if (guestSessionData) {
+          event.locals.guestSession = guestSessionData;
+        } else {
+          // Expired or invalid — clean up the cookie
+          event.cookies.delete('guest_session', { path: '/' });
+        }
+      } catch (error) {
+        Logger.root.error(
+          { context: 'auth', error },
+          'Guest session verification failed'
+        );
+        event.cookies.delete('guest_session', { path: '/' });
+      }
+    }
+  }
+
+  // ========== CSRF PROTECTION ==========
+  // Skip CSRF entirely in development to avoid friction during local testing
+  if (process.env.NODE_ENV === 'production') {
+    // Ensure CSRF cookie is set on every response so the token is available for API calls
+    if (!event.cookies.get('csrf_token')) {
+      event.cookies.set('csrf_token', generateCsrfToken(), {
+        path: '/',
+        httpOnly: false,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24
+      });
+    }
+    // Verify token on state-changing API requests.
+    // Currently in audit mode — logs violations but does not block, so existing
+    // frontend code keeps working while components migrate to fetchApi().
+    const csrfExempt = ['/api/logs', '/api/analytics', '/api/track-visit', '/api/track-cta'];
+    if (pathname.startsWith('/api/') && !csrfExempt.some(p => pathname.startsWith(p))) {
+      const csrfResponse = await csrfMiddleware(event);
+      if (csrfResponse) {
+        // Audit mode: log but don't block. Remove this condition to enforce.
+        Logger.root.warn(
+          { context: 'security', method: event.request.method, path: pathname },
+          'CSRF token missing or invalid (audit mode — not blocking)'
+        );
+      }
     }
   }
 

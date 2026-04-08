@@ -65,12 +65,12 @@ export interface SurveyResponseData {
 // Points and Rewards Types
 export interface PointsTransaction {
   id: string;
-  type: 'earned' | 'redeemed' | 'bonus' | 'penalty';
+  type: 'completed' | 'terminated' | 'quota_full' | 'disqualified' | 'redeemed' | 'bonus' | 'rejected' | 'penalty' | 'adjustment' | 'refund' | 'expired';
   amount: number;
   balance: number;
   description: string;
   referenceId?: string;
-  referenceType?: 'survey' | 'reward' | 'referral' | 'bonus';
+  referenceType?: string;
   createdAt: Date;
 }
 

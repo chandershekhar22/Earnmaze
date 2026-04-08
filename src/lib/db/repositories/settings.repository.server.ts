@@ -66,26 +66,14 @@ export async function getAllAppSettings(): Promise<Record<string, string>> {
  * @returns Updated setting
  */
 export async function setAppSetting(key: string, value: string) {
-	const existing = await db
-		.select()
-		.from(appSettings)
-		.where(eq(appSettings.key, key))
-		.limit(1);
-
-	if (existing.length > 0) {
-		// Update existing
-		return await db
-			.update(appSettings)
-			.set({ value, updatedAt: new Date() })
-			.where(eq(appSettings.key, key))
-			.returning();
-	} else {
-		// Insert new
-		return await db
-			.insert(appSettings)
-			.values({ key, value })
-			.returning();
-	}
+	return await db
+		.insert(appSettings)
+		.values({ key, value })
+		.onConflictDoUpdate({
+			target: appSettings.key,
+			set: { value, updatedAt: new Date() },
+		})
+		.returning();
 }
 
 /**
@@ -93,11 +81,10 @@ export async function setAppSetting(key: string, value: string) {
  * @param settings - Object mapping keys to values
  */
 export async function setAppSettings(settings: Record<string, string>): Promise<void> {
-	const keys = Object.keys(settings);
-	
-	for (const key of keys) {
-		await setAppSetting(key, settings[key]);
-	}
+	const entries = Object.entries(settings);
+	if (entries.length === 0) return;
+
+	await Promise.all(entries.map(([key, value]) => setAppSetting(key, value)));
 }
 
 /**

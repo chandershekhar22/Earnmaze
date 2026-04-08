@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { CircleCheck, CircleX, Loader, Check, Code2, Home, CircleDollarSign, ClipboardList, Mail, ShieldCheck, Palette, Settings } from '@lucide/svelte';
 
 	// Define all available settings with their metadata
 	interface SettingConfig {
@@ -208,7 +209,7 @@
 		try {
 			const response = await fetch('/api/admin/settings');
 			const data = await response.json();
-			
+
 			if (data.success) {
 				// Initialize with defaults, then override with saved values
 				const loaded: Record<string, string> = {};
@@ -243,7 +244,7 @@
 			});
 
 			const data = await response.json();
-			
+
 			if (data.success) {
 				message = `${config.label} saved successfully!`;
 				messageType = 'success';
@@ -262,7 +263,7 @@
 
 	async function saveAllSettings() {
 		const categorySettings = settingsConfig.filter(s => s.category === activeCategory);
-		
+
 		for (const config of categorySettings) {
 			await saveSetting(config.key);
 		}
@@ -285,6 +286,19 @@
 		};
 		return icons[category] || icons['System'];
 	}
+
+	function getCategoryIconComp(category: string) {
+		const map: Record<string, typeof Settings> = {
+			'Landing Page': Home,
+			'Points & Rewards': CircleDollarSign,
+			'Surveys': ClipboardList,
+			'Email': Mail,
+			'Security': ShieldCheck,
+			'Branding': Palette,
+			'System': Settings
+		};
+		return map[category] ?? Settings;
+	}
 </script>
 
 <svelte:head>
@@ -295,25 +309,26 @@
 	{#if isLoading}
 		<div class="flex items-center justify-center py-20">
 			<div class="text-center">
-				<div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600"></div>
-				<p class="mt-4 text-neutral-600">Loading settings...</p>
+				<div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500"></div>
+				<p class="mt-4 text-neutral-400">Loading settings...</p>
 			</div>
 		</div>
 	{:else}
 		<div class="flex flex-col lg:flex-row gap-6">
 			<!-- Sidebar Categories -->
 			<div class="lg:w-56 flex-shrink-0">
-				<nav class="bg-white border border-neutral-200 rounded-xl p-2 space-y-1 sticky top-6">
+				<nav class="card !p-2 space-y-1 sticky top-6">
 					{#each categories as category}
+						{@const CategoryIcon = getCategoryIconComp(category)}
 						<button
 							onclick={() => activeCategory = category}
-							class="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all {activeCategory === category 
-								? 'bg-violet-50 text-violet-700 border border-violet-200' 
-								: 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'}"
+							class="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all {activeCategory === category
+								? 'bg-primary-500/15 text-primary-400 border border-primary-500/20'
+								: 'text-neutral-400 hover:bg-white/[0.03] hover:text-white'}"
 						>
-							<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={getCategoryIcon(category)} />
-							</svg>
+							<span class="w-9 h-9 flex items-center justify-center rounded-lg flex-shrink-0 {activeCategory === category ? 'bg-primary-500/10 text-primary-400' : 'bg-white/5 text-neutral-500'}">
+								<CategoryIcon class="w-5 h-5" />
+							</span>
 							<span class="truncate">{category}</span>
 						</button>
 					{/each}
@@ -324,57 +339,51 @@
 			<div class="flex-1 min-w-0">
 				<!-- Success/Error Message -->
 				{#if message}
-					<div class="mb-4 p-4 rounded-xl {messageType === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-rose-50 border border-rose-200 text-rose-700'} flex items-center gap-3">
+					<div class="mb-4 p-4 rounded-xl {messageType === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'} flex items-center gap-3">
 						{#if messageType === 'success'}
-							<svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-							</svg>
-						{:else}
-							<svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-							</svg>
+						<CircleCheck class="w-6 h-6 flex-shrink-0" />
+					{:else}
+						<CircleX class="w-6 h-6 flex-shrink-0" />
 						{/if}
 						<span>{message}</span>
 					</div>
 				{/if}
 
-				<div class="bg-white border border-neutral-200 rounded-xl">
+				<div class="card !p-0">
 					<!-- Category Header -->
-					<div class="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
+					{#each [getCategoryIconComp(activeCategory)] as ActiveCategoryIcon}
+					<div class="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between">
 						<div class="flex items-center gap-3">
-							<div class="p-2 bg-violet-50 rounded-lg">
-								<svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={getCategoryIcon(activeCategory)} />
-								</svg>
+								<div class="p-3 bg-primary-500/10 rounded-xl">
+									<ActiveCategoryIcon class="w-7 h-7 text-primary-400" />
 							</div>
 							<div>
-								<h2 class="text-lg font-bold text-neutral-900">{activeCategory}</h2>
+								<h2 class="text-lg font-bold text-white">{activeCategory}</h2>
 								<p class="text-sm text-neutral-500">Configure {activeCategory.toLowerCase()} settings</p>
 							</div>
 						</div>
 						<button
 							onclick={saveAllSettings}
-							class="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-violet-700 hover:to-indigo-700 transition-all flex items-center gap-2"
+							class="btn-primary text-sm"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-							</svg>
+							<Check class="w-4 h-4" />
 							Save All
 						</button>
 					</div>
+					{/each}
 
 					<!-- Settings List -->
-					<div class="divide-y divide-neutral-100">
+					<div class="divide-y divide-white/[0.04]">
 						{#each settingsConfig.filter(s => s.category === activeCategory) as config}
-							<div class="p-5 hover:bg-neutral-50/50 transition-colors">
+							<div class="p-5 hover:bg-white/[0.02] transition-colors">
 								<div class="flex flex-col lg:flex-row lg:items-start gap-4">
 									<div class="lg:w-1/3">
-										<label for={config.key} class="block text-sm font-semibold text-neutral-900">
+										<label for={config.key} class="block text-sm font-semibold text-white">
 											{config.label}
 										</label>
 										<p class="mt-1 text-xs text-neutral-500">{config.description}</p>
 									</div>
-									
+
 									<div class="lg:flex-1 flex items-start gap-3">
 										{#if config.type === 'boolean'}
 											<label class="relative inline-flex items-center cursor-pointer">
@@ -385,8 +394,8 @@
 													onchange={(e) => handleChange(config.key, e.currentTarget.checked ? 'true' : 'false')}
 													class="sr-only peer"
 												/>
-												<div class="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
-												<span class="ms-3 text-sm text-neutral-600">
+												<div class="w-11 h-6 bg-surface-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-neutral-400 after:border-neutral-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600 peer-checked:after:bg-white"></div>
+												<span class="ms-3 text-sm text-neutral-400">
 													{settings[config.key] === 'true' ? 'Enabled' : 'Disabled'}
 												</span>
 											</label>
@@ -397,14 +406,14 @@
 												oninput={(e) => handleChange(config.key, e.currentTarget.value)}
 												placeholder={config.placeholder}
 												rows="3"
-												class="flex-1 px-4 py-2.5 text-sm border border-neutral-200 rounded-lg focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all resize-none"
+												class="input flex-1 resize-none"
 											></textarea>
 										{:else if config.type === 'select' && config.options}
 											<select
 												id={config.key}
 												bind:value={settings[config.key]}
 												onchange={(e) => handleChange(config.key, e.currentTarget.value)}
-												class="flex-1 px-4 py-2.5 text-sm border border-neutral-200 rounded-lg focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white"
+												class="select flex-1"
 											>
 												{#each config.options as option}
 													<option value={option.value}>{option.label}</option>
@@ -417,24 +426,19 @@
 												bind:value={settings[config.key]}
 												oninput={(e) => handleChange(config.key, e.currentTarget.value)}
 												placeholder={config.placeholder}
-												class="flex-1 px-4 py-2.5 text-sm border border-neutral-200 rounded-lg focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+												class="input flex-1"
 											/>
 										{/if}
 
 										<button
 											onclick={() => saveSetting(config.key)}
 											disabled={savingKeys.has(config.key)}
-											class="px-3 py-2.5 text-sm font-medium text-violet-600 hover:text-violet-700 hover:bg-violet-50 rounded-lg transition-all disabled:opacity-50 flex items-center gap-1.5"
+											class="btn-ghost text-primary-400 hover:text-primary-300 flex items-center gap-1.5"
 										>
 											{#if savingKeys.has(config.key)}
-												<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-													<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-													<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-												</svg>
+												<Loader class="animate-spin h-4 w-4" />
 											{:else}
-												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-												</svg>
+												<Check class="w-4 h-4" />
 											{/if}
 											Save
 										</button>
@@ -446,15 +450,13 @@
 				</div>
 
 				<!-- Current Settings Preview -->
-				<div class="mt-6 bg-white border border-neutral-200 rounded-xl p-5">
-					<h3 class="text-sm font-bold text-neutral-900 mb-4 flex items-center gap-2">
-						<svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-						</svg>
+				<div class="mt-6 card">
+					<h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+						<Code2 class="w-4 h-4 text-neutral-500" />
 						Current {activeCategory} Values
 					</h3>
-					<div class="bg-neutral-50 rounded-lg p-4 font-mono text-xs overflow-x-auto">
-						<pre class="text-neutral-700">{JSON.stringify(
+					<div class="bg-surface-50 rounded-lg p-4 font-mono text-xs overflow-x-auto border border-white/[0.06]">
+						<pre class="text-neutral-400">{JSON.stringify(
 							Object.fromEntries(
 								settingsConfig
 									.filter(s => s.category === activeCategory)

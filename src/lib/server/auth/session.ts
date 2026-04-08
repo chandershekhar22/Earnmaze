@@ -23,9 +23,20 @@ export interface AuthUser {
  * Returns null if not authenticated
  */
 export async function getAuthUser(event: RequestEvent): Promise<AuthUser | null> {
-	// Try both cookie names for compatibility
+	// Check if hooks already resolved the user (JWT Bearer or session)
+	if (event.locals.user) {
+		const u = event.locals.user;
+		return {
+			id: u.id,
+			name: u.name || 'User',
+			email: u.email,
+			userType: u.userType as UserType,
+		};
+	}
+
+	// Fallback: try session cookie directly
 	const token = event.cookies.get('session') || event.cookies.get('session_token');
-	
+
 	if (!token) {
 		return null;
 	}

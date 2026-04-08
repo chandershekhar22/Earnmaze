@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { validateTurnstileToken } from '$lib/server/turnstile';
 import { Logger } from '$lib/utils/app-logger';
-import { isValidEmail, normalizeEmail } from '$lib/utils/validation';
+import { getClientIP } from '$lib/server/geo-restriction';
 import { 
 	getUserByEmail, 
 	createUser,
@@ -26,9 +26,19 @@ import {
 import {
 	getFirstAvailableSurvey
 } from '$lib/db/repositories/survey.repository.server';
+import { saveEmailSchema, validateInput } from '$lib/validation/api-schemas';
 
-export const POST: RequestHandler = async ({ request, getClientAddress, cookies }) => {
+export const POST: RequestHandler = async (event) => {
+	const { request, cookies, getClientAddress } = event;
 	try {
+		const body = await request.json();
+
+		// Validate and sanitize input
+		const validation = await validateInput(saveEmailSchema, body);
+		if (!validation.success) {
+			return json({ error: validation.error }, { status: 400 });
+		}
+
 		const { 
 			email, 
 			visitorId, 
@@ -36,36 +46,25 @@ export const POST: RequestHandler = async ({ request, getClientAddress, cookies 
 			utmParams, 
 			timeToConvert, 
 			turnstileToken,
-
-		} = await request.json();
+		} = validation.data;
 
 		// Validate Turnstile token
-		if (!turnstileToken) {
-			return json({ error: 'Verification required' }, { status: 400 });
-		}
-
-		const turnstileError = await validateTurnstileToken(turnstileToken, getClientAddress());
+		const turnstileError = await validateTurnstileToken(turnstileToken, getClientIP(event));
 		if (turnstileError) {
 			return json({ error: turnstileError }, { status: 400 });
 		}
 
-		// Validate email with utility function
-		if (!isValidEmail(email)) {
-			Logger.root.warn({ context: 'auth', email }, 'Invalid email format attempted');
-			return json({ error: 'Invalid email address' }, { status: 400 });
-		}
-
-		const normalizedEmail = normalizeEmail(email);
+		const normalizedEmail = email; // schema already lowercases + trims
 
 		// Find the visit ID for this session using repository
-		const visitData = await getVisitBySessionId(analyticsSessionId);
+		const visitData = analyticsSessionId ? await getVisitBySessionId(analyticsSessionId) : null;
 
 	
 		// Track the email conversion using repository
 		await createEmailConversion({
 			email: normalizedEmail,
-			visitorId,
-			sessionId: analyticsSessionId,
+			visitorId: visitorId ?? '',
+			sessionId: analyticsSessionId ?? '',
 			visitId: visitData?.id || null,
 			utmSource: utmParams?.utm_source || visitData?.utmSource || null,
 			utmMedium: utmParams?.utm_medium || visitData?.utmMedium || null,
@@ -97,15 +96,13 @@ export const POST: RequestHandler = async ({ request, getClientAddress, cookies 
 			userId = result.user.id;
 			isNewUser = true;
 
-			// Initialize points with welcome bonus using repository
-			const settings = await getAppSettings([
-				'welcome_panelist_points',
-				'bonus_panelist_points'
-			]);
-			
-			const welcomePoints = parseInt(settings.welcome_panelist_points || '0') || 0;
-	
-			await addBonusPoints(userId, welcomePoints, 'Welcome bonus for new panelist');
+			// Initialize points with signup bonus using repository
+			const settings = await getAppSettings(['signup_bonus_points']);
+			const signupBonus = parseInt(settings.signup_bonus_points || '0') || 0;
+
+			if (signupBonus > 0) {
+				await addBonusPoints(userId, signupBonus, 'Welcome bonus for new panelist');
+			}
 
 			Logger.root.info({ context: 'auth', email: normalizedEmail, userId }, 'Created new user and panelist');
 		}

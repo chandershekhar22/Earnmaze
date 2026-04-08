@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { GuestDashboardResponse } from '$types/guest-session';
-import { validateGuestSession, getAllAvailableSurveys } from '$lib/db';
+import { getAllAvailableSurveys } from '$lib/db';
 import { Logger } from '$lib/utils/app-logger';
 
 /**
@@ -12,39 +12,25 @@ import { Logger } from '$lib/utils/app-logger';
  * - Session-specific points (not lifetime)
  * - Basic tracking for current session only
  */
-export const GET: RequestHandler = async ({ cookies }) => {
+export const GET: RequestHandler = async ({ locals }) => {
 	try {
-		const token = cookies.get('guest_session');
+		const session = locals.guestSession;
 
-		if (!token) {
+		if (!session) {
 			return json(
 				{ success: false, error: 'NO_SESSION', message: 'No guest session found' },
 				{ status: 401 }
 			);
 		}
 
-		// Verify and fetch guest session using repository
-		const session = await validateGuestSession(token);
-
-		if (!session) {
-			// Clear invalid cookie
-			cookies.delete('guest_session', { path: '/' });
-			return json(
-				{ success: false, error: 'SESSION_EXPIRED', message: 'Guest session expired' },
-				{ status: 401 }
-			);
-		}
-
 		// Fetch available surveys using repository
-		const allSurveys = await getAllAvailableSurveys();
-		const availableSurveys = allSurveys.slice(0, 20);
+		const availableSurveys = await getAllAvailableSurveys(20);
 
 		Logger.root.info({ context: 'api', sessionId: session.id, email: session.email }, 'Guest dashboard accessed');
 
 		return json({
 			success: true,
 			data: {
-				email: session.email,
 				sessionPoints: session.sessionPoints || 0,
 				surveysViewed: session.surveysViewed || 0,
 				surveysCompleted: session.surveysCompleted || 0,

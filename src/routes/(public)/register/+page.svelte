@@ -1,9 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { getDashboardUrl } from '$lib/utils/dashboard-routing';
 	import { onMount } from 'svelte';
 	import Turnstile from '$lib/components/Turnstile.svelte';
+	import { AlertTriangle, Loader, UserPlus, Check, X } from '@lucide/svelte';
+
+	// Read tracking params from URL
+	let referralCode = $derived($page.url.searchParams.get('ref') || undefined);
+	let utmSource = $derived($page.url.searchParams.get('utm_source') || undefined);
+	let utmMedium = $derived($page.url.searchParams.get('utm_medium') || undefined);
+	let utmCampaign = $derived($page.url.searchParams.get('utm_campaign') || undefined);
 
 	let email = $state('');
 	let password = $state('');
@@ -12,8 +20,17 @@
 	let isLoading = $state(false);
 	let turnstileToken = $state<string | null>(null);
 	let turnstileRef: any;
-	
+
 	let passwordMismatch = $derived(password !== confirmPassword && confirmPassword.length > 0);
+	let passwordTouched = $derived(password.length > 0);
+
+	let pwRules = $derived([
+		{ label: 'At least 8 characters', met: password.length >= 8 },
+		{ label: 'One uppercase letter', met: /[A-Z]/.test(password) },
+		{ label: 'One lowercase letter', met: /[a-z]/.test(password) },
+		{ label: 'One number', met: /[0-9]/.test(password) },
+	]);
+	let allRulesMet = $derived(pwRules.every(r => r.met));
 
 	onMount(() => {
 		authStore.clearError();
@@ -39,7 +56,7 @@
 
 	async function handleSubmit() {
 		if (!email || !password || !confirmPassword || passwordMismatch) return;
-		
+
 		// Validate Turnstile token
 		if (!turnstileToken) {
 			authStore.state.error = 'Please complete the CAPTCHA verification';
@@ -51,7 +68,12 @@
 			email,
 			password,
 			name: name || undefined,
-			turnstileToken
+			turnstileToken,
+			referralCode,
+			utmSource,
+			utmMedium,
+			utmCampaign,
+			registrationSource: utmSource ? 'ad-campaign' : 'registration-page',
 		});
 		isLoading = false;
 
@@ -64,15 +86,15 @@
 			turnstileToken = null;
 		}
 	}
-	
+
 	function handleTurnstileVerify(token: string) {
 		turnstileToken = token;
 	}
-	
+
 	function handleTurnstileError() {
 		turnstileToken = null;
 	}
-	
+
 	function handleTurnstileExpire() {
 		turnstileToken = null;
 	}
@@ -89,12 +111,10 @@
 <div class="w-full max-w-md space-y-8 animate-fade-in">
 	<!-- Header -->
 	<div class="text-center">
-		<div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto shadow-glow mb-6">
-			<svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-			</svg>
+		<div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary-500/20 mb-6">
+			<UserPlus class="w-7 h-7 text-white" />
 		</div>
-		<h1 class="text-2xl font-bold text-neutral-900">Create your account</h1>
+		<h1 class="text-2xl font-bold text-white">Create your account</h1>
 		<p class="text-neutral-500 mt-2">Join EarnMaze and start earning rewards</p>
 	</div>
 
@@ -102,13 +122,11 @@
 	<div class="card">
 		<form onsubmit={handleFormSubmit} class="space-y-5">
 			{#if authStore.state.error}
-				<div class="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 rounded-xl animate-scale-in">
-					<div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center flex-shrink-0">
-						<svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-						</svg>
+				<div class="flex items-center gap-3 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl animate-scale-in">
+					<div class="w-8 h-8 rounded-lg bg-rose-500/15 flex items-center justify-center flex-shrink-0">
+						<AlertTriangle class="w-4 h-4 text-rose-400" />
 					</div>
-					<span class="text-sm font-medium text-rose-700">{authStore.state.error}</span>
+					<span class="text-sm font-medium text-rose-400">{authStore.state.error}</span>
 				</div>
 			{/if}
 
@@ -128,7 +146,7 @@
 			<!-- Name Field -->
 			<div>
 				<label for="name" class="label">
-					Full name <span class="text-neutral-400 font-normal">(optional)</span>
+					Full name <span class="text-neutral-600 font-normal">(optional)</span>
 				</label>
 				<input
 					id="name"
@@ -147,9 +165,28 @@
 					type="password"
 					bind:value={password}
 					required
-					class="input"
+					class="input {passwordTouched && !allRulesMet ? 'border-amber-500/30 focus:border-amber-500/50 focus:ring-amber-500/20' : passwordTouched && allRulesMet ? 'border-emerald-500/30 focus:border-emerald-500/50 focus:ring-emerald-500/20' : ''}"
 					placeholder="Create a strong password"
 				/>
+				{#if passwordTouched}
+					<div class="mt-2.5 space-y-1.5">
+						{#each pwRules as rule}
+							<div class="flex items-center gap-2 text-xs transition-all duration-200">
+								{#if rule.met}
+									<div class="w-4 h-4 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+										<Check class="w-2.5 h-2.5 text-emerald-400" />
+									</div>
+									<span class="text-emerald-400 font-medium">{rule.label}</span>
+								{:else}
+									<div class="w-4 h-4 rounded-full bg-white/[0.06] flex items-center justify-center flex-shrink-0">
+										<X class="w-2.5 h-2.5 text-neutral-600" />
+									</div>
+									<span class="text-neutral-500">{rule.label}</span>
+								{/if}
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 
 			<!-- Confirm Password Field -->
@@ -164,25 +201,23 @@
 					placeholder="Confirm your password"
 				/>
 				{#if passwordMismatch}
-					<p class="text-xs text-rose-600 font-medium mt-1.5 flex items-center gap-1">
-						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-						</svg>
+					<p class="text-xs text-rose-400 font-medium mt-1.5 flex items-center gap-1">
+						<AlertTriangle class="w-3.5 h-3.5" />
 						Passwords do not match
 					</p>
 				{/if}
 			</div>
 
 			<!-- Terms and Conditions -->
-			<div class="p-4 bg-neutral-50 rounded-xl">
+			<div class="p-4 bg-surface-200 rounded-xl">
 				<label class="flex items-start gap-3 cursor-pointer">
 					<input
 						id="terms"
 						type="checkbox"
 						required
-						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
+						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
 					/>
-					<span class="text-sm text-neutral-600 leading-relaxed">
+					<span class="text-sm text-neutral-400 leading-relaxed">
 						I agree to the
 						<a href="/terms-of-service" class="link">Terms of Service</a>
 						and
@@ -198,7 +233,7 @@
 					onVerify={handleTurnstileVerify}
 					onError={handleTurnstileError}
 					onExpire={handleTurnstileExpire}
-					theme="auto"
+					theme="dark"
 					size="normal"
 				/>
 			</div>
@@ -210,21 +245,17 @@
 				class="btn-primary w-full"
 			>
 				{#if isLoading}
-					<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-					</svg>
+					<Loader class="w-4 h-4 animate-spin" />
 					Creating account...
 				{:else}
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-					</svg>
+					<UserPlus class="w-4 h-4" />
 					Create account
 				{/if}
 			</button>
 		</form>
 
 		<!-- Sign In Link -->
-		<div class="mt-6 pt-6 border-t border-neutral-200">
+		<div class="mt-6 pt-6 border-t border-white/[0.06]">
 			<p class="text-center text-sm text-neutral-500">
 				Already have an account?
 				<a href="/login" class="link ml-1">Sign in here →</a>
@@ -233,10 +264,10 @@
 
 		<!-- Legal Links Footer -->
 		<div class="relative text-center pt-4 mt-4">
-			<div class="text-xs text-neutral-500 space-x-4">
-				<a href="/privacy-policy" class="hover:text-violet-600 transition-colors">Privacy Policy</a>
+			<div class="text-xs text-neutral-600 space-x-4">
+				<a href="/privacy-policy" class="hover:text-primary-400 transition-colors">Privacy Policy</a>
 				<span>•</span>
-				<a href="/terms-of-service" class="hover:text-violet-600 transition-colors">Terms of Service</a>
+				<a href="/terms-of-service" class="hover:text-primary-400 transition-colors">Terms of Service</a>
 			</div>
 		</div>
 	</div>

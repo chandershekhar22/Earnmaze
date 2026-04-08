@@ -5,52 +5,31 @@ import {
 	createSession,
 	createUser,
 	upgradeGuestSession,
-	validateGuestSession,
 	consumeGuestUpgradeToken,
 	getUserByEmail,
 	hashPassword,
+	addBonusPoints,
 } from '$lib/db';
+import { getAppSettings } from '$lib/db/repositories/settings.repository.server';
 import type { GuestUpgradeSetPasswordResponse } from '$types/guest-session';
-import { db } from '$lib/db';
-import { user as userTable } from '$lib/db/schema/auth';
-import { eq } from 'drizzle-orm';
+import { updateUserPasswordAndActivate } from '$lib/db/repositories';
+import { guestUpgradeSetPasswordSchema } from '$lib/validation/api-schemas';
+import { z } from 'zod';
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 	try {
-		const body = (await request.json()) as { upgradeToken?: string; password?: string };
-		const upgradeToken = (body.upgradeToken || '').trim();
-		const password = body.password || '';
-
-		const guestToken = cookies.get('guest_session');
-		if (!guestToken) {
+		const guestSession = locals.guestSession;
+		if (!guestSession) {
 			return json(
 				{ success: false, error: 'NO_GUEST_SESSION', message: 'No guest session found' } satisfies GuestUpgradeSetPasswordResponse,
 				{ status: 400 }
 			);
 		}
 
-		const guestSession = await validateGuestSession(guestToken);
-		if (!guestSession) {
-			cookies.delete('guest_session', { path: '/' });
-			return json(
-				{ success: false, error: 'SESSION_EXPIRED', message: 'Guest session expired' } satisfies GuestUpgradeSetPasswordResponse,
-				{ status: 401 }
-			);
-		}
-
-		if (!upgradeToken) {
-			return json(
-				{ success: false, error: 'MISSING_TOKEN', message: 'Missing verification token' } satisfies GuestUpgradeSetPasswordResponse,
-				{ status: 400 }
-			);
-		}
-
-		if (!password || password.length < 8) {
-			return json(
-				{ success: false, error: 'WEAK_PASSWORD', message: 'Password must be at least 8 characters' } satisfies GuestUpgradeSetPasswordResponse,
-				{ status: 400 }
-			);
-		}
+		const body = await request.json();
+		const validated = guestUpgradeSetPasswordSchema.parse(body);
+		const upgradeToken = validated.upgradeToken;
+		const password = validated.password;
 
 		const ok = await consumeGuestUpgradeToken({
 			guestSessionId: guestSession.id,
@@ -67,18 +46,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		const existingUser = await getUserByEmail(guestSession.email);
 		let upgradedUser = existingUser;
 
+		const hashed = await hashPassword(password);
+
 		if (existingUser) {
-			const hashed = await hashPassword(password);
-			await db
-				.update(userTable)
-				.set({
-					password: hashed,
-					isPasswordSet: true,
-					emailVerified: true,
-					status: 'active',
-					updatedAt: new Date(),
-				})
-				.where(eq(userTable.id, existingUser.id));
+			await updateUserPasswordAndActivate(existingUser.id, hashed);
 		} else {
 			const { user: newUser } = await createUser({
 				email: guestSession.email,
@@ -87,11 +58,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				registrationSource: 'guest_upgrade',
 			});
 
-			// Mark verified now that OTP was confirmed.
-			await db
-				.update(userTable)
-				.set({ emailVerified: true, status: 'active', updatedAt: new Date() })
-				.where(eq(userTable.id, newUser.id));
+			// Activate and mark email verified (createUser already hashed, but ensure consistency)
+			await updateUserPasswordAndActivate(newUser.id, hashed);
 
 			upgradedUser = newUser;
 		}
@@ -103,7 +71,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			);
 		}
 
-		await upgradeGuestSession(guestToken, upgradedUser.id);
+		await upgradeGuestSession(guestSession.token, upgradedUser.id);
+
+		// Credit signup bonus points
+		const settings = await getAppSettings(['signup_bonus_points']);
+		const signupBonus = parseInt(settings.signup_bonus_points || '0') || 0;
+		if (signupBonus > 0) {
+			await addBonusPoints(upgradedUser.id, signupBonus, 'Welcome bonus for guest upgrade');
+		}
 
 		const sessionToken = await createSession(upgradedUser.id);
 		cookies.set('session', sessionToken, {
@@ -131,6 +106,13 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			message: 'Account created successfully',
 		} satisfies GuestUpgradeSetPasswordResponse);
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return json(
+				{ success: false, error: 'VALIDATION_ERROR', message: error.issues[0]?.message || 'Invalid input' } satisfies GuestUpgradeSetPasswordResponse,
+				{ status: 400 }
+			);
+		}
+
 		Logger.root.error({ context: 'errors', error }, 'Guest upgrade set-password error');
 
 		if (error instanceof Error && error.message.includes('unique')) {

@@ -1,34 +1,40 @@
 import { json } from '@sveltejs/kit';
 
 import type { RequestHandler } from './$types';
-import { createSession, createUser, getUserByEmail } from '$lib/db';
+import { createSession, createUser, getUserByEmail, db } from '$lib/db';
 import { validateTurnstileToken } from '$lib/server/turnstile';
 import type { RegisterResponse, AuthUserResponse } from '$lib/types/api-responses';
 import { getUserByReferralCode } from '$lib/db/repositories/auth.repository.server';
+import { referrals } from '$lib/db/schema/transactions';
 import { Logger } from '$lib/utils/app-logger';
-import { isValidEmail, normalizeEmail } from '$lib/utils/validation';
+import { authRateLimit } from '$lib/server/rate-limit';
+import { registerSchema, validateInput } from '$lib/validation/api-schemas';
+import { getClientIP } from '$lib/server/geo-restriction';
 
-export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
+const REFERRER_BONUS = 50;
+const REFERRED_BONUS = 25;
+
+export const POST: RequestHandler = async (event) => {
+	const rateLimited = await authRateLimit(event);
+	if (rateLimited) return rateLimited;
+
+	const { request, cookies, getClientAddress } = event;
 	try {
-		const { email, password, name, turnstileToken, referralCode } = await request.json();
-
-		if (!email || !password) {
-			return json({ error: 'Email and password are required' }, { status: 400 });
+		const body = await request.json();
+		const validation = await validateInput(registerSchema, body);
+		if (!validation.success) {
+			return json({ error: validation.error }, { status: 400 });
 		}
 
+		const { email, password, name, turnstileToken, referralCode, utmSource, utmMedium, utmCampaign, registrationSource } = validation.data;
+
 		// Verify Turnstile token
-		const turnstileError = await validateTurnstileToken(turnstileToken, getClientAddress());
+		const turnstileError = await validateTurnstileToken(turnstileToken, getClientIP(event));
 		if (turnstileError) {
 			return json({ error: turnstileError }, { status: 400 });
 		}
 
-		// Validate email with utility function
-		if (!isValidEmail(email)) {
-			Logger.root.warn({ context: 'auth', email }, 'Invalid email format attempted');
-			return json({ error: 'Invalid email address' }, { status: 400 });
-		}
-
-		const normalizedEmail = normalizeEmail(email);
+		const normalizedEmail = email; // loginSchema already lowercases + trims
 
 		// Check if user already exists
 		const existingUser = await getUserByEmail(normalizedEmail);
@@ -41,23 +47,50 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 			Logger.root.warn({ context: 'auth', email, referralCode }, 'Invalid referral code used during registration');
 		}
 
+		// Prevent self-referral (same email as referrer)
+		if (referrer && referrer.email.toLowerCase() === normalizedEmail.toLowerCase()) {
+			Logger.root.warn({ context: 'auth', email, referralCode }, 'Self-referral attempt blocked');
+			return json({ error: 'Cannot use your own referral code' }, { status: 400 });
+		}
 
-		// Create new user
+
+		// Create new user (with referral link if valid)
 		await createUser({
 			email: normalizedEmail,
 			password,
 			name,
 			userType: 'panelist',
-			registrationSource: 'registration-page',
-			utmSource: null,
-			utmMedium: null,
-			utmCampaign: null,
+			registrationSource: registrationSource || 'registration-page',
+			utmSource: utmSource || null,
+			utmMedium: utmMedium || null,
+			utmCampaign: utmCampaign || null,
+			referredBy: referrer?.id ?? null,
 		});
 
 		// Get the created user
 		const user = await getUserByEmail(email);
 		if (!user) {
 			return json({ error: 'Failed to create user' }, { status: 500 });
+		}
+
+		// Create referral record if user was referred
+		if (referrer && referralCode) {
+			try {
+				await db.insert(referrals).values({
+					referrerId: referrer.id,
+					referredId: user.id,
+					referralCode,
+					status: 'pending',
+					referrerBonus: REFERRER_BONUS,
+					referredBonus: REFERRED_BONUS,
+				});
+				Logger.root.info(
+					{ context: 'referral', referrerId: referrer.id, referredId: user.id, referralCode },
+					'Referral record created'
+				);
+			} catch (refError) {
+				Logger.root.error({ context: 'referral', error: refError }, 'Failed to create referral record');
+			}
 		}
 
 		// Create session

@@ -6,6 +6,7 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import { page } from '$app/stores';
+	import { afterNavigate } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -13,6 +14,12 @@
 	let mounted = $state(false);
 	let authChecked = $state(false);
 	let isSidebarOpen = $state(false);
+	let mainEl: HTMLElement;
+
+	// Scroll to top on page navigation
+	afterNavigate(() => {
+		mainEl?.scrollTo(0, 0);
+	});
 
 	function toggleSidebar() {
 		isSidebarOpen = !isSidebarOpen;
@@ -23,20 +30,17 @@
 	});
 
 	$effect(() => {
-		// Wait for auth store to finish loading before making routing decisions
 		if (mounted && !authStore.state.isLoading && !authChecked) {
 			authChecked = true;
-			
+
 			if (!authStore.state.user) {
 				Logger.root.warn({ context: 'auth', route: $page.route.id, path: $page.url.pathname }, 'Unauthenticated access attempt to panelist area');
 				const redirectUrl = encodeURIComponent($page.url.pathname);
 				goto(`/login?redirect=${redirectUrl}`);
 			} else {
-				// Check if user type is panelist or admin
 				const userType = authStore.state.user.userType;
 				if (userType !== 'panelist' && userType !== 'admin') {
 					Logger.root.warn({ context: 'auth', userId: authStore.state.user.id, userType, route: $page.route.id, path: $page.url.pathname }, 'Unauthorized user type accessing panelist area');
-					// Redirect to their appropriate dashboard
 					if (userType === 'client') {
 						goto('/client/dashboard');
 					} else if (userType === 'moderator') {
@@ -45,7 +49,6 @@
 						goto('/');
 					}
 				} else {
-					// Log panelist area access
 					Logger.root.info({ context: 'ui', userId: authStore.state.user.id, userType, route: $page.route.id, path: $page.url.pathname }, 'Panelist area accessed');
 				}
 			}
@@ -53,7 +56,6 @@
 	});
 
 	$effect(() => {
-		// Handle session expiration
 		if (mounted && authChecked && !authStore.state.isLoading && !authStore.state.user) {
 			Logger.root.info({ context: 'auth' }, 'User session expired in respondent area, redirecting to login');
 			goto('/login');
@@ -62,34 +64,36 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard - EarnMaze Panel</title>
+	<title>Dashboard - EarnMaze</title>
 	<meta name="description" content="EarnMaze respondent dashboard - manage your surveys, points, and rewards" />
 </svelte:head>
 
 {#if mounted && authStore.state.user}
-	<!-- Respondent dashboard layout with sidebar -->
-	<div class="flex h-screen bg-neutral-50 overflow-hidden">
+	<div class="flex h-screen bg-surface overflow-hidden">
 		<Sidebar bind:isOpen={isSidebarOpen} />
 		<div class="flex-1 flex flex-col overflow-hidden w-full lg:w-auto">
 			<Header onMenuClick={toggleSidebar} />
-			<main class="flex-1 overflow-x-hidden overflow-y-auto bg-neutral-50 p-4 md:p-6">
-				<div class="mx-auto">
+			<main bind:this={mainEl} class="flex-1 overflow-x-hidden overflow-y-auto bg-surface p-4 md:p-6 lg:p-8">
+				<div class="max-w-6xl mx-auto">
 					{@render children()}
 				</div>
 			</main>
 		</div>
 	</div>
-{:else if mounted && authChecked}
-	<!-- Fallback loading state while redirecting -->
-	<div class="min-h-screen flex items-center justify-center bg-neutral-50">
-		<div class="text-center">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto mb-4"></div>
-			<p class="text-neutral-600">Redirecting to login...</p>
-		</div>
-	</div>
 {:else}
-	<!-- Initial loading state -->
-	<div class="min-h-screen flex items-center justify-center bg-neutral-50">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+	<!-- Branded loading screen -->
+	<div class="min-h-screen flex items-center justify-center bg-surface">
+		<div class="text-center animate-fade-in">
+			<div class="relative w-12 h-12 mx-auto mb-4">
+				<div class="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-xl opacity-20 blur-lg animate-pulse"></div>
+				<div class="relative w-12 h-12 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+					<svg class="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+					</svg>
+				</div>
+			</div>
+			<p class="text-sm font-semibold text-white/40">Loading your dashboard...</p>
+		</div>
 	</div>
 {/if}

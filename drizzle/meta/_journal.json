@@ -36,6 +36,34 @@
       "when": 1769936248115,
       "tag": "0004_abandoned_hammerhead",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1774184306679,
+      "tag": "0005_brown_mantis",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774199015795,
+      "tag": "0006_cooing_thing",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774199878733,
+      "tag": "0007_wide_rocket_racer",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1775187863304,
+      "tag": "0008_watery_gauntlet",
+      "breakpoints": true
     }
   ]
 }

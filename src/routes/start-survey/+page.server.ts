@@ -2,11 +2,11 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { createHmac } from 'crypto';
 import { getAuthUser } from '$lib/server/auth';
-import { db, getSurveyById, getOrCreateStartedSurveyTransaction, getUserByEmail } from '$lib/db';
+import { db, getSurveyById, createSurveyTransaction, getUserByEmail } from '$lib/db';
 import { surveyTransactionDetails } from '$lib/db/schema/surveys';
 import { nanoid } from 'nanoid';
 import { Logger } from '$lib/utils/app-logger';
-import { validateGuestSession, linkSurveyTransactionToSession } from '$lib/db/repositories/guest-session.repository.server';
+import { linkSurveyTransactionToSession } from '$lib/db/repositories/guest-session.repository.server';
 
 type UserContext = {
 	panelistId: string;
@@ -24,7 +24,8 @@ type DeviceInfo = {
 // Helper: Hash email with HMAC-SHA256
 function hashEmail(email: string | null): string {
 	if (!email) return '';
-	const secret = process.env.UID_SECRET || 'default-secret-key';
+	const secret = process.env.UID_SECRET;
+	if (!secret) throw new Error('UID_SECRET environment variable is required');
 	return createHmac('sha256', secret).update(email.toLowerCase()).digest('hex');
 }
 
@@ -35,9 +36,8 @@ function detectDeviceType(userAgent: string): 'mobile' | 'tablet' | 'desktop' {
 	return 'desktop';
 }
 
-// Helper: Resolve user from auth session or guest session
+// Helper: Resolve user from auth session or guest session (both set by hooks)
 async function resolveUser(event: Parameters<PageServerLoad>[0]): Promise<UserContext | null> {
-	const { cookies } = event;
 	const authUser = await getAuthUser(event);
 
 	if (authUser?.userType === 'panelist') {
@@ -48,10 +48,7 @@ async function resolveUser(event: Parameters<PageServerLoad>[0]): Promise<UserCo
 		};
 	}
 
-	const guestToken = cookies.get('guest_session');
-	if (!guestToken) return null;
-
-	const guestSession = await validateGuestSession(guestToken);
+	const guestSession = event.locals.guestSession;
 	if (!guestSession) return null;
 
 	const userRecord = await getUserByEmail(guestSession.email);
@@ -97,10 +94,9 @@ export const load: PageServerLoad = async (event) => {
 		}
 
 		// Create or resume survey transaction
-		const { transactionId, respondentId, isNew } = await getOrCreateStartedSurveyTransaction({
+		const { transactionId, respondentId, isNew } = await createSurveyTransaction({
 			panelistId: userContext.panelistId,
-			surveyId,
-			fallbackRespondentId: nanoid()
+			surveyId
 		});
 		
 		Logger.root.info(
@@ -156,6 +152,7 @@ export const load: PageServerLoad = async (event) => {
 		const surveyUrl = new URL(surveyData.link);
 		surveyUrl.searchParams.set('rid', respondentId);
 		surveyUrl.searchParams.set('uid', hashEmail(userContext.email));
+
 
 		Logger.root.info(
 			{

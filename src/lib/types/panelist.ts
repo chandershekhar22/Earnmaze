@@ -10,7 +10,6 @@ export interface PanelistDashboardData {
   points: {
     currentPoints: number;
     lifetimePoints: number;
-    pendingPoints: number;
     redeemedPoints: number;
     tierProgress: number;
   } | null;

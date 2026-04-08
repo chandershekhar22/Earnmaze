@@ -1,39 +1,32 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/db';
-import { passwordReset, user as userTable } from '$lib/db/schema/auth';
-import { eq, and } from 'drizzle-orm';
+import {
+	findPasswordResetToken,
+	deletePasswordResetToken,
+	resetPasswordWithToken,
+	invalidateAllUserSessions,
+	hashPassword,
+} from '$lib/db/repositories';
 import { Logger } from '$lib/utils/app-logger';
-import { hashPassword } from '$lib/db';
+import { resetPasswordSchema, validateInput } from '$lib/validation/api-schemas';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const body = (await request.json()) as { token?: string; password?: string };
-		const token = (body.token || '').trim();
-		const password = body.password || '';
-
-		if (!token) {
+		const body = await request.json();
+		const validation = await validateInput(resetPasswordSchema, body);
+		if (!validation.success) {
 			return json(
-				{ success: false, error: 'MISSING_TOKEN', message: 'Reset token is required' },
+				{ success: false, error: 'VALIDATION_ERROR', message: validation.error },
 				{ status: 400 }
 			);
 		}
 
-		if (!password || password.length < 8) {
-			return json(
-				{ success: false, error: 'WEAK_PASSWORD', message: 'Password must be at least 8 characters' },
-				{ status: 400 }
-			);
-		}
+		const { token, password } = validation.data;
 
 		// Find and validate reset token
-		const resetRecord = await db
-			.select()
-			.from(passwordReset)
-			.where(eq(passwordReset.token, token))
-			.limit(1);
+			const resetRecord = await findPasswordResetToken(token);
 
-		if (!resetRecord.length) {
+			if (!resetRecord) {
 			Logger.root.warn({ context: 'security' }, 'Invalid password reset token');
 			return json(
 				{ success: false, error: 'INVALID_TOKEN', message: 'Reset link is invalid or expired' },
@@ -41,11 +34,20 @@ export const POST: RequestHandler = async ({ request }) => {
 			);
 		}
 
-		const { userId, expiresAt } = resetRecord[0];
+const { userId, expiresAt, isUsed } = resetRecord;
+
+		// Check if token was already used
+		if (isUsed) {
+			Logger.root.warn({ context: 'security', userId }, 'Already-used password reset token attempted');
+			return json(
+				{ success: false, error: 'TOKEN_USED', message: 'Reset link has already been used' },
+				{ status: 400 }
+			);
+		}
 
 		// Check if token is expired
 		if (expiresAt < new Date()) {
-			await db.delete(passwordReset).where(eq(passwordReset.token, token));
+				await deletePasswordResetToken(token);
 			Logger.root.warn({ context: 'security', userId }, 'Expired password reset token used');
 			return json(
 				{ success: false, error: 'EXPIRED_TOKEN', message: 'Reset link has expired' },
@@ -56,22 +58,15 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Hash new password
 		const hashedPassword = await hashPassword(password);
 
-		// Update user password
-		await db
-			.update(userTable)
-			.set({
-				password: hashedPassword,
-				isPasswordSet: true,
-				updatedAt: new Date(),
-			})
-			.where(eq(userTable.id, userId));
+		// Atomically update password and mark token as used
+		await resetPasswordWithToken(token, userId, hashedPassword);
 
-		// Delete reset token
-		await db.delete(passwordReset).where(eq(passwordReset.token, token));
+		// Invalidate all existing sessions so stolen/old sessions can't be reused
+		await invalidateAllUserSessions(userId);
 
 		Logger.root.info(
 			{ context: 'security', userId },
-			'Password reset completed'
+			'Password reset completed, all sessions invalidated'
 		);
 
 		return json({

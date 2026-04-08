@@ -8,7 +8,11 @@ const OTP_MAX_ATTEMPTS = 5;
 const UPGRADE_TOKEN_TTL_MINUTES = 15;
 
 function getPepper(): string {
-	return process.env.SESSION_SECRET || process.env.OTP_PEPPER || 'dev';
+	const pepper = process.env.SESSION_SECRET || process.env.OTP_PEPPER;
+	if (!pepper) {
+		throw new Error('CRITICAL: Neither SESSION_SECRET nor OTP_PEPPER environment variable is set. Refusing to use insecure default.');
+	}
+	return pepper;
 }
 
 function hashOtp(email: string, otp: string): string {
@@ -128,4 +132,15 @@ export async function consumeGuestUpgradeToken(params: {
 		.where(eq(guestUpgradeVerification.id, row.id));
 
 	return true;
+}
+/**
+ * Get the most recent OTP record for a guest session (for rate-limit checks)
+ */
+export async function getExistingOtpForSession(guestSessionId: string) {
+	const result = await db
+		.select()
+		.from(guestUpgradeVerification)
+		.where(eq(guestUpgradeVerification.guestSessionId, guestSessionId))
+		.limit(1);
+	return result[0] ?? null;
 }

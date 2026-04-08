@@ -1,9 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { requireAdmin } from '$lib/server/auth';
-import { db } from '$lib/db';
-import { survey } from '$lib/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { createSurveyAdmin } from '$lib/db/repositories';
+import { getAdminSurveys } from '$lib/db/repositories/survey.repository.server';
 import { z } from 'zod';
 import { Logger } from '$lib/utils/app-logger';
 
@@ -12,8 +11,11 @@ const surveySchema = z.object({
 	title: z.string().min(1, 'Title is required').max(255),
 	description: z.string().optional().nullable(),
 	points: z.number().int().min(1, 'Points must be at least 1'),
+	terminatedPoints: z.number().int().min(0).optional().default(0),
+	quotaFullPoints: z.number().int().min(0).optional().default(0),
 	link: z.string().url('Must be a valid URL'),
-	isActive: z.boolean().optional().default(true)
+	isActive: z.boolean().optional().default(true),
+	priority: z.enum(['low', 'medium', 'high']).optional().default('medium')
 });
 
 // GET - List all surveys (with optional filters)
@@ -21,12 +23,12 @@ export const GET: RequestHandler = async (event) => {
 	const admin = await requireAdmin(event);
 	
 	try {
-		const surveys = await db
-			.select()
-			.from(survey)
-			.where(eq(survey.isDeleted, false))
-			.orderBy(sql`${survey.createdAt} DESC`);
+		const page = parseInt(event.url.searchParams.get('page') || '1');
+		const limit = parseInt(event.url.searchParams.get('limit') || '20');
+		const search = event.url.searchParams.get('search') || '';
+		const status = event.url.searchParams.get('status') || 'all';
 
+		const surveys = await getAdminSurveys({ page, limit, search, status });
 		return json({ success: true, data: surveys });
 	} catch (error) {
 		Logger.root.error(
@@ -48,17 +50,17 @@ export const POST: RequestHandler = async (event) => {
 		const body = await event.request.json();
 		const validated = surveySchema.parse(body);
 
-		const [newSurvey] = await db
-			.insert(survey)
-			.values({
+		const newSurvey = await createSurveyAdmin(
+			{
 				title: validated.title,
 				description: validated.description || null,
 				points: validated.points,
 				link: validated.link,
 				isActive: validated.isActive,
-				createdBy: admin.id
-			})
-			.returning();
+				priority: validated.priority,
+			},
+			admin.id
+		);
 
 		return json({ success: true, data: newSurvey }, { status: 201 });
 	} catch (error) {

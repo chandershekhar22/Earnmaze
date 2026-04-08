@@ -163,11 +163,14 @@ export async function validateGuestSession(token: string): Promise<GuestSessionI
 		return null;
 	}
 
-	// Update last activity
-	await db
-		.update(guestSession)
-		.set({ lastActivityAt: new Date(), updatedAt: new Date() })
-		.where(eq(guestSession.id, session.id));
+	// Throttle last activity writes — only update if >60s since last write
+	const lastActivity = session.lastActivityAt?.getTime() ?? 0;
+	if (Date.now() - lastActivity > 60_000) {
+		await db
+			.update(guestSession)
+			.set({ lastActivityAt: new Date(), updatedAt: new Date() })
+			.where(eq(guestSession.id, session.id));
+	}
 
 	return {
 		id: session.id,
@@ -337,4 +340,16 @@ export async function hasRecentGuestSession(email: string, withinHours: number =
 		.limit(1);
 
 	return recent.length > 0;
+}
+
+/**
+ * Check if a survey transaction was made by a guest (i.e. has a guest_survey_activity record)
+ */
+export async function getGuestActivityByTransactionId(surveyTransactionId: number) {
+	const [activity] = await db
+		.select({ id: guestSurveyActivity.id })
+		.from(guestSurveyActivity)
+		.where(eq(guestSurveyActivity.surveyTransactionId, surveyTransactionId))
+		.limit(1);
+	return activity ?? null;
 }

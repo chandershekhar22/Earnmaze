@@ -10,12 +10,6 @@ export async function sendPasswordResetEmail(email: string, resetToken: string, 
 		
 		// TODO: Queue email task with worker
 		// For development, we'll log it
-		Logger.root.info(
-			{ context: 'email', email, resetToken: resetToken.slice(0, 8) + '...' },
-			`Password reset link: ${resetLink}`
-		);
-
-		// In production, you would queue this with your Celery worker:
 		await sendTask('email.send.reset.password', [email, resetLink]);
 	} catch (error) {
 		Logger.root.error(
@@ -38,7 +32,7 @@ export async function sendWelcomeEmail(email: string, name: string|null): Promis
     }
 }
 
-export async function sendVerificationEmail(email: string, otp: string): Promise<void> {  
+export async function sendVerificationEmail(email: string, otp: string): Promise<void> {
     try {
         await sendTask('email.send.verify', [email, otp]);
     } catch (error) {
@@ -48,5 +42,17 @@ export async function sendVerificationEmail(email: string, otp: string): Promise
         );
         throw error;
     }
-}   
+}
+
+export async function sendRedemptionOtpEmail(email: string, otp: string, rewardName: string, pointsCost: number): Promise<void> {
+    try {
+        await sendTask('email.send.redemption.otp', [email, otp, rewardName, pointsCost]);
+    } catch (error) {
+        Logger.root.error(
+            { context: 'errors', email, error },
+            'Failed to send redemption OTP email'
+        );
+        throw error;
+    }
+}
 

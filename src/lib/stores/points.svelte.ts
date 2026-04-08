@@ -1,18 +1,16 @@
 import { Logger, API } from '$lib/utils/app-logger';
 
 export interface PointsData {
-	totalPoints: number;
-	availablePoints: number;
-	pendingPoints: number;
+	currentBalance: number;
 	lifetimeEarned: number;
+	lifetimeRedeemed: number;
 }
 
 class PointsStore {
 	data = $state<PointsData>({
-		totalPoints: 0,
-		availablePoints: 0,
-		pendingPoints: 0,
-		lifetimeEarned: 0
+		currentBalance: 0,
+		lifetimeEarned: 0,
+		lifetimeRedeemed: 0
 	});
 
 	async fetchPoints() {
@@ -28,24 +26,21 @@ class PointsStore {
 
 			if (response.ok) {
 				const pointsData = await response.json();
-				Logger.root.info({ context: 'points', availablePoints: pointsData.availablePoints, totalPoints: pointsData.totalPoints }, 'Points fetched successfully');
+				Logger.root.info({ context: 'points', currentBalance: pointsData.currentBalance }, 'Points fetched successfully');
 				this.data = pointsData;
 				return pointsData;
 			} else {
 				Logger.root.warn({ context: 'points', statusCode: response.status }, 'Failed to fetch points');
-				// Keep existing data on error
 				return null;
 			}
 		} catch (error) {
 			const duration = performance.now() - startTime;
 			API.error(requestId, error as Error, duration);
 			Logger.root.error({ context: 'errors', error: error instanceof Error ? error.message : 'Unknown error', duration: `${duration}ms` }, 'Points fetch network error');
-			// Keep existing data on error
 			return null;
 		}
 	}
 
-	// Update points after a transaction
 	updatePoints(pointsData: Partial<PointsData>) {
 		this.data = {
 			...this.data,
@@ -54,13 +49,11 @@ class PointsStore {
 		Logger.root.info({ context: 'points', ...pointsData }, 'Points updated locally');
 	}
 
-	// Reset points (useful for logout)
 	reset() {
 		this.data = {
-			totalPoints: 0,
-			availablePoints: 0,
-			pendingPoints: 0,
-			lifetimeEarned: 0
+			currentBalance: 0,
+			lifetimeEarned: 0,
+			lifetimeRedeemed: 0
 		};
 		Logger.root.info({ context: 'points' }, 'Points reset');
 	}

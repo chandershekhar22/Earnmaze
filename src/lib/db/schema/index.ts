@@ -10,3 +10,4 @@ export * from "./analytics";
 export * from "./settings";
 export * from "./guest-sessions";
 export * from "./guest-upgrade-verifications";
+export * from "./support-tickets";

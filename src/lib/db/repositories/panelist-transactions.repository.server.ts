@@ -35,36 +35,14 @@ export async function getPanelistSurveyTransactions(panelistId: string, limit: n
         .limit(limit);
 }
 
-export async function getOrCreateStartedSurveyTransaction(params: { panelistId: string; surveyId: string; fallbackRespondentId?: string }) {
-    const { panelistId, surveyId, fallbackRespondentId } = params;
+export async function createSurveyTransaction(params: { panelistId: string; surveyId: string; }) {
+    const { panelistId, surveyId } = params;
     Logger.root.debug(
         { context: 'surveys', panelistId, surveyId },
-        'Get or create started survey transaction'
+        'Creating survey transaction'
     );
-    const [existing] = await db
-        .select()
-        .from(surveyTransaction)
-        .where(
-            and(
-                eq(surveyTransaction.panelistId, panelistId),
-                eq(surveyTransaction.surveyId, surveyId),
-                eq(surveyTransaction.status, 'started')
-            )
-        )
-        .limit(1);
 
-    if (existing) {
-        const respondentId = existing.respondentId || fallbackRespondentId || nanoid();
-        if (!existing.respondentId) {
-            await db
-                .update(surveyTransaction)
-                .set({ respondentId })
-                .where(eq(surveyTransaction.id, existing.id));
-        }
-        return { transactionId: existing.id, respondentId, isNew: false } as const;
-    }
-
-    const respondentId = fallbackRespondentId || nanoid();
+    const respondentId =  nanoid();
     const [created] = await db
         .insert(surveyTransaction)
         .values({

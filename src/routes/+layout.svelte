@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page, navigating } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { themeStore } from '$lib/stores/theme.svelte';
@@ -10,7 +10,7 @@
 	import '../app.pcss';
 
 	let { children }: { children: Snippet } = $props();
-	
+
 	let mounted = $state(false);
 	let appliedTheme = $state<'light' | 'dark'>('light');
 
@@ -20,8 +20,10 @@
 		// Initialize app-wide logging
 		initializeAppLogging();
 
-		// Initialize auth state
-		authStore.checkAuth();
+		// Initialize auth state — skip if already authenticated (e.g. just logged in)
+		if (!authStore.state.user) {
+			authStore.checkAuth();
+		}
 
 		// Initialize theme
 		themeStore.initialize();
@@ -64,6 +66,13 @@
 </svelte:head>
 
 <ErrorBoundary>
+	<!-- Global navigation loader -->
+	{#if $navigating}
+		<div class="fixed top-0 left-0 right-0 z-[100]">
+			<div class="h-0.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 nav-progress"></div>
+		</div>
+	{/if}
+
 	{#if mounted}
 		<div class="min-h-screen {appliedTheme === 'dark' ? 'dark' : ''}">
 			{@render children()}
@@ -71,8 +80,8 @@
 		</div>
 	{:else}
 		<!-- Loading state -->
-		<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
+		<div class="min-h-screen flex items-center justify-center bg-surface">
+			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
 		</div>
 	{/if}
 </ErrorBoundary>

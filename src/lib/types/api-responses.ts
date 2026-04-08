@@ -111,7 +111,6 @@ export interface PanelistPointsResponse {
 	currentBalance: number;
 	lifetimeEarned: number;
 	lifetimeRedeemed: number;
-	pendingPoints: number;
 }
 
 /**
@@ -123,7 +122,6 @@ export interface PointsTransactionItem {
 	type: typeof pointsTransactionTypes[number];
 	points: number;
 	currentBalance: number;
-	pendingBalance: number;
 	description: string;
 	referenceType?: string | null;
 	referenceId?: string | null;
@@ -172,6 +170,7 @@ export interface AvailableSurveyItem {
 	description: string;
 	points: number;
 	link: string;
+	priority: 'low' | 'medium' | 'high';
 }
 
 /**

@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getLifetimePoints, getPanelistPoints, getTotalRedeemedPoints } from '$lib/db';
+import { getPanelistPoints } from '$lib/db';
+import { getPointsSummary } from '$lib/db/repositories/panelist-points-aggregations.repository.server';
 import type { PanelistPointsResponse } from '$lib/types/api-responses';
 import { Logger } from '$lib/utils/app-logger';
 
@@ -10,32 +11,30 @@ export const GET: RequestHandler = async ({ locals }) => {
 		const user = locals.user;
 
 		if (!user) {
-			return json({ error: 'Unauthorized' }, { status: 401 });
+			return json({ success: false, error: 'UNAUTHORIZED', message: 'Authentication required' }, { status: 401 });
 		}
 
-		// Check if user is a panelist
 		if (user.userType !== 'panelist') {
-			return json({ error: 'Forbidden' }, { status: 403 });
+			return json({ success: false, error: 'FORBIDDEN', message: 'Panelist access required' }, { status: 403 });
 		}
 
-		const pointsData = await getPanelistPoints(user.id);
-		const lifeTimeEarned = await getLifetimePoints(user.id);
-		const redeemedPoints = await getTotalRedeemedPoints(user.id)
+		const [pointsData, summary] = await Promise.all([
+			getPanelistPoints(user.id),
+			getPointsSummary(user.id),
+		]);
 
-		// Construct typed response with only allowed fields
 		const response: PanelistPointsResponse = {
-			currentBalance: pointsData.currentPoints,
-			lifetimeEarned: lifeTimeEarned,
-			lifetimeRedeemed: redeemedPoints,
-			pendingPoints: pointsData.pendingPoints,
+			currentBalance: pointsData?.currentPoints ?? 0,
+			lifetimeEarned: summary.lifetimePoints,
+			lifetimeRedeemed: summary.redeemedPoints,
 		};
 
-		return json(response);
+		return json({ success: true, data: response });
 	} catch (error) {
 		Logger.root.error(
 			{ context: 'api', error, userId: locals.user?.id },
 			'Failed to fetch points data'
 		);
-		return json({ error: 'Failed to fetch points data' }, { status: 500 });
+		return json({ success: false, error: 'FETCH_FAILED', message: 'Failed to fetch points data' }, { status: 500 });
 	}
 };

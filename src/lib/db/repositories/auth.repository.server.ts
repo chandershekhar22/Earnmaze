@@ -1,7 +1,7 @@
 import { hash, verify } from 'argon2';
 import { eq } from 'drizzle-orm';
 import { db } from '../index';
-import { user, session, userTypeEnum } from '../schema/auth';
+import { user, session, userTypeEnum, passwordReset } from '../schema/auth';
 import { randomBytes } from 'crypto';
 import { initializePanelistPoints } from './panelist-points.repository.server';
 import { sendWelcomeEmail } from '../../server/email-service';
@@ -56,6 +56,20 @@ export async function validateSession(sessionId: string): Promise<typeof user.$i
 	if (sessionData.expiresAt < new Date()) {
 		await db.delete(session).where(eq(session.token, sessionId));
 		return null;
+	}
+
+	// Enforce absolute max lifetime (90 days from creation)
+	const MAX_SESSION_LIFETIME_MS = 90 * 24 * 60 * 60 * 1000;
+	if (Date.now() - sessionData.createdAt.getTime() > MAX_SESSION_LIFETIME_MS) {
+		await db.delete(session).where(eq(session.token, sessionId));
+		return null;
+	}
+
+	// Sliding session: extend expiry if less than 7 days remaining
+	const sevenDays = 7 * 24 * 60 * 60 * 1000;
+	if (sessionData.expiresAt.getTime() - Date.now() < sevenDays) {
+		const newExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+		await db.update(session).set({ expiresAt: newExpiry }).where(eq(session.token, sessionId));
 	}
 
 	return userData;
@@ -131,8 +145,100 @@ export async function createUser(data: {
 	return { user: newUser };
 }
 
+/**
+ * Invalidate all sessions for a user.
+ * Used after password reset to force re-login and during login to prevent session fixation.
+ */
+export async function invalidateAllUserSessions(userId: string): Promise<void> {
+	await db.delete(session).where(eq(session.userId, userId));
+}
+
 export async function getUserByReferralCode(referralCode: string) {
 	const result = await db.select().from(user).where(eq(user.referralCode, referralCode)).limit(1);
 	return result[0] || null;
+}
+
+// ---------------------------------------------------------------------------
+// Password Reset
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a password reset token record
+ */
+export async function createPasswordResetToken(
+	userId: string,
+	token: string,
+	expiresAt: Date
+): Promise<void> {
+	await db.insert(passwordReset).values({ userId, token, expiresAt });
+}
+
+/**
+ * Find a password reset record by token
+ */
+export async function findPasswordResetToken(token: string) {
+	const result = await db
+		.select()
+		.from(passwordReset)
+		.where(eq(passwordReset.token, token))
+		.limit(1);
+	return result[0] ?? null;
+}
+
+/**
+ * Delete a password reset token (e.g. when expired)
+ */
+export async function deletePasswordResetToken(token: string): Promise<void> {
+	await db.delete(passwordReset).where(eq(passwordReset.token, token));
+}
+
+/**
+ * Mark a password reset token as used and update the user's password in one transaction
+ */
+export async function resetPasswordWithToken(
+	token: string,
+	userId: string,
+	hashedPassword: string
+): Promise<void> {
+	await db.transaction(async (tx) => {
+		await tx
+			.update(user)
+			.set({ password: hashedPassword, isPasswordSet: true, updatedAt: new Date() })
+			.where(eq(user.id, userId));
+
+		await tx
+			.update(passwordReset)
+			.set({ isUsed: true, usedAt: new Date() })
+			.where(eq(passwordReset.token, token));
+	});
+}
+
+/**
+ * Update a user's password (plain update, no transaction)
+ */
+export async function updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
+	await db
+		.update(user)
+		.set({ password: hashedPassword, isPasswordSet: true, updatedAt: new Date() })
+		.where(eq(user.id, userId));
+}
+
+/**
+ * Update a user's password and mark email as verified + status active (guest upgrade flow)
+ */
+export async function updateUserPasswordAndActivate(
+	userId: string,
+	hashedPassword: string
+): Promise<void> {
+	await db
+		.update(user)
+		.set({
+			password: hashedPassword,
+			isPasswordSet: true,
+			emailVerified: true,
+			status: 'active',
+			updatedAt: new Date(),
+		})
+		.where(eq(user.id, userId));
 }
 

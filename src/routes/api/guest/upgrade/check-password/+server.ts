@@ -2,18 +2,14 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getUserByEmail } from '$lib/db';
 import { Logger } from '$lib/utils/app-logger';
+import { guestUpgradeCheckPasswordSchema } from '$lib/validation/api-schemas';
+import { z } from 'zod';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const body = (await request.json()) as { email?: string };
-		const email = (body.email || '').trim().toLowerCase();
-
-		if (!email) {
-			return json(
-				{ success: false, error: 'INVALID_EMAIL', message: 'Email is required' },
-				{ status: 400 }
-			);
-		}
+		const body = await request.json();
+		const validated = guestUpgradeCheckPasswordSchema.parse(body);
+		const email = validated.email.trim().toLowerCase();
 
 		// Check if user exists and has a password set
 		const user = await getUserByEmail(email);
@@ -43,8 +39,13 @@ export const POST: RequestHandler = async ({ request }) => {
 			},
 		});
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return json(
+				{ success: false, error: 'VALIDATION_ERROR', message: error.issues[0]?.message || 'Invalid input' },
+				{ status: 400 }
+			);
+		}
 		Logger.root.error({ context: 'errors', error }, 'Check password error');
-
 		return json(
 			{ success: false, error: 'INTERNAL_ERROR', message: 'Failed to check password status' },
 			{ status: 500 }

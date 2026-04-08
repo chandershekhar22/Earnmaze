@@ -1,6 +1,23 @@
 import 'dotenv/config';
+// @ts-expect-error - pg has no declaration file
+import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-export const db = drizzle(process.env.DATABASE_URL!);
+
+const pool = new pg.Pool({
+	connectionString: process.env.DATABASE_URL!,
+	max: 20,
+	idleTimeoutMillis: 30_000,
+	connectionTimeoutMillis: 5_000,
+	keepAlive: true,
+	keepAliveInitialDelayMillis: 10_000,
+});
+
+// Silently handle pool errors to prevent unhandled rejection crashes
+pool.on('error', (err: Error) => {
+	console.error('[db] Pool connection error:', err.message);
+});
+
+export const db = drizzle(pool);
 
 // Barrel exports for database repositories
 // Auth repository
@@ -18,9 +35,7 @@ export {
 // Panelist Points repository
 export {
 	resetPanelistPoints,
-	addPendingPoints,
-	confirmPendingPoints,
-	rejectPendingPoints,
+	addPoints,
 	addBonusPoints,
 	redeemPoints,
 	getPanelistPoints,
@@ -40,7 +55,7 @@ export {
 // Panelist Transactions repository
 export {
 	getPanelistSurveyTransactions,
-	getOrCreateStartedSurveyTransaction,
+	createSurveyTransaction,
 } from './repositories/panelist-transactions.repository.server';
 
 // Panelist Tier repository
@@ -109,6 +124,16 @@ export {
 	getAppSettingAsBoolean,
 	getAppSettingAsJson
 } from './repositories/settings.repository.server';
+
+// Support Tickets repository
+export {
+	createTicket,
+	getTicketsByPanelist,
+	getTicketById,
+	getAllTickets,
+	replyToTicket,
+	updateTicketStatus
+} from './repositories/support-tickets.repository.server';
 
 // Re-export schema
 export * from './schema';

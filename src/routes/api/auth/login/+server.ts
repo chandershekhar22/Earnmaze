@@ -1,27 +1,38 @@
 import { json } from '@sveltejs/kit';
-import { verifyPassword, createSession, getUserByEmail } from '$lib/db';
+import { verifyPassword, createSession, getUserByEmail, db } from '$lib/db';
+import { user as userTable, session as sessionTable } from '$lib/db/schema/auth';
+import { eq, sql, and, lt } from 'drizzle-orm';
 import { validateTurnstileToken } from '$lib/server/turnstile';
 import { Security, Logger } from '$lib/utils/app-logger';
+import { authRateLimit } from '$lib/server/rate-limit';
+import { loginSchema, validateInput } from '$lib/validation/api-schemas';
 import type { RequestHandler } from './$types';
 import type { LoginResponse, AuthUserResponse } from '$lib/types/api-responses';
+import { getClientIP } from '$lib/server/geo-restriction';
 
-export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
+export const POST: RequestHandler = async (event) => {
+	const rateLimited = await authRateLimit(event);
+	if (rateLimited) return rateLimited;
+
+	const { request, cookies, getClientAddress } = event;
 	try {
-		const { email, password, turnstileToken } = await request.json();
-
-		if (!email || !password) {
-			Security.logAuthAttempt('login', 'missing-email-or-password', false, {
-				reason: 'missing_credentials'
+		const body = await request.json();
+		const validation = await validateInput(loginSchema, body);
+		if (!validation.success) {
+			Security.logAuthAttempt('login', 'validation-failed', false, {
+				reason: validation.error
 			});
-			return json({ error: 'Email and password are required' }, { status: 400 });
+			return json({ error: validation.error }, { status: 400 });
 		}
 
+		const { email, password, turnstileToken } = validation.data;
+
 		// Verify Turnstile token
-		const turnstileError = await validateTurnstileToken(turnstileToken, getClientAddress());
+		const turnstileError = await validateTurnstileToken(turnstileToken, getClientIP(event));
 		if (turnstileError) {
 			Security.logSecurityEvent('turnstile-validation-failed', 'medium', {
 				reason: turnstileError,
-				ip: getClientAddress()
+				ip: getClientIP(event)
 			});
 			return json({ error: turnstileError }, { status: 400 });
 		}
@@ -30,7 +41,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 		if (!user || !user.password) {
 			Security.logAuthAttempt('login', 'unknown-user', false, {
 				emailHash: Buffer.from(email).toString('base64'),
-				ip: getClientAddress()
+				ip: getClientIP(event)
 			});
 			return json({ error: 'Invalid email or password' }, { status: 401 });
 		}
@@ -39,7 +50,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 		if (!isValidPassword) {
 			Security.logAuthAttempt('login', user.email, false, {
 				reason: 'invalid_password',
-				ip: getClientAddress()
+				ip: getClientIP(event)
 			});
 			return json({ error: 'Invalid email or password' }, { status: 401 });
 		}
@@ -47,14 +58,25 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 		if (!user.isActive) {
 			Security.logAuthAttempt('login', user.email, false, {
 				reason: 'inactive_account',
-				ip: getClientAddress()
+				ip: getClientIP(event)
 			});
 			return json({ error: 'Account is not active' }, { status: 401 });
 		}
 
+		// Clean up only expired sessions (don't kill active sessions on other devices)
+		await db.delete(sessionTable).where(
+			and(eq(sessionTable.userId, user.id), lt(sessionTable.expiresAt, new Date()))
+		);
+
+		// Update login count and last login timestamp
+		await db.update(userTable).set({
+			loginCount: sql`COALESCE(${userTable.loginCount}, 0) + 1`,
+			lastLoginAt: new Date(),
+		}).where(eq(userTable.id, user.id));
+
 		const sessionId = await createSession(user.id);
 		Security.logAuthAttempt('login', user.email, true, {
-			ip: getClientAddress()
+			ip: getClientIP(event)
 		});
 
 		// Set session cookie

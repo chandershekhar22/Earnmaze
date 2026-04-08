@@ -1,4 +1,4 @@
-import pino, { type Logger as PinoLogger, type LoggerOptions, multistream } from 'pino';
+import type { Logger as PinoLogger, LoggerOptions } from 'pino';
 import { browser, dev } from '$app/environment';
 import type { ClientLogLevel, ClientLogPayload } from '$types/logging';
 
@@ -13,10 +13,73 @@ const logLevel = browser ? 'error' : isDev ? 'debug' : 'info';
 const enableRabbit = !browser && typeof process !== 'undefined' && Boolean(process.env.RABBITMQ_URL);
 const rabbitQueue = !browser && typeof process !== 'undefined' ? (process.env.RABBITMQ_LOG_QUEUE || 'app-logs') : 'app-logs';
 
+// Extract caller information from stack trace
+function extractCaller(): { file?: string; line?: number; column?: number } {
+	const stack = new Error().stack;
+	if (!stack) return {};
+	
+	const lines = stack.split('\n');
+	for (let i = 0; i < lines.length; i++) {
+		const line = lines[i];
+		// Match file path and line:column info
+		const match = line.match(/at\s+(?:.*?\s+)?\(?([^:]+):(\d+):(\d+)\)?/);
+		if (match) {
+			const filepath = match[1];
+			// Skip internal frames and logger implementation frames
+			if (
+				filepath.includes('app-logger') ||
+				filepath.includes('/node_modules/pino/') ||
+				filepath.includes('node:internal') ||
+				filepath.includes('/internal/')
+			) {
+				continue;
+			}
+
+			const normalizedFile = filepath.includes('/src/')
+				? filepath.replace(/.*\/src\//, 'src/')
+				: filepath.includes('/build/')
+					? filepath.replace(/.*\/build\//, 'build/')
+					: filepath;
+
+			if (normalizedFile) {
+				return {
+					file: normalizedFile,
+					line: parseInt(match[2], 10),
+					column: parseInt(match[3], 10)
+				};
+			}
+		}
+	}
+	return {};
+}
+
 const baseOptions: LoggerOptions = {
 	level: logLevel,
-	base: { app: 'em-panel' }
+	base: { app: 'em-panel' },
+	hooks: {
+		logMethod(args, method) {
+			const caller = extractCaller();
+			if (Object.keys(caller).length > 0) {
+				if (args.length > 0 && args[0] !== null && typeof args[0] === 'object') {
+					args[0] = { ...args[0], ...caller };
+				} else {
+					args.unshift(caller);
+				}
+			}
+			method.apply(this, args as Parameters<typeof method>);
+		}
+	}
 };
+
+// Server-only: dynamically load pino to keep ~45KB out of the client bundle.
+// Vite dead-code-eliminates the `!browser` branch from the client build.
+let pino: any = null;
+let pinoMultistream: any = null;
+if (!browser) {
+	const pinoMod = await import('pino');
+	pino = pinoMod.default;
+	pinoMultistream = pinoMod.multistream;
+}
 
 // Lightweight RabbitMQ publisher (fire-and-forget). Only active server-side when RABBITMQ_URL is set.
 let rabbitInit: Promise<any> | null = null;
@@ -94,58 +157,75 @@ const rabbitStream = {
 };
 
 // Create multiple streams: stdout/pretty + file + rabbitmq
-const streams = browser
-	? undefined
-	: multistream([
+const streams = !browser && pinoMultistream
+	? pinoMultistream([
 		{ stream: process.stdout },
 		{ stream: pino.destination(logFilePath) },
 		...(enableRabbit ? [{ stream: rabbitStream }] : [])
-	]);
+	])
+	: undefined;
 
 // Backend logger (server-only transports)
-const serverLogger = streams ? pino(baseOptions, streams) : pino(baseOptions);
+const serverLogger: PinoLogger = !browser
+	? (streams ? pino(baseOptions, streams) : pino(baseOptions))
+	: null!;
 
-// Frontend logger (console only, structured objects in browser) with remote posting
-const sendClientLog = async (payload: ClientLogPayload) => {
-	if (!browser || typeof fetch !== 'function') return;
-	try {
-		await fetch('/api/logs', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
-	} catch (err) {
-		// Swallow to avoid log loops
-	}
-};
-
-const clientLogger = pino({
-	level: logLevel,
-	base: { app: 'em-panel', context: 'ui' },
-	browser: { asObject: true }
-});
-
-if (browser) {
-	(['info', 'warn', 'error'] as const).forEach((level) => {
-		const original = (clientLogger as any)[level].bind(clientLogger);
-		(clientLogger as any)[level] = (obj: any, msg?: string, ...rest: unknown[]) => {
-			const message = typeof obj === 'string' && !msg ? obj : msg || '';
+// Browser logger: lightweight console-based, no pino dependency (~0KB)
+function createBrowserLogger(bindings: Record<string, unknown> = {}): PinoLogger {
+	const sendRemote = async (level: ClientLogLevel, obj: any, msg?: string, caller?: { file?: string; line?: number; column?: number }) => {
+		if (typeof fetch !== 'function') return;
+		try {
 			const data = typeof obj === 'object' && obj !== null ? obj : undefined;
-			void sendClientLog({
-				level: level as ClientLogLevel,
-				message: message || 'client-log',
-				data: data as Record<string, unknown> | undefined,
-				href: typeof window !== 'undefined' ? window.location.href : undefined
+			const message = typeof obj === 'string' ? obj : msg || '';
+			await fetch('/api/logs', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					level,
+					message: message || 'client-log',
+					data: data as Record<string, unknown> | undefined,
+					href: typeof window !== 'undefined' ? window.location.href : undefined,
+					...(caller || {})
+				} satisfies ClientLogPayload)
 			});
-			return original(obj, msg, ...rest);
+		} catch { /* swallow to avoid log loops */ }
+	};
+
+	const makeMethod = (level: string, consoleFn: (...args: any[]) => void) =>
+		(obj: any, msg?: string, ...rest: any[]) => {
+			const caller = extractCaller();
+			const callerStr = caller.file ? ` [${caller.file}:${caller.line}]` : '';
+			if (typeof obj === 'string') {
+				consoleFn(`[${level}]${callerStr}`, obj, ...rest);
+			} else {
+				consoleFn(`[${level}]${callerStr}`, msg || '', obj, ...rest);
+			}
+			if (['info', 'warn', 'error'].includes(level)) {
+				void sendRemote(level as ClientLogLevel, obj, msg, caller);
+			}
 		};
-	});
+
+	return {
+		level: logLevel,
+		info: makeMethod('info', console.info),
+		warn: makeMethod('warn', console.warn),
+		error: makeMethod('error', console.error),
+		debug: makeMethod('debug', console.debug),
+		trace: () => {},
+		fatal: makeMethod('fatal', console.error),
+		child: (childBindings: Record<string, unknown>) =>
+			createBrowserLogger({ ...bindings, ...childBindings }),
+	} as unknown as PinoLogger;
 }
+
+const clientLogger: PinoLogger = browser
+	? createBrowserLogger({ app: 'em-panel', context: 'ui' })
+	: pino({ level: logLevel, base: { app: 'em-panel', context: 'ui' }, browser: { asObject: true } });
 
 // Export both; root resolves to environment-appropriate logger for existing call sites
 export const Logger: { root: PinoLogger; server: PinoLogger; client: PinoLogger } = {
 	root: browser ? clientLogger : serverLogger,
-	server: serverLogger,
+	server: browser ? clientLogger : serverLogger,
 	client: clientLogger
 };
 

@@ -18,6 +18,12 @@ export * from './panelist-transactions.repository.server';
 // Panelist Tier repository
 export * from './panelist-tier.repository.server';
 
+// Panelist Profile repository
+export * from './panelist-profile.repository.server';
+
+// Panelist History repository
+export * from './panelist-history.repository.server';
+
 // Survey repository
 export * from './survey.repository.server';
 
@@ -32,3 +38,15 @@ export * from './analytics.repository.server';
 
 // Settings repository
 export * from './settings.repository.server';
+
+// Rewards repository
+export * from './rewards.repository.server';
+
+// Admin Users repository
+export * from './admin-users.repository.server';
+
+// Support Tickets repository
+export * from './support-tickets.repository.server';
+
+// FAQ repository
+export * from './faq.repository.server';

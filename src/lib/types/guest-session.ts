@@ -33,6 +33,7 @@ export interface GuestSessionInfo {
 	surveysCompleted: number;
 	expiresAt: Date;
 	createdAt: Date;
+	upgradedToUserId?: string | null;
 }
 
 /**

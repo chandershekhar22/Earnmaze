@@ -7,4 +7,7 @@ export interface ClientLogPayload {
 	href?: string;
 	sessionId?: string;
 	userId?: string;
+	file?: string;
+	line?: number;
+	column?: number;
 }

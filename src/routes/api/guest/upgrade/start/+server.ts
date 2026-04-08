@@ -1,46 +1,33 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { eq } from 'drizzle-orm';
 import { Logger } from '$lib/utils/app-logger';
 import { validateTurnstileToken } from '$lib/server/turnstile';
-import { createGuestUpgradeOtp, validateGuestSession } from '$lib/db';
-import { db } from '$lib/db';
-import { guestUpgradeVerification } from '$lib/db/schema/guest-upgrade-verifications';
+import { getClientIP } from '$lib/server/geo-restriction';
+import { createGuestUpgradeOtp } from '$lib/db';
+import { getExistingOtpForSession } from '$lib/db/repositories';
 import { sendTask } from '$lib/utils/celery';
 import type { GuestUpgradeStartResponse } from '$types/guest-session';
 import { sendVerificationEmail } from '$lib/server/email-service';
 
-export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
+export const POST: RequestHandler = async (event) => {
+	const { request, locals, getClientAddress } = event;
 	try {
 		const body = (await request.json()) as { turnstileToken?: string };
 		const turnstileToken = body.turnstileToken;
 
-		const guestToken = cookies.get('guest_session');
-		if (!guestToken) {
+		const guestSession = locals.guestSession;
+		if (!guestSession) {
 			return json(
 				{ success: false, error: 'NO_GUEST_SESSION', message: 'No guest session found' } satisfies GuestUpgradeStartResponse,
 				{ status: 400 }
 			);
 		}
 
-		const guestSession = await validateGuestSession(guestToken);
-		if (!guestSession) {
-			cookies.delete('guest_session', { path: '/' });
-			return json(
-				{ success: false, error: 'SESSION_EXPIRED', message: 'Guest session expired' } satisfies GuestUpgradeStartResponse,
-				{ status: 401 }
-			);
-		}
-
 		// Check rate limiting: prevent resends within 1 minute
-		const existingOtp = await db
-			.select()
-			.from(guestUpgradeVerification)
-			.where(eq(guestUpgradeVerification.guestSessionId, guestSession.id))
-			.limit(1);
+		const existingOtpRecord = await getExistingOtpForSession(guestSession.id);
 
-		if (existingOtp.length > 0 && existingOtp[0].otpSentAt) {
-			const secondsSinceLastSend = Math.floor((Date.now() - existingOtp[0].otpSentAt.getTime()) / 1000);
+		if (existingOtpRecord && existingOtpRecord.otpSentAt) {
+			const secondsSinceLastSend = Math.floor((Date.now() - existingOtpRecord.otpSentAt.getTime()) / 1000);
 			const RESEND_COOLDOWN_SECONDS = 60; // 1 minute
 
 			if (secondsSinceLastSend < RESEND_COOLDOWN_SECONDS) {
@@ -67,7 +54,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 			);
 		}
 
-		const turnstileError = await validateTurnstileToken(turnstileToken, getClientAddress());
+		const turnstileError = await validateTurnstileToken(turnstileToken, getClientIP(event));
 		if (turnstileError) {
 			Logger.root.warn({ context: 'auth', email: guestSession.email, reason: turnstileError }, 'Guest upgrade OTP captcha failed');
 			return json(

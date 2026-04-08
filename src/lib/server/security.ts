@@ -42,11 +42,13 @@ export function verifyCsrfToken(event: RequestEvent): boolean {
 		return false;
 	}
 
-	// Constant-time comparison
-	return crypto.timingSafeEqual(
-		Buffer.from(cookieToken),
-		Buffer.from(headerToken)
-	);
+	// Constant-time comparison (must be same length or timingSafeEqual throws)
+	const cookieBuf = Buffer.from(cookieToken);
+	const headerBuf = Buffer.from(headerToken);
+	if (cookieBuf.length !== headerBuf.length) {
+		return false;
+	}
+	return crypto.timingSafeEqual(cookieBuf, headerBuf);
 }
 
 /**
@@ -58,7 +60,7 @@ export async function csrfMiddleware(event: RequestEvent): Promise<Response | nu
 		const token = generateCsrfToken();
 		event.cookies.set(CSRF_COOKIE_NAME, token, {
 			path: '/',
-			httpOnly: true,
+			httpOnly: false, // must be readable by client JS for double-submit pattern
 			secure: process.env.NODE_ENV === 'production',
 			sameSite: 'strict',
 			maxAge: 60 * 60 * 24 // 24 hours
