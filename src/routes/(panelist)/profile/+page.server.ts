@@ -11,7 +11,7 @@ export const load: PageServerLoad = async (event) => {
 		profile: {
 			name: userData?.name ?? '',
 			email: userData?.email ?? '',
-			emailVerified: userData?.emailVerified ?? false,
+			emailVerified: (userData as any)?.emailVerified ?? false,
 			demographics: {
 				age: demographics?.dateOfBirth ?? '',
 				gender: demographics?.gender ?? '',

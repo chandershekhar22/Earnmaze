@@ -31,6 +31,8 @@ export async function getAuthUser(event: RequestEvent): Promise<AuthUser | null>
 			name: u.name || 'User',
 			email: u.email,
 			userType: u.userType as UserType,
+			emailVerified: u.emailVerified ?? false,
+			image: u.image ?? null,
 		};
 	}
 

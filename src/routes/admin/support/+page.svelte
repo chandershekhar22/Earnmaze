@@ -434,7 +434,7 @@
 	<!-- Status filter pills -->
 	<div class="flex items-center gap-1.5 mb-4">
 		{#each [['all','All',ticketCounts.all,'text-white'],['open','Open',ticketCounts.open,'text-primary-400'],['in_progress','In Progress',ticketCounts.in_progress,'text-amber-400'],['resolved','Resolved',ticketCounts.resolved,'text-emerald-400'],['closed','Closed',ticketCounts.closed,'text-neutral-400']] as [val,label,count,color]}
-			<button onclick={() => statusFilter = val} class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {statusFilter === val ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white hover:bg-white/5'}">
+			<button onclick={() => statusFilter = String(val)} class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {statusFilter === String(val) ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white hover:bg-white/5'}">
 				{label} <span class="ml-0.5 {color}">{count}</span>
 			</button>
 		{/each}

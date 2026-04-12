@@ -87,11 +87,11 @@ function setSecurityHeaders(headers: Headers) {
   headers.set(
     'Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; " +
+    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com; " +
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "img-src 'self' data:; " + // Removed https: wildcard
+    "img-src 'self' data:; " +
     "font-src 'self' data: https://fonts.gstatic.com; " +
-    "connect-src 'self' https://challenges.cloudflare.com; " +
+    "connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com; " +
     "frame-src https://challenges.cloudflare.com; " +
     "base-uri 'self'; " +
     "form-action 'self'; " +

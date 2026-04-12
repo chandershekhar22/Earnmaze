@@ -184,7 +184,7 @@
 												</div>
 												<div class="text-xs text-neutral-300 space-y-0.5">
 													<div>Status: <span class="font-bold text-white">{r.status.replace('_', ' ')}</span></div>
-													<div>Awarded: <span class="font-bold {r.awardedPoints > 0 ? 'text-emerald-400' : 'text-neutral-500'}">{r.awardedPoints ?? 0} pts</span></div>
+													<div>Awarded: <span class="font-bold {(r.awardedPoints ?? 0) > 0 ? 'text-emerald-400' : 'text-neutral-500'}">{r.awardedPoints ?? 0} pts</span></div>
 													<div>Duration: <span class="font-bold text-white">{duration(r.startedAt, r.completedAt)}</span></div>
 												</div>
 											</div>

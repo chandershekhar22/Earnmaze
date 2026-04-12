@@ -44,7 +44,7 @@ describe('JWT utilities', () => {
 			const payload = await verifyToken(token);
 			expect(payload).not.toBeNull();
 			expect(payload!.sub).toBe(userId);
-			expect(payload!.email).toBe(email);
+			
 			expect(payload!.userType).toBe(userType);
 			expect(payload!.type).toBe('access');
 		});

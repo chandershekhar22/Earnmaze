@@ -3,7 +3,8 @@ import { eq } from 'drizzle-orm';
 import { db } from '../index';
 import { user, session, userTypeEnum, passwordReset } from '../schema/auth';
 import { randomBytes } from 'crypto';
-import { initializePanelistPoints } from './panelist-points.repository.server';
+import { initializePanelistPoints, addBonusPoints } from './panelist-points.repository.server';
+import { getAppSettings } from './settings.repository.server';
 import { sendWelcomeEmail } from '../../server/email-service';
 
 export async function hashPassword(password: string): Promise<string> {
@@ -134,10 +135,21 @@ export async function createUser(data: {
 	// Create panelist profile if userType is panelist
 	if (userTypeValue === 'panelist') {
 		
-		// initialize panelist
-		// Initialize points (welcome + bonus)
+		// Initialize points record
 		await initializePanelistPoints(newUser.id);
-		// send welcome email via celery
+
+		// Credit signup bonus
+		try {
+			const settings = await getAppSettings(['signup_bonus_points']);
+			const signupBonus = parseInt(settings.signup_bonus_points || '0') || 0;
+			if (signupBonus > 0) {
+				await addBonusPoints(newUser.id, signupBonus, 'Welcome bonus for new panelist');
+			}
+		} catch {
+			// Don't block registration if bonus fails
+		}
+
+		// Send welcome email via celery
 		await sendWelcomeEmail(newUser.email, newUser.name);
 	}
 

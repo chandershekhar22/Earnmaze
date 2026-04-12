@@ -82,7 +82,7 @@ export const PATCH: RequestHandler = async ({ request }) => {
 			return json({ success: false, error: 'INVALID_TOKEN', message: 'Invalid or expired refresh token' }, { status: 401 });
 		}
 
-		const tokens = await createTokenPair(payload.sub, payload.email, payload.userType);
+		const tokens = await createTokenPair(payload.sub, '', payload.userType);
 
 		return json({ success: true, data: tokens });
 	} catch (error) {

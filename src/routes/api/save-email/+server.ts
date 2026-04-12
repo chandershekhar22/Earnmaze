@@ -3,10 +3,9 @@ import type { RequestHandler } from './$types';
 import { validateTurnstileToken } from '$lib/server/turnstile';
 import { Logger } from '$lib/utils/app-logger';
 import { getClientIP } from '$lib/server/geo-restriction';
-import { 
-	getUserByEmail, 
+import {
+	getUserByEmail,
 	createUser,
-	getUserByReferralCode,
 } from '$lib/db/repositories/auth.repository.server';
 import { 
 	createGuestSessionForUser, 
@@ -16,13 +15,6 @@ import {
 	getVisitBySessionId,
 	createEmailConversion
 } from '$lib/db/repositories/analytics.repository.server';
-import {
-	addBonusPoints,
-	initializePanelistPoints
-} from '$db';
-import {
-	getAppSettings
-} from '$lib/db/repositories/settings.repository.server';
 import {
 	getFirstAvailableSurvey
 } from '$lib/db/repositories/survey.repository.server';
@@ -96,15 +88,8 @@ export const POST: RequestHandler = async (event) => {
 			userId = result.user.id;
 			isNewUser = true;
 
-			// Initialize points with signup bonus using repository
-			const settings = await getAppSettings(['signup_bonus_points']);
-			const signupBonus = parseInt(settings.signup_bonus_points || '0') || 0;
-
-			if (signupBonus > 0) {
-				await addBonusPoints(userId, signupBonus, 'Welcome bonus for new panelist');
-			}
-
-			Logger.root.info({ context: 'auth', email: normalizedEmail, userId }, 'Created new user and panelist');
+			// Signup bonus is credited on guest upgrade (set-password), not on initial guest creation
+			Logger.root.info({ context: 'auth', email: normalizedEmail, userId }, 'Created new guest user');
 		}
 
 		// Create or reuse guest session using repository
