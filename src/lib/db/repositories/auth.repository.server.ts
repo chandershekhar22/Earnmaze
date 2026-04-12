@@ -138,19 +138,21 @@ export async function createUser(data: {
 		// Initialize points record
 		await initializePanelistPoints(newUser.id);
 
-		// Credit signup bonus
-		try {
-			const settings = await getAppSettings(['signup_bonus_points']);
-			const signupBonus = parseInt(settings.signup_bonus_points || '0') || 0;
-			if (signupBonus > 0) {
-				await addBonusPoints(newUser.id, signupBonus, 'Welcome bonus for new panelist');
+		// Credit signup bonus only for direct registration (with password), not guest creation
+		if (data.password) {
+			try {
+				const settings = await getAppSettings(['signup_bonus_points']);
+				const signupBonus = parseInt(settings.signup_bonus_points || '0') || 0;
+				if (signupBonus > 0) {
+					await addBonusPoints(newUser.id, signupBonus, 'Welcome bonus for new panelist');
+				}
+			} catch {
+				// Don't block registration if bonus fails
 			}
-		} catch {
-			// Don't block registration if bonus fails
-		}
 
-		// Send welcome email via celery
-		await sendWelcomeEmail(newUser.email, newUser.name);
+			// Send welcome email via celery
+			await sendWelcomeEmail(newUser.email, newUser.name);
+		}
 	}
 
 

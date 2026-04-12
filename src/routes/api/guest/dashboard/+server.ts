@@ -31,6 +31,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 		return json({
 			success: true,
 			data: {
+				email: session.email,
 				sessionPoints: session.sessionPoints || 0,
 				surveysViewed: session.surveysViewed || 0,
 				surveysCompleted: session.surveysCompleted || 0,

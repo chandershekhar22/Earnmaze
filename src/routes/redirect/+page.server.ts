@@ -7,7 +7,7 @@ import {
 	getSurveyTransactionByRespondentId,
 	completeSurveyTransaction,
 } from '$lib/db/repositories/survey.repository.server';
-import { getGuestActivityByTransactionId } from '$lib/db/repositories';
+import { getGuestActivityByTransactionId, updateGuestSessionStats } from '$lib/db/repositories';
 
 type CompletionStatus = 'completed' | 'terminated' | 'quota_full' | 'disqualified';
 
@@ -140,6 +140,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		if (locals.user) {
 			dashboardUrl = '/surveys';
 		} else if (locals.guestSession) {
+			// Update guest session stats (points, surveys viewed/completed)
+			try {
+				await updateGuestSessionStats(locals.guestSession.id);
+			} catch {
+				// Don't block redirect if stats update fails
+			}
 			dashboardUrl = '/guest/dashboard';
 		} else {
 			// No active session — look up whether this was a guest via
