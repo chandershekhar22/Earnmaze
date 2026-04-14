@@ -91,31 +91,23 @@ export async function csrfMiddleware(event: RequestEvent): Promise<Response | nu
  * Set comprehensive security headers
  */
 export function setSecurityHeaders(headers: Headers): void {
-	// Prevent clickjacking
 	headers.set('X-Frame-Options', 'DENY');
-	
-	// Prevent MIME sniffing
 	headers.set('X-Content-Type-Options', 'nosniff');
-	
-	// XSS protection (legacy, but doesn't hurt)
 	headers.set('X-XSS-Protection', '1; mode=block');
-	
-	// Referrer policy
 	headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-	
-	// Permissions policy
 	headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=()');
-	
-	// Content Security Policy
+
+	// 'unsafe-inline' on script-src is required by SvelteKit's hydration script;
+	// 'unsafe-inline' on style-src is required by Svelte's scoped style injection.
 	headers.set(
 		'Content-Security-Policy',
 		[
 			"default-src 'self'",
-			"script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
-			"style-src 'self' 'unsafe-inline'",
+			"script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://*.clarity.ms",
+			"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
 			"img-src 'self' data: https:",
-			"font-src 'self' data:",
-			"connect-src 'self' https://challenges.cloudflare.com",
+			"font-src 'self' data: https://fonts.gstatic.com",
+			"connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com https://*.clarity.ms https://c.bing.com",
 			"frame-src https://challenges.cloudflare.com",
 			"base-uri 'self'",
 			"form-action 'self'",
@@ -123,10 +115,9 @@ export function setSecurityHeaders(headers: Headers): void {
 			"upgrade-insecure-requests"
 		].join('; ')
 	);
-	
-	// HSTS (only in production)
+
 	if (process.env.NODE_ENV === 'production') {
-		headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+		headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 	}
 }
 

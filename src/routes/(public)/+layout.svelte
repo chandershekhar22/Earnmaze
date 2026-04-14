@@ -4,6 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { getDashboardUrl } from '$lib/utils/dashboard-routing';
+	import { loadClarity } from '$lib/clarity';
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -13,6 +14,7 @@
 
 	onMount(() => {
 		mounted = true;
+		if (!authStore.state.user) loadClarity();
 	});
 
 	$effect(() => {

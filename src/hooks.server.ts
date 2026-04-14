@@ -5,7 +5,7 @@ import { validateGuestSession } from '$lib/db/repositories/guest-session.reposit
 import { getDashboardUrl, canAccessRoute } from '$lib/utils/dashboard-routing';
 import { checkGeoRestriction, logGeoRestrictionEvent } from '$lib/server/geo-restriction';
 import { generateRayId, Logger } from '$lib/utils/app-logger';
-import { csrfMiddleware, generateCsrfToken } from '$lib/server/security';
+import { csrfMiddleware, generateCsrfToken, setSecurityHeaders } from '$lib/server/security';
 import { verifyToken } from '$lib/server/jwt';
 import { db } from '$lib/db';
 import { session as sessionTable, passwordReset } from '$lib/db/schema/auth';
@@ -74,34 +74,6 @@ function checkRateLimit(identifier: string, limit = 100, windowMs = 60000): bool
 
   record.count++;
   return true;
-}
-
-// Security headers
-function setSecurityHeaders(headers: Headers) {
-  headers.set('X-Frame-Options', 'DENY');
-  headers.set('X-Content-Type-Options', 'nosniff');
-  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  // Note: 'unsafe-inline' is required for Svelte's style injection
-  // Consider using nonces in production for better security
-  headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "img-src 'self' data:; " +
-    "font-src 'self' data: https://fonts.gstatic.com; " +
-    "connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com; " +
-    "frame-src https://challenges.cloudflare.com; " +
-    "base-uri 'self'; " +
-    "form-action 'self'; " +
-    "object-src 'none'; " + // Block plugins
-    "upgrade-insecure-requests;" // Force HTTPS
-  );
-  // HSTS header (only in production with HTTPS)
-  if (process.env.NODE_ENV === 'production') {
-    headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  }
 }
 
 // Helper to check if path matches any pattern
