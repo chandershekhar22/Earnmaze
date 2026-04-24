@@ -29,7 +29,7 @@ export const GEO_CONFIG = {
 	// Paths that require geo-restriction (only these paths will be checked)
 	// Use '*' wildcard for matching all sub-paths (e.g., '/dashboard/*' matches '/dashboard/profile')
 	restrictedPaths: [
-		'/earn-money',
+		'/earn-points',
 	],
 	
 	// Error message
