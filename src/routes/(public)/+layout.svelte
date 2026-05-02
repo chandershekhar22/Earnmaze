@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { getDashboardUrl } from '$lib/utils/dashboard-routing';
 	import { loadClarity } from '$lib/clarity';
+	import { loadGA } from '$lib/ga';
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -12,7 +13,10 @@
 	let authChecked = $state(false);
 
 	onMount(() => {
-		if (!authStore.state.user) loadClarity();
+		if (!authStore.state.user) {
+			loadClarity();
+			loadGA();
+		}
 	});
 
 	// Server-side hooks already redirect logged-in users away from public routes.

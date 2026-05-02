@@ -103,11 +103,11 @@ export function setSecurityHeaders(headers: Headers): void {
 		'Content-Security-Policy',
 		[
 			"default-src 'self'",
-			"script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://*.clarity.ms",
+			"script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://*.clarity.ms https://www.googletagmanager.com",
 			"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
 			"img-src 'self' data: https:",
 			"font-src 'self' data: https://fonts.gstatic.com",
-			"connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com https://*.clarity.ms https://c.bing.com",
+			"connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com https://*.clarity.ms https://c.bing.com https://www.google-analytics.com https://*.analytics.google.com https://*.google-analytics.com",
 			"frame-src https://challenges.cloudflare.com",
 			"base-uri 'self'",
 			"form-action 'self'",
