@@ -9,23 +9,20 @@
 
 	let { children }: { children: Snippet } = $props();
 
-	let mounted = $state(false);
 	let authChecked = $state(false);
 
 	onMount(() => {
-		mounted = true;
 		if (!authStore.state.user) loadClarity();
 	});
 
+	// Server-side hooks already redirect logged-in users away from public routes.
+	// This $effect is a fallback for client-side navigation (SPA transitions),
+	// where the server hooks don't run.
 	$effect(() => {
-		// Wait for auth store to finish loading before making routing decisions
-		if (mounted && !authStore.state.isLoading && !authChecked) {
+		if (!authStore.state.isLoading && !authChecked) {
 			authChecked = true;
-
 			if (authStore.state.user) {
-				// Redirect to appropriate dashboard based on user type
-				const dashboardUrl = getDashboardUrl(authStore.state.user.userType);
-				goto(dashboardUrl);
+				goto(getDashboardUrl(authStore.state.user.userType));
 			}
 		}
 	});
@@ -38,7 +35,7 @@
 		$page.url.pathname === '/reset-password'
 	);
 
-	let isEarnMoneyPage = $derived($page.url.pathname === '/earn-money');
+	let isEarnMoneyPage = $derived($page.url.pathname === '/earn-points');
 </script>
 
 <svelte:head>
@@ -49,9 +46,8 @@
 	/>
 </svelte:head>
 
-{#if mounted}
-	{#if isAuthPage}
-		<!-- Auth pages layout -->
+{#if isAuthPage}
+	<!-- Auth pages layout -->
 		<main
 			class="min-h-screen flex items-center justify-center bg-surface relative overflow-hidden py-12 px-4 sm:px-6 lg:px-8"
 		>
@@ -79,6 +75,7 @@
 					</div>
 						{#if !isEarnMoneyPage}
 							<nav class="flex items-center space-x-2 md:space-x-4">
+								<a href="/" class="hidden sm:inline-block text-neutral-400 hover:text-white transition-colors text-sm md:text-base">Home</a>
 								<a href="/about" class="hidden sm:inline-block text-neutral-400 hover:text-white transition-colors text-sm md:text-base">About</a>
 								<a href="/login" class="text-sm md:text-base px-3 py-1.5 md:px-4 md:py-2 text-neutral-300 hover:text-white font-medium transition-colors touch-manipulation">Sign In</a>
 								<a href="/register" class="btn-primary text-sm md:text-base !px-3 !py-1.5 md:!px-4 md:!py-2 touch-manipulation">Sign Up</a>
@@ -108,6 +105,7 @@
 							<ul class="space-y-2 text-sm">
 								<li><a href="/" class="text-neutral-400 hover:text-primary-400 transition-colors">Home</a></li>
 								<li><a href="/about" class="text-neutral-400 hover:text-primary-400 transition-colors">About</a></li>
+								<li><a href="/help" class="text-neutral-400 hover:text-primary-400 transition-colors">Help</a></li>
 								<li><a href="/login" class="text-neutral-400 hover:text-primary-400 transition-colors">Sign In</a></li>
 							</ul>
 						</div>
@@ -128,11 +126,5 @@
 					</div>
 				</div>
 			</footer>
-		</div>
-	{/if}
-{:else}
-	<!-- Loading state -->
-	<div class="min-h-screen flex items-center justify-center bg-surface">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
 	</div>
 {/if}

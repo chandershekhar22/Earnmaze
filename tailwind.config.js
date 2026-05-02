@@ -1,6 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
+	// Patterns below are constructed dynamically (e.g. `bg-{color}-500/10`)
+	// in step/feature cards on landing pages, so Tailwind's static scanner
+	// cannot see them. Keep this list in sync with the colors used.
+	safelist: [
+		{
+			pattern: /(bg|text|border|from|to)-(violet|fuchsia|emerald|cyan|amber|sky|rose|primary)-(300|400|500)(\/(?:10|15|20|25|30|40))?/,
+			variants: ['hover', 'group-hover']
+		}
+	],
 	darkMode: 'class',
 	theme: {
 		extend: {

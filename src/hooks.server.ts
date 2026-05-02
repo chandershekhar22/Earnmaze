@@ -41,13 +41,29 @@ const ROUTE_CONFIG = {
     '/register',
     '/about',
     '/geo-blocked',
-    '/earn-money',
+    '/earn-points',
     '/guest/dashboard',
     '/guest/upgrade',
     '/privacy-policy',
     '/terms-of-service',
     '/forgot-password',
     '/reset-password'
+  ],
+  // Routes that redirect logged-in users to their dashboard. Mirrors the
+  // (public) route group so authenticated visitors never see marketing or
+  // auth UI. Crawlers (no session) get the full SSR'd page including OG tags.
+  loggedInRedirects: [
+    '/',
+    '/about',
+    '/earn-points',
+    '/forgot-password',
+    '/help',
+    '/login',
+    '/privacy-policy',
+    '/register',
+    '/reset-password',
+    '/signup',
+    '/terms-of-service'
   ],
   rateLimitExempt: [
     '/api/analytics',
@@ -327,6 +343,13 @@ export const handle: Handle = async ({ event, resolve }) => {
       const userDashboard = getDashboardUrl(event.locals.user.userType);
       throw redirect(302, userDashboard);
     }
+  }
+
+  // Redirect logged-in users away from the (public) route group so they
+  // never see marketing/auth UI. SSR for crawlers still works because they
+  // don't carry a session cookie.
+  if (event.locals.user && ROUTE_CONFIG.loggedInRedirects.includes(pathname)) {
+    throw redirect(302, getDashboardUrl(event.locals.user.userType));
   }
 
   // Redirect users to their appropriate dashboard when accessing /dashboard directly

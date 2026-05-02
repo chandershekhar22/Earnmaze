@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4c1d95"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#d946ef"/>
+    </linearGradient>
+    <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#d946ef"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="accentText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Base gradient -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative glows -->
+  <circle cx="120" cy="120" r="320" fill="url(#glow1)"/>
+  <circle cx="1080" cy="510" r="280" fill="url(#glow2)"/>
+  <circle cx="950" cy="80" r="180" fill="url(#glow1)" opacity="0.6"/>
+
+  <!-- Subtle grid dots -->
+  <g fill="white" opacity="0.06">
+    <circle cx="100" cy="540" r="3"/>
+    <circle cx="160" cy="540" r="3"/>
+    <circle cx="220" cy="540" r="3"/>
+    <circle cx="100" cy="580" r="3"/>
+    <circle cx="160" cy="580" r="3"/>
+    <circle cx="1080" cy="50" r="3"/>
+    <circle cx="1140" cy="50" r="3"/>
+    <circle cx="1080" cy="90" r="3"/>
+  </g>
+
+  <!-- Logo card top-left -->
+  <g transform="translate(80, 80)">
+    <!-- Soft outer glow for separation from background -->
+    <rect x="-6" y="-6" width="112" height="112" rx="30" fill="white" opacity="0.08"/>
+    <rect width="100" height="100" rx="24" fill="url(#logoBg)" stroke="white" stroke-opacity="0.25" stroke-width="1.5"/>
+    <!-- Maze E -->
+    <path d="M25 25h31v9.4H34.4v9.4h18.8v9.4H34.4v9.4h22v9.4H25z" fill="white" opacity="0.97"/>
+    <!-- Spark -->
+    <path d="M69 19l3.8 7.5L80.5 30l-8.7 3.5L69 41l-3.8-7.5L56.5 30l8.7-3.5z" fill="url(#spark)"/>
+    <circle cx="69" cy="30" r="3" fill="white" opacity="0.7"/>
+  </g>
+
+  <!-- EarnMaze wordmark next to logo -->
+  <text x="210" y="150"
+        font-family="Inter, DejaVu Sans, sans-serif"
+        font-weight="900"
+        font-size="56"
+        fill="white"
+        letter-spacing="-1">EarnMaze</text>
+
+  <!-- Main headline -->
+  <text x="80" y="340"
+        font-family="Inter, DejaVu Sans, sans-serif"
+        font-weight="900"
+        font-size="92"
+        fill="white"
+        letter-spacing="-3">Share your voice.</text>
+  <text x="80" y="450"
+        font-family="Inter, DejaVu Sans, sans-serif"
+        font-weight="900"
+        font-size="92"
+        fill="url(#accentText)"
+        letter-spacing="-3">Get rewarded.</text>
+
+  <!-- Bottom tagline pill -->
+  <g transform="translate(80, 510)">
+    <rect width="500" height="56" rx="28" fill="white" opacity="0.12"/>
+    <rect x="1" y="1" width="498" height="54" rx="27" fill="none" stroke="white" stroke-opacity="0.18" stroke-width="1"/>
+    <text x="32" y="36"
+          font-family="Inter, DejaVu Sans, sans-serif"
+          font-weight="600"
+          font-size="22"
+          fill="white"
+          opacity="0.95">Surveys  •  Points  •  Real rewards</text>
+  </g>
+</svg>

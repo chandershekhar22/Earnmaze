@@ -78,6 +78,29 @@
 	.card-lift { transition:all .3s cubic-bezier(.22,1,.36,1) }
 	.card-lift:hover { transform:translateY(-4px) }
 	.card-lift:active { transform:translateY(-1px); transition-duration:.1s }
+
+	/* ── Respect reduced-motion preferences ── */
+	@media (prefers-reduced-motion: reduce) {
+		.bl-1, .bl-2, .bl-3, .bl-4,
+		.glow, .grad-x, .shimmer, .icon-bob,
+		.line-grow {
+			animation: none !important;
+		}
+		.hi-badge, .hi-title, .hi-sub, .hi-cta, .hi-trust {
+			animation: none !important;
+			opacity: 1 !important;
+			transform: none !important;
+		}
+		.reveal {
+			opacity: 1 !important;
+			transform: none !important;
+			transition: none !important;
+		}
+		.card-lift, .card-lift:hover, .card-lift:active {
+			transition: none !important;
+			transform: none !important;
+		}
+	}
 </style>
 
 <!-- ━━━ HERO ━━━ -->
@@ -95,7 +118,7 @@
 		<div class="hi-badge">
 			<span class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/[0.06] backdrop-blur-sm border border-white/[0.08] rounded-full text-xs font-semibold text-neutral-300">
 				<Sparkles class="w-3.5 h-3.5 text-amber-400 icon-bob" />
-				Trusted by 10,000+ earners worldwide
+				Earn rewards in your spare time
 			</span>
 		</div>
 
@@ -119,14 +142,14 @@
 					<ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
 				</span>
 			</a>
-			<a href="/about" class="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white/[0.06] border border-white/[0.08] text-neutral-300 font-semibold text-base rounded-xl hover:bg-white/[0.1] hover:text-white hover:border-white/[0.15] transition-all duration-200">
+			<a href="#steps" class="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white/[0.06] border border-white/[0.08] text-neutral-300 font-semibold text-base rounded-xl hover:bg-white/[0.1] hover:text-white hover:border-white/[0.15] transition-all duration-200">
 				How it works
 			</a>
 		</div>
 
 		<!-- Trust badges -->
 		<div class="hi-trust flex flex-wrap justify-center gap-6 text-sm text-neutral-500">
-			{#each [{ t: 'Free to join' }, { t: 'Instant payouts' }, { t: '100% secure' }] as item}
+			{#each [{ t: 'Free to join' }, { t: 'Fast payouts' }, { t: '100% secure' }] as item}
 				<span class="flex items-center gap-1.5 hover:text-neutral-300 transition-colors">
 					<Check class="w-4 h-4 text-emerald-400" /> {item.t}
 				</span>
@@ -136,7 +159,7 @@
 </section>
 
 <!-- ━━━ HOW IT WORKS ━━━ -->
-<section class="py-16 md:py-24 bg-surface" data-section="steps">
+<section id="steps" class="py-16 md:py-24 bg-surface scroll-mt-20" data-section="steps">
 	<div class="max-w-5xl mx-auto px-4 sm:px-6">
 		<div class="text-center mb-12 reveal {sections.steps ? 'vis' : ''}">
 			<span class="text-[10px] font-bold text-primary-400 uppercase tracking-[0.2em]">Simple process</span>
@@ -190,8 +213,8 @@
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 			{#each [
-				{ icon: CircleDollarSign, color: 'violet', title: 'High-paying surveys', desc: 'Premium partners mean better rates. Earn $1-$10 per survey.' },
-				{ icon: Zap, color: 'emerald', title: 'Instant rewards', desc: 'No waiting periods. Redeem gift cards the moment you hit the threshold.' },
+				{ icon: CircleDollarSign, color: 'violet', title: 'Competitive payouts', desc: 'Earn points for every completed survey, with rates that reflect your time.' },
+				{ icon: Zap, color: 'emerald', title: 'Fast payouts', desc: 'Redeem points for gift cards as soon as you hit the threshold. Most are processed within a few business days.' },
 				{ icon: ShieldCheck, color: 'cyan', title: 'Smart matching', desc: "Our algorithm finds surveys you'll actually qualify for." },
 				{ icon: Clock, color: 'amber', title: 'Quick surveys', desc: 'Most surveys take 5-10 minutes. Earn during your lunch break.' },
 			] as feat, i}
@@ -236,14 +259,14 @@
 		</h2>
 
 		<p class="reveal reveal-d2 {sections.cta ? 'vis' : ''} text-base text-white/70 mb-8 max-w-lg mx-auto leading-relaxed">
-			Join thousands of people turning spare minutes into real rewards. Free forever.
+			Turn spare minutes into real rewards. Free to join, no subscription.
 		</p>
 
 		<div class="reveal reveal-d3 {sections.cta ? 'vis' : ''} flex flex-col sm:flex-row gap-3 justify-center">
 			<a href="/register" class="group relative inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-violet-700 font-bold text-base rounded-xl shadow-2xl shadow-black/20 hover:shadow-3xl hover:-translate-y-1 active:translate-y-0 transition-all duration-200 overflow-hidden">
 				<span class="absolute inset-0 bg-neutral-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
 				<span class="relative flex items-center gap-2">
-					Create Free Account
+					Start Earning Free
 					<ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
 				</span>
 			</a>

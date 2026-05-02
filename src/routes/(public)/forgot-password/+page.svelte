@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Logger } from '$lib/utils/app-logger';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { CircleCheck, KeyRound } from '@lucide/svelte';
 
 	let email = $state('');
@@ -12,6 +13,14 @@
 	onMount(() => {
 		mounted = true;
 	});
+
+	function goBack() {
+		if (typeof window !== 'undefined' && window.history.length > 1) {
+			window.history.back();
+		} else {
+			goto('/login');
+		}
+	}
 
 	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
@@ -126,12 +135,13 @@
 				</div>
 
 				<div class="flex space-x-3">
-					<a
-						href="/login"
+					<button
+						type="button"
+						onclick={goBack}
 						class="btn-secondary flex-1 text-center"
 					>
 						Back
-					</a>
+					</button>
 					<button
 						type="submit"
 						disabled={isLoading || !email}
