@@ -4,7 +4,7 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { LayoutDashboard, BarChart3, Users, ClipboardList, Gift, Coins, Settings, HelpCircle, Globe, LogOut, Menu, X, ArrowLeftRight, MessageSquareText, Repeat, Share2 } from '@lucide/svelte';
+	import { LayoutDashboard, BarChart3, Users, ClipboardList, Gift, Coins, Settings, HelpCircle, Globe, LogOut, Menu, X, ArrowLeftRight, MessageSquareText, Repeat, Share2, ShieldCheck } from '@lucide/svelte';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
@@ -21,6 +21,7 @@
 		{ href: '/admin/referrals', label: 'Referrals', icon: Share2 },
 		{ href: '/admin/support', label: 'Support', icon: HelpCircle },
 		{ href: '/admin/geo-settings', label: 'Geo', icon: Globe },
+		{ href: '/admin/consent', label: 'Consent', icon: ShieldCheck },
 		{ href: '/admin/settings', label: 'Settings', icon: Settings },
 	];
 

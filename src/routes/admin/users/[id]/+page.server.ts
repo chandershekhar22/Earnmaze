@@ -3,7 +3,7 @@ import { obfuscateEmail } from '$lib/utils/obfuscate';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/db';
-import { user } from '$lib/db/schema/auth';
+import { user, emailConsentLog } from '$lib/db/schema/auth';
 import { panelistPoint, pointsTransactions } from '$lib/db/schema/panelist-points';
 import { surveyTransaction } from '$lib/db/schema/surveys';
 import { supportTicket } from '$lib/db/schema/support-tickets';
@@ -19,7 +19,7 @@ export const load: PageServerLoad = async (event) => {
 	const [userData] = await db.select().from(user).where(eq(user.id, id)).limit(1);
 	if (!userData) throw error(404, 'User not found');
 
-	const [pointsData, pointsSummary, transactions, surveys, tickets, stats, userReferrals] = await Promise.all([
+	const [pointsData, pointsSummary, transactions, surveys, tickets, stats, userReferrals, consentEvents] = await Promise.all([
 		db.select().from(panelistPoint).where(eq(panelistPoint.panelistId, id)).limit(1).then(r => r[0] ?? null),
 		getPointsSummary(id),
 		db.select().from(pointsTransactions).where(eq(pointsTransactions.panelistId, id)).orderBy(desc(pointsTransactions.createdAt)).limit(50),
@@ -33,6 +33,7 @@ export const load: PageServerLoad = async (event) => {
 			referrerBonus: referrals.referrerBonus,
 			createdAt: referrals.createdAt,
 		}).from(referrals).leftJoin(user, eq(referrals.referredId, user.id)).where(eq(referrals.referrerId, id)).orderBy(desc(referrals.createdAt)).limit(20),
+		db.select().from(emailConsentLog).where(eq(emailConsentLog.userId, id)).orderBy(desc(emailConsentLog.createdAt)).limit(50),
 	]);
 
 	return {
@@ -48,6 +49,22 @@ export const load: PageServerLoad = async (event) => {
 			loginCount: userData.loginCount,
 			lastLoginAt: userData.lastLoginAt?.toISOString() ?? null,
 			createdAt: userData.createdAt?.toISOString() ?? null,
+		},
+		consent: {
+			ageVerifiedAt: userData.ageVerifiedAt?.toISOString() ?? null,
+			tosAcceptedAt: userData.tosAcceptedAt?.toISOString() ?? null,
+			privacyAcceptedAt: userData.privacyAcceptedAt?.toISOString() ?? null,
+			marketingConsent: userData.marketingConsent,
+			marketingConsentAt: userData.marketingConsentAt?.toISOString() ?? null,
+			surveyDataSharingAcceptedAt: userData.surveyDataSharingAcceptedAt?.toISOString() ?? null,
+			events: consentEvents.map((e) => ({
+				id: e.id,
+				channel: e.channel,
+				granted: e.granted,
+				source: e.source,
+				ipAddress: e.ipAddress,
+				createdAt: e.createdAt.toISOString(),
+			})),
 		},
 		points: {
 			current: pointsData?.currentPoints ?? 0,

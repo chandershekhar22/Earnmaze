@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Logger } from '$lib/utils/app-logger';
-	import { untrack } from 'svelte';
-	import { Check, X, User, Users, ClipboardList, Bell, Mail, Smartphone, Loader, ShieldCheck, AlertCircle } from '@lucide/svelte';
+	import { onMount, untrack } from 'svelte';
+	import { Check, X, User, Users, ClipboardList, Bell, Mail, Smartphone, Loader, ShieldCheck, AlertCircle, Megaphone } from '@lucide/svelte';
 	import InfoBanner from '$lib/components/InfoBanner.svelte';
 	import { toastStore } from '$lib/stores/toast.svelte';
 
@@ -28,6 +28,49 @@
 	})));
 	let saving = $state(false);
 	let message = $state('');
+
+	// Marketing email consent — fetched + toggled separately from profile
+	// preferences because every change writes to the consent audit log.
+	let marketingConsent = $state(false);
+	let marketingConsentAt = $state<string | null>(null);
+	let marketingSaving = $state(false);
+
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/panelist/email-preferences');
+			if (response.ok) {
+				const data = await response.json();
+				marketingConsent = data.marketingConsent ?? false;
+				marketingConsentAt = data.marketingConsentAt ?? null;
+			}
+		} catch (err) {
+			Logger.root.warn({ context: 'errors', error: err }, 'Failed to load email preferences');
+		}
+	});
+
+	async function toggleMarketingConsent() {
+		const next = !marketingConsent;
+		marketingSaving = true;
+		try {
+			const response = await fetch('/api/panelist/email-preferences', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ marketingConsent: next }),
+			});
+			if (response.ok) {
+				marketingConsent = next;
+				marketingConsentAt = new Date().toISOString();
+				toastStore.success('Saved', next ? 'Subscribed to marketing emails.' : 'Unsubscribed from marketing emails.');
+			} else {
+				toastStore.error('Error', 'Could not update preferences.');
+			}
+		} catch (err) {
+			Logger.root.error({ context: 'errors', error: err }, 'Failed to toggle marketing consent');
+			toastStore.error('Error', 'Could not update preferences.');
+		} finally {
+			marketingSaving = false;
+		}
+	}
 
 	const surveyCategories = [
 		'Consumer Products', 'Technology', 'Healthcare', 'Finance', 'Education',
@@ -273,6 +316,49 @@
 					</div>
 				</label>
 			</div>
+		</div>
+
+		<!-- Marketing Email Consent -->
+		<div class="card animate-slide-up" style="animation-delay: 175ms">
+			<div class="flex items-center gap-3 mb-6">
+				<div class="p-2.5 bg-violet-500/10 rounded-xl">
+					<Megaphone class="w-5 h-5 text-violet-400" />
+				</div>
+				<div>
+					<h2 class="text-sm font-bold text-white">Marketing Emails</h2>
+					<p class="text-xs text-neutral-600">Promotional offers and product updates (separate from transactional emails)</p>
+				</div>
+			</div>
+			<button
+				type="button"
+				onclick={toggleMarketingConsent}
+				disabled={marketingSaving}
+				class="w-full flex items-center justify-between p-4 bg-surface-200 rounded-xl cursor-pointer hover:bg-surface-300 transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-left"
+			>
+				<div class="flex items-center gap-3">
+					<div class="w-9 h-9 rounded-lg bg-surface-100 border border-white/[0.06] flex items-center justify-center">
+						<Mail class="w-4 h-4 text-neutral-500" />
+					</div>
+					<div>
+						<span class="text-sm font-medium text-white">Send me marketing emails</span>
+						<p class="text-[10px] text-neutral-600">
+							{#if marketingConsent && marketingConsentAt}
+								Opted in {new Date(marketingConsentAt).toLocaleDateString()}
+							{:else}
+								You will not receive promotional emails
+							{/if}
+						</p>
+					</div>
+				</div>
+				<div class="relative">
+					<input type="checkbox" checked={marketingConsent} class="sr-only peer" tabindex="-1" readonly />
+					<div class="w-10 h-6 bg-surface-300 peer-focus:ring-2 peer-focus:ring-primary-500/20 rounded-full peer peer-checked:bg-primary-600 transition-colors"></div>
+					<div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm"></div>
+				</div>
+			</button>
+			<p class="mt-3 text-[10px] text-neutral-600 leading-relaxed">
+				Transactional emails (verification codes, password resets, redemption confirmations) are sent regardless of this setting — they're required for the service to function.
+			</p>
 		</div>
 
 		<!-- Save -->

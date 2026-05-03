@@ -12,6 +12,7 @@
 	let isLoading = $state(false);
 	let isRedirecting = $state(false);
 	let turnstileToken = $state<string | null>(null);
+	let needsInteraction = $state(false);
 	let turnstileRef: any;
 
 	// Get redirect URL from query params
@@ -42,17 +43,32 @@
 		handleSubmit();
 	}
 
+	async function waitForToken(): Promise<string | null> {
+		if (turnstileToken) return turnstileToken;
+		const start = Date.now();
+		while (!turnstileToken) {
+			// Recompute each tick: if interaction kicks in mid-wait, extend the deadline
+			const timeoutMs = needsInteraction ? 60000 : 8000;
+			if (Date.now() - start >= timeoutMs) break;
+			await new Promise((r) => setTimeout(r, 100));
+		}
+		return turnstileToken;
+	}
+
 	async function handleSubmit() {
 		if (!email || !password) return;
 
-		// Validate Turnstile token
-		if (!turnstileToken) {
-			authStore.state.error = 'Please complete the CAPTCHA verification';
+		isLoading = true;
+		const token = await waitForToken();
+		if (!token) {
+			isLoading = false;
+			authStore.state.error = needsInteraction
+				? 'Please complete the security check below.'
+				: 'Verification timed out. Please refresh and try again.';
 			return;
 		}
 
-		isLoading = true;
-		const result = await authStore.login({ email, password, turnstileToken });
+		const result = await authStore.login({ email, password, turnstileToken: token });
 		isLoading = false;
 
 		if (result.success && authStore.state.user) {
@@ -69,6 +85,7 @@
 
 	function handleTurnstileVerify(token: string) {
 		turnstileToken = token;
+		needsInteraction = false;
 	}
 
 	function handleTurnstileError() {
@@ -77,6 +94,10 @@
 
 	function handleTurnstileExpire() {
 		turnstileToken = null;
+	}
+
+	function handleBeforeInteractive() {
+		needsInteraction = true;
 	}
 </script>
 
@@ -180,12 +201,16 @@
 				</div>
 
 				<!-- Cloudflare Turnstile -->
-				<div class="flex justify-center py-4">
+				<div class="flex flex-col items-center gap-2 py-4">
+					{#if needsInteraction}
+						<p class="text-sm text-amber-400">Please complete the security check below.</p>
+					{/if}
 					<Turnstile
 						bind:this={turnstileRef}
 						onVerify={handleTurnstileVerify}
 						onError={handleTurnstileError}
 						onExpire={handleTurnstileExpire}
+						onBeforeInteractive={handleBeforeInteractive}
 						theme="dark"
 						size="normal"
 					/>
@@ -195,7 +220,7 @@
 				<div class="pt-4">
 					<button
 						type="submit"
-						disabled={isLoading || !email || !password || !turnstileToken}
+						disabled={isLoading || !email || !password}
 						class="btn-primary w-full !py-4 !text-base"
 					>
 						<div class="flex items-center justify-center">

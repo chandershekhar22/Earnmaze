@@ -1,4 +1,4 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { validateSession } from '$lib/db';
 import { validateGuestSession } from '$lib/db/repositories/guest-session.repository.server';
@@ -7,6 +7,7 @@ import { checkGeoRestriction, logGeoRestrictionEvent } from '$lib/server/geo-res
 import { generateRayId, Logger } from '$lib/utils/app-logger';
 import { csrfMiddleware, generateCsrfToken, setSecurityHeaders } from '$lib/server/security';
 import { verifyToken } from '$lib/server/jwt';
+import { notifyError } from '$lib/utils/telegram';
 import { db } from '$lib/db';
 import { session as sessionTable, passwordReset } from '$lib/db/schema/auth';
 import { lt } from 'drizzle-orm';
@@ -238,15 +239,30 @@ export const handle: Handle = async ({ event, resolve }) => {
       try {
         const payload = await verifyToken(authHeader.slice(7));
         if (payload && payload.type === 'access') {
-          // Set locals.user with JWT payload so existing guards work
-          event.locals.user = {
-            id: payload.sub,
-            email: '',
-            userType: payload.userType as any,
-            name: null,
-            isActive: true,
-            emailVerified: true,
-          } as any;
+          // Validate userType against the enum — never trust the JWT payload
+          // unconditionally. A signature flaw upstream or a forged token must
+          // not be able to claim 'admin' or any privileged role.
+          const ALLOWED_USER_TYPES = ['admin', 'client', 'moderator', 'panelist'] as const;
+          type AllowedUserType = (typeof ALLOWED_USER_TYPES)[number];
+          const claimedType = payload.userType;
+          if (
+            typeof claimedType === 'string' &&
+            (ALLOWED_USER_TYPES as readonly string[]).includes(claimedType)
+          ) {
+            event.locals.user = {
+              id: payload.sub,
+              email: '',
+              userType: claimedType as AllowedUserType,
+              name: null,
+              isActive: true,
+              emailVerified: true,
+            } as any;
+          } else {
+            Logger.root.warn(
+              { context: 'auth', claimedType, sub: payload.sub },
+              'JWT had invalid or missing userType — rejecting'
+            );
+          }
         }
       } catch {
         // Invalid JWT — ignore, fall through to guest/no-auth
@@ -372,4 +388,38 @@ export const handle: Handle = async ({ event, resolve }) => {
   setSecurityHeaders(response.headers);
   withCorrelation(response);
   return response;
+};
+
+// Unhandled-error hook — logs via Loki AND fires a Telegram alert (best-effort).
+export const handleError: HandleServerError = ({ error, event, status }) => {
+  const correlationId = (event.locals as { correlationId?: string })?.correlationId;
+  Logger.root.error(
+    {
+      context: 'errors',
+      pathname: event.url.pathname,
+      status,
+      correlationId,
+      error,
+    },
+    'Unhandled server error'
+  );
+
+  // Skip alerts for 4xx (user errors). Only fire for genuine server failures.
+  if (status === undefined || status >= 500) {
+    try {
+      notifyError(`${event.request.method} ${event.url.pathname}`, error, {
+        status: String(status ?? 500),
+        correlationId: correlationId ?? 'n/a',
+      }).catch(() => {
+        // Alert dispatch is best-effort; swallow any failure
+      });
+    } catch {
+      // Sync throw from sendTask (e.g., null celery client) — swallow
+    }
+  }
+
+  return {
+    message: 'Internal server error',
+    correlationId,
+  };
 };

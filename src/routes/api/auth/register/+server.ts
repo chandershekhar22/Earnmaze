@@ -6,10 +6,16 @@ import { validateTurnstileToken } from '$lib/server/turnstile';
 import type { RegisterResponse, AuthUserResponse } from '$lib/types/api-responses';
 import { getUserByReferralCode } from '$lib/db/repositories/auth.repository.server';
 import { referrals } from '$lib/db/schema/transactions';
+import { user as userTable } from '$lib/db/schema/auth';
+import { eq } from 'drizzle-orm';
+import { recordConsent } from '$lib/server/email-consent';
 import { Logger } from '$lib/utils/app-logger';
 import { authRateLimit } from '$lib/server/rate-limit';
 import { registerSchema, validateInput } from '$lib/validation/api-schemas';
 import { getClientIP } from '$lib/server/geo-restriction';
+import { notifyUpdate } from '$lib/utils/telegram';
+import { maskEmail } from '$lib/utils/mask';
+import { sendWelcomeEmail } from '$lib/server/email-service';
 
 const REFERRER_BONUS = 50;
 const REFERRED_BONUS = 25;
@@ -26,7 +32,18 @@ export const POST: RequestHandler = async (event) => {
 			return json({ error: validation.error }, { status: 400 });
 		}
 
-		const { email, password, name, turnstileToken, referralCode, utmSource, utmMedium, utmCampaign, registrationSource } = validation.data;
+		const {
+			email,
+			password,
+			name,
+			turnstileToken,
+			referralCode,
+			utmSource,
+			utmMedium,
+			utmCampaign,
+			registrationSource,
+			marketingConsent,
+		} = validation.data;
 
 		// Verify Turnstile token
 		const turnstileError = await validateTurnstileToken(turnstileToken, getClientIP(event));
@@ -73,6 +90,40 @@ export const POST: RequestHandler = async (event) => {
 			return json({ error: 'Failed to create user' }, { status: 500 });
 		}
 
+		// Stamp age + legal acceptance + (optionally) marketing consent.
+		// The form already validated that ageVerified/tosAccepted/privacyAccepted
+		// were true; these timestamps are the audit trail.
+		const now = new Date();
+		const ipAddress = getClientIP(event);
+		const userAgent = request.headers.get('user-agent') ?? null;
+		try {
+			await db
+				.update(userTable)
+				.set({
+					ageVerified: true,
+					ageVerifiedAt: now,
+					tosAcceptedAt: now,
+					privacyAcceptedAt: now,
+					updatedAt: now,
+				})
+				.where(eq(userTable.id, user.id));
+
+			if (marketingConsent) {
+				await recordConsent(user.id, 'marketing', true, {
+					source: 'register-form',
+					ipAddress,
+					userAgent,
+				});
+			}
+		} catch (consentErr) {
+			// Don't fail registration if consent stamping fails — the user is
+			// already created. Surface in Loki so it can be back-filled.
+			Logger.root.error(
+				{ context: 'consent', userId: user.id, error: consentErr },
+				'Failed to stamp age/ToS/consent at registration'
+			);
+		}
+
 		// Create referral record if user was referred
 		if (referrer && referralCode) {
 			try {
@@ -117,6 +168,35 @@ export const POST: RequestHandler = async (event) => {
 				image: user.image,
 			} satisfies AuthUserResponse,
 		};
+
+		// Best-effort welcome email — fire-and-forget. Existing flows handle
+		// retries and rate-limits at the worker level.
+		try {
+			sendWelcomeEmail(user.email, name ?? null).catch((err) => {
+				Logger.root.warn(
+					{ context: 'email', email: user.email, error: err },
+					'Welcome email dispatch failed'
+				);
+			});
+		} catch {
+			/* swallow sync throw — email failure must not block the response */
+		}
+
+		// Best-effort signup notification to the Telegram updates channel.
+		// "/register" funnel — full account creation with password. Earn-points
+		// captures show up as "🎯 New lead (earn-points)" instead.
+		// Email is masked for privacy; full address stays in DB / Loki.
+		try {
+			const utmTag = utmSource ? ` · src=${utmSource}` : '';
+			const refTag = referralCode ? ` · ref` : '';
+			notifyUpdate(
+				`✨ New signup (register): <code>${maskEmail(user.email)}</code>${utmTag}${refTag}`
+			).catch(() => {
+				/* swallow — signal is in Loki */
+			});
+		} catch {
+			/* swallow sync throw too */
+		}
 
 		return json(response);
 	} catch (error) {

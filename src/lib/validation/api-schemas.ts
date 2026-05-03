@@ -47,6 +47,18 @@ export const registerSchema = z.object({
 	utmMedium: z.string().max(255).optional(),
 	utmCampaign: z.string().max(255).optional(),
 	registrationSource: z.string().max(100).optional(),
+	// Required acknowledgements — must be true to complete signup.
+	ageVerified: z.literal(true, {
+		errorMap: () => ({ message: 'You must confirm you are 18 or older' }),
+	}),
+	tosAccepted: z.literal(true, {
+		errorMap: () => ({ message: 'You must accept the Terms of Service' }),
+	}),
+	privacyAccepted: z.literal(true, {
+		errorMap: () => ({ message: 'You must accept the Privacy Policy' }),
+	}),
+	// Optional opt-in — default false, never coerce true without an explicit click.
+	marketingConsent: z.boolean().optional().default(false),
 });
 
 export const forgotPasswordSchema = z.object({
@@ -55,7 +67,14 @@ export const forgotPasswordSchema = z.object({
 
 export const resetPasswordSchema = z.object({
 	token: z.string().min(1, 'Reset token required'),
-	password: passwordSchema
+	password: passwordSchema,
+	// Optional in the schema, but the server requires them when this reset is
+	// also a first-time activation (user has no tosAcceptedAt yet — guests
+	// converting via /forgot-password).
+	ageVerified: z.boolean().optional(),
+	tosAccepted: z.boolean().optional(),
+	privacyAccepted: z.boolean().optional(),
+	marketingConsent: z.boolean().optional().default(false),
 });
 
 // ==================== Guest Endpoints ====================
@@ -79,7 +98,19 @@ export const guestUpgradeCheckPasswordSchema = z.object({
 
 export const guestUpgradeSetPasswordSchema = z.object({
 	upgradeToken: z.string().min(1, 'Upgrade token required'),
-	password: passwordSchema
+	password: passwordSchema,
+	// Required acknowledgements at upgrade — guest captured implicit consent
+	// at earn-points; full account creation needs explicit click-through.
+	ageVerified: z.literal(true, {
+		errorMap: () => ({ message: 'You must confirm you are 18 or older' }),
+	}),
+	tosAccepted: z.literal(true, {
+		errorMap: () => ({ message: 'You must accept the Terms of Service' }),
+	}),
+	privacyAccepted: z.literal(true, {
+		errorMap: () => ({ message: 'You must accept the Privacy Policy' }),
+	}),
+	marketingConsent: z.boolean().optional().default(false),
 });
 
 // ==================== Survey Endpoints ====================
@@ -153,6 +184,9 @@ export const saveEmailSchema = z.object({
 	}).optional().nullable(),
 	timeToConvert: z.number().min(0).max(86400).optional(),
 	turnstileToken: turnstileTokenSchema,
+	// Optional marketing opt-in — defaults false. Age 18+, ToS, Privacy are
+	// accepted implicitly via the form's "By continuing..." notice line.
+	marketingConsent: z.boolean().optional().default(false),
 });
 
 // ==================== Profile Endpoints ====================

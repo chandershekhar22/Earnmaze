@@ -19,6 +19,13 @@ import {
 	getFirstAvailableSurvey
 } from '$lib/db/repositories/survey.repository.server';
 import { saveEmailSchema, validateInput } from '$lib/validation/api-schemas';
+import { sendWelcomeEmail } from '$lib/server/email-service';
+import { notifyUpdate } from '$lib/utils/telegram';
+import { maskEmail } from '$lib/utils/mask';
+import { recordConsent } from '$lib/server/email-consent';
+import { user as userTable } from '$lib/db/schema/auth';
+import { db as dbConn } from '$lib/db';
+import { eq } from 'drizzle-orm';
 
 export const POST: RequestHandler = async (event) => {
 	const { request, cookies, getClientAddress } = event;
@@ -31,13 +38,14 @@ export const POST: RequestHandler = async (event) => {
 			return json({ error: validation.error }, { status: 400 });
 		}
 
-		const { 
-			email, 
-			visitorId, 
-			sessionId: analyticsSessionId, 
-			utmParams, 
-			timeToConvert, 
+		const {
+			email,
+			visitorId,
+			sessionId: analyticsSessionId,
+			utmParams,
+			timeToConvert,
 			turnstileToken,
+			marketingConsent,
 		} = validation.data;
 
 		// Validate Turnstile token
@@ -90,6 +98,37 @@ export const POST: RequestHandler = async (event) => {
 
 			// Signup bonus is credited on guest upgrade (set-password), not on initial guest creation
 			Logger.root.info({ context: 'auth', email: normalizedEmail, userId }, 'Created new guest user');
+
+			// Stamp implicit-consent timestamps. The form's "By continuing..." notice
+			// line is the affirmative-action moment for ToS/Privacy/age-18+. Marketing
+			// consent is the explicit checkbox (separate audit-log entry below).
+			const now = new Date();
+			try {
+				await dbConn
+					.update(userTable)
+					.set({
+						ageVerified: true,
+						ageVerifiedAt: now,
+						tosAcceptedAt: now,
+						privacyAcceptedAt: now,
+						updatedAt: now,
+					})
+					.where(eq(userTable.id, userId));
+
+				if (marketingConsent) {
+					await recordConsent(userId, 'marketing', true, {
+						source: 'earn-points-form',
+						ipAddress: getClientIP(event),
+						userAgent: request.headers.get('user-agent') ?? null,
+					});
+				}
+			} catch (consentErr) {
+				// Don't fail lead capture if consent stamping fails — surface in Loki.
+				Logger.root.error(
+					{ context: 'consent', userId, error: consentErr },
+					'Failed to stamp consent for earn-points lead'
+				);
+			}
 		}
 
 		// Create or reuse guest session using repository
@@ -142,8 +181,35 @@ export const POST: RequestHandler = async (event) => {
 
 		Logger.root.info({ context: 'auth', userId, isNewUser, sessionId: guestSessionId, redirectUrl }, 'User registration complete');
 
+		// Best-effort welcome email — only on first capture, not on resume.
+		// Existing users hitting earn-points again don't get re-welcomed.
+		if (isNewUser) {
+			try {
+				sendWelcomeEmail(normalizedEmail, null).catch((err) => {
+					Logger.root.warn({ context: 'email', email: normalizedEmail, error: err }, 'Welcome email dispatch failed');
+				});
+			} catch {
+				/* swallow sync throw — email failure must not block the redirect */
+			}
+		}
+
+		// Best-effort Telegram update — differentiated from /register so the
+		// channel shows funnel source. Earn-points flows are guest captures
+		// that may convert to full signups via /guest/upgrade later.
+		try {
+			const label = isNewUser ? '🎯 New lead (earn-points)' : '↩️ Returning lead (earn-points)';
+			const utmTag = utmParams?.utm_source ? ` · src=${utmParams.utm_source}` : '';
+			notifyUpdate(
+				`${label}: <code>${maskEmail(normalizedEmail)}</code>${utmTag}`
+			).catch(() => {
+				/* swallow */
+			});
+		} catch {
+			/* swallow sync throw */
+		}
+
 		// Return success and redirect URL
-		return json({ 
+		return json({
 			success: true,
 			userId,
 			sessionId: guestSessionId,

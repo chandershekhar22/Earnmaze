@@ -4,18 +4,30 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import { getDashboardUrl } from '$lib/utils/dashboard-routing';
-	import { loadClarity } from '$lib/clarity';
-	import { loadGA } from '$lib/ga';
+	import { loadClarity, stopClarity } from '$lib/clarity';
+	import { loadGA, stopGA } from '$lib/ga';
+	import { cookieConsent } from '$lib/stores/cookie-consent.svelte';
+	import CookieBanner from '$lib/components/CookieBanner.svelte';
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
 
 	let authChecked = $state(false);
 
-	onMount(() => {
-		if (!authStore.state.user) {
+	// Reactive analytics gate: loads on consent grant, halts on revoke.
+	// Loaders are idempotent (script injected at most once, re-grants flip
+	// the consent flag via the provider's API); stop functions tell the
+	// already-loaded scripts to pause data collection.
+	$effect(() => {
+		if (authStore.state.user) return; // logged-in pages don't track
+		if (!cookieConsent.loaded) return; // wait for store to hydrate
+
+		if (cookieConsent.analytics) {
 			loadClarity();
 			loadGA();
+		} else {
+			stopClarity();
+			stopGA();
 		}
 	});
 
@@ -120,6 +132,7 @@
 							<ul class="space-y-2 text-sm">
 								<li><a href="/privacy-policy" class="text-neutral-400 hover:text-primary-400 transition-colors">Privacy Policy</a></li>
 								<li><a href="/terms-of-service" class="text-neutral-400 hover:text-primary-400 transition-colors">Terms of Service</a></li>
+								<li><button type="button" onclick={() => cookieConsent.reopen()} class="text-neutral-400 hover:text-primary-400 transition-colors">Cookie settings</button></li>
 							</ul>
 						</div>
 					</div>
@@ -132,3 +145,5 @@
 			</footer>
 	</div>
 {/if}
+
+<CookieBanner />

@@ -8,6 +8,7 @@ import { Logger } from '$lib/utils/app-logger';
 import { createRedemptionOtp, verifyRedemptionOtp } from '$lib/server/redemption-otp';
 import { sendRedemptionOtpEmail } from '$lib/server/email-service';
 import { user } from '$lib/db/schema/auth';
+import { notifyUpdate } from '$lib/utils/telegram';
 
 /**
  * POST /api/rewards/redeem — Step 1: Request OTP before redemption
@@ -197,6 +198,24 @@ export const PATCH: RequestHandler = async (event) => {
 		});
 
 		Logger.root.info({ context: 'api', userId: authUser.id, rewardId, redemptionId: txResult.redemptionId }, 'Reward redeemed successfully (OTP verified)');
+
+		// Best-effort Telegram update for the operations channel.
+		// Escape reward.name — admin-controlled but treated as untrusted to
+		// avoid breaking Telegram's HTML parser if it contains <, >, or &.
+		const safeRewardName = String(reward.name ?? '')
+			.slice(0, 200)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;');
+		try {
+			notifyUpdate(
+				`🎁 Redemption: <b>${safeRewardName}</b> · ${reward.pointsCost} pts · ${reward.value} ${reward.currency ?? 'USD'}`
+			).catch(() => {
+				/* swallow */
+			});
+		} catch {
+			/* swallow sync throw */
+		}
 
 		return json({
 			success: true,

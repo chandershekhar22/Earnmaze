@@ -532,6 +532,15 @@
 
 		<!-- Pagination -->
 		{#if data.pagination.totalPages > 1}
+			{@const buildPageUrl = (p: number) => {
+				const params = new URLSearchParams();
+				params.set('page', String(p));
+				if (data.filters.search) params.set('search', data.filters.search);
+				if (data.filters.status !== 'all') params.set('status', data.filters.status);
+				if (data.filters.priority && data.filters.priority !== 'all')
+					params.set('priority', data.filters.priority);
+				return `/admin/surveys?${params.toString()}`;
+			}}
 			<div class="bg-surface-50 px-6 py-4 flex items-center justify-between border-t border-white/[0.06]">
 				<div class="text-sm text-neutral-400">
 					Showing page {data.pagination.page} of {data.pagination.totalPages}
@@ -540,7 +549,8 @@
 				<div class="flex gap-2">
 					{#if data.pagination.page > 1}
 						<a
-							href="/admin/surveys?page={data.pagination.page - 1}{data.filters.search ? `&search=${data.filters.search}` : ''}{data.filters.status !== 'all' ? `&status=${data.filters.status}` : ''}"
+							href={buildPageUrl(data.pagination.page - 1)}
+							data-sveltekit-reload
 							class="btn-secondary text-sm"
 						>
 							Previous
@@ -548,7 +558,8 @@
 					{/if}
 					{#if data.pagination.page < data.pagination.totalPages}
 						<a
-							href="/admin/surveys?page={data.pagination.page + 1}{data.filters.search ? `&search=${data.filters.search}` : ''}{data.filters.status !== 'all' ? `&status=${data.filters.status}` : ''}"
+							href={buildPageUrl(data.pagination.page + 1)}
+							data-sveltekit-reload
 							class="btn-secondary text-sm"
 						>
 							Next

@@ -5,6 +5,8 @@
 	import { onMount } from 'svelte';
 	import { CircleCheck, KeyRound } from '@lucide/svelte';
 
+	let { data }: { data: { requiresConsent: boolean; tokenValid: boolean } } = $props();
+
 	let password = $state('');
 	let confirmPassword = $state('');
 	let isLoading = $state(false);
@@ -12,6 +14,13 @@
 	let success = $state(false);
 	let tokenInvalid = $state(false);
 	let mounted = $state(false);
+
+	// Only collected when this reset is also a first-time activation
+	// (guest converting via /forgot-password). Existing panelists skip these.
+	let ageVerified = $state(false);
+	let tosAccepted = $state(false);
+	let privacyAccepted = $state(false);
+	let marketingConsent = $state(false);
 
 	$effect(() => {
 		if (mounted && !$page.url.searchParams.get('token')) {
@@ -48,6 +57,11 @@
 			return;
 		}
 
+		if (data.requiresConsent && (!ageVerified || !tosAccepted || !privacyAccepted)) {
+			error = 'Please confirm age and accept the Terms and Privacy Policy';
+			return;
+		}
+
 		isLoading = true;
 		error = '';
 		Logger.root.info({ context: 'security' }, 'Password reset submitted');
@@ -56,7 +70,16 @@
 			const response = await fetch('/api/auth/reset-password', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ token, password }),
+				body: JSON.stringify({
+					token,
+					password,
+					...(data.requiresConsent && {
+						ageVerified: true,
+						tosAccepted: true,
+						privacyAccepted: true,
+						marketingConsent,
+					}),
+				}),
 			});
 
 			const result = await response.json();
@@ -182,6 +205,66 @@
 					/>
 				</div>
 
+				{#if data.requiresConsent}
+					<!-- First-time activation via forgot-password flow.
+					     Same required checkboxes as /register and /guest/upgrade. -->
+					<div class="p-4 bg-surface-200 rounded-xl space-y-3">
+						<label class="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={ageVerified}
+								required
+								disabled={isLoading}
+								class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+							/>
+							<span class="text-sm text-neutral-400 leading-relaxed">
+								I confirm I am at least 18 years old.
+							</span>
+						</label>
+						<label class="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={tosAccepted}
+								required
+								disabled={isLoading}
+								class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+							/>
+							<span class="text-sm text-neutral-400 leading-relaxed">
+								I agree to the
+								<a href="/terms-of-service" class="link" target="_blank" rel="noopener">Terms of Service</a>.
+							</span>
+						</label>
+						<label class="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={privacyAccepted}
+								required
+								disabled={isLoading}
+								class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+							/>
+							<span class="text-sm text-neutral-400 leading-relaxed">
+								I agree to the
+								<a href="/privacy-policy" class="link" target="_blank" rel="noopener">Privacy Policy</a>.
+							</span>
+						</label>
+					</div>
+
+					<div class="p-4 bg-surface-200 rounded-xl">
+						<label class="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={marketingConsent}
+								disabled={isLoading}
+								class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+							/>
+							<span class="text-sm text-neutral-400 leading-relaxed">
+								Send me product updates and offers from EarnMaze. You can opt
+								out any time.
+							</span>
+						</label>
+					</div>
+				{/if}
+
 				<div class="flex space-x-3">
 					<a
 						href="/login"
@@ -191,10 +274,10 @@
 					</a>
 					<button
 						type="submit"
-						disabled={isLoading || !password || !confirmPassword}
+						disabled={isLoading || !password || !confirmPassword || (data.requiresConsent && (!ageVerified || !tosAccepted || !privacyAccepted))}
 						class="btn-primary flex-1"
 					>
-						{isLoading ? 'Resetting...' : 'Reset Password'}
+						{isLoading ? 'Resetting...' : (data.requiresConsent ? 'Activate Account' : 'Reset Password')}
 					</button>
 				</div>
 			</form>

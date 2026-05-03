@@ -19,7 +19,25 @@
 	let name = $state('');
 	let isLoading = $state(false);
 	let turnstileToken = $state<string | null>(null);
+	let needsInteraction = $state(false);
 	let turnstileRef: any;
+
+	// Required acknowledgements (must all be true to enable submit).
+	let ageVerified = $state(false);
+	let tosAccepted = $state(false);
+	let privacyAccepted = $state(false);
+	// Optional opt-in (default OFF for GDPR/CAN-SPAM compliance).
+	let marketingConsent = $state(false);
+
+	let canSubmit = $derived(
+		!!email &&
+			!!password &&
+			!!confirmPassword &&
+			!passwordMismatch &&
+			ageVerified &&
+			tosAccepted &&
+			privacyAccepted
+	);
 
 	let passwordMismatch = $derived(password !== confirmPassword && confirmPassword.length > 0);
 	let passwordTouched = $derived(password.length > 0);
@@ -54,26 +72,45 @@
 		handleSubmit();
 	}
 
+	async function waitForToken(): Promise<string | null> {
+		if (turnstileToken) return turnstileToken;
+		const start = Date.now();
+		while (!turnstileToken) {
+			const timeoutMs = needsInteraction ? 60000 : 8000;
+			if (Date.now() - start >= timeoutMs) break;
+			await new Promise((r) => setTimeout(r, 100));
+		}
+		return turnstileToken;
+	}
+
 	async function handleSubmit() {
 		if (!email || !password || !confirmPassword || passwordMismatch) return;
+		if (!ageVerified || !tosAccepted || !privacyAccepted) return;
 
-		// Validate Turnstile token
-		if (!turnstileToken) {
-			authStore.state.error = 'Please complete the CAPTCHA verification';
+		isLoading = true;
+		const token = await waitForToken();
+		if (!token) {
+			isLoading = false;
+			authStore.state.error = needsInteraction
+				? 'Please complete the security check below.'
+				: 'Verification timed out. Please refresh and try again.';
 			return;
 		}
 
-		isLoading = true;
 		const result = await authStore.register({
 			email,
 			password,
 			name: name || undefined,
-			turnstileToken,
+			turnstileToken: token,
 			referralCode,
 			utmSource,
 			utmMedium,
 			utmCampaign,
 			registrationSource: utmSource ? 'ad-campaign' : 'registration-page',
+			ageVerified: true,
+			tosAccepted: true,
+			privacyAccepted: true,
+			marketingConsent,
 		});
 		isLoading = false;
 
@@ -89,10 +126,15 @@
 
 	function handleTurnstileVerify(token: string) {
 		turnstileToken = token;
+		needsInteraction = false;
 	}
 
 	function handleTurnstileError() {
 		turnstileToken = null;
+	}
+
+	function handleBeforeInteractive() {
+		needsInteraction = true;
 	}
 
 	function handleTurnstileExpire() {
@@ -208,31 +250,75 @@
 				{/if}
 			</div>
 
-			<!-- Terms and Conditions -->
-			<div class="p-4 bg-surface-200 rounded-xl">
+			<!-- Required acknowledgements -->
+			<div class="p-4 bg-surface-200 rounded-xl space-y-3">
 				<label class="flex items-start gap-3 cursor-pointer">
 					<input
-						id="terms"
 						type="checkbox"
+						bind:checked={ageVerified}
+						required
+						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
+					/>
+					<span class="text-sm text-neutral-400 leading-relaxed">
+						I confirm I am at least 18 years old.
+					</span>
+				</label>
+				<label class="flex items-start gap-3 cursor-pointer">
+					<input
+						type="checkbox"
+						bind:checked={tosAccepted}
 						required
 						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
 					/>
 					<span class="text-sm text-neutral-400 leading-relaxed">
 						I agree to the
-						<a href="/terms-of-service" class="link">Terms of Service</a>
-						and
-						<a href="/privacy-policy" class="link">Privacy Policy</a>
+						<a href="/terms-of-service" class="link" target="_blank" rel="noopener">
+							Terms of Service
+						</a>.
+					</span>
+				</label>
+				<label class="flex items-start gap-3 cursor-pointer">
+					<input
+						type="checkbox"
+						bind:checked={privacyAccepted}
+						required
+						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
+					/>
+					<span class="text-sm text-neutral-400 leading-relaxed">
+						I agree to the
+						<a href="/privacy-policy" class="link" target="_blank" rel="noopener">
+							Privacy Policy
+						</a>.
+					</span>
+				</label>
+			</div>
+
+			<!-- Optional marketing opt-in (UNCHECKED by default per GDPR / DPDP) -->
+			<div class="p-4 bg-surface-200 rounded-xl">
+				<label class="flex items-start gap-3 cursor-pointer">
+					<input
+						type="checkbox"
+						bind:checked={marketingConsent}
+						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
+					/>
+					<span class="text-sm text-neutral-400 leading-relaxed">
+						Send me product updates and offers from EarnMaze. You can opt out
+						any time.
 					</span>
 				</label>
 			</div>
 
 			<!-- Cloudflare Turnstile -->
-			<div class="flex justify-center">
+			<div class="flex flex-col items-center gap-2">
+				{#if needsInteraction}
+					<p class="text-sm text-amber-400">Please complete the security check below.</p>
+				{/if}
 				<Turnstile
 					bind:this={turnstileRef}
 					onVerify={handleTurnstileVerify}
 					onError={handleTurnstileError}
 					onExpire={handleTurnstileExpire}
+					onBeforeInteractive={handleBeforeInteractive}
 					theme="dark"
 					size="normal"
 				/>
@@ -241,7 +327,7 @@
 			<!-- Submit Button -->
 			<button
 				type="submit"
-				disabled={isLoading || !email || !password || !confirmPassword || passwordMismatch || !turnstileToken}
+				disabled={isLoading || !canSubmit}
 				class="btn-primary w-full"
 			>
 				{#if isLoading}

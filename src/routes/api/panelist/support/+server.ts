@@ -5,6 +5,8 @@ import { createTicket } from '$lib/db/repositories';
 import { getTicketById, addTicketNote, getTicketNotes, updateTicketStatus } from '$lib/db/repositories/support-tickets.repository.server';
 import { z } from 'zod';
 import { Logger } from '$lib/utils/app-logger';
+import { notifyTelegram, notifyUpdate } from '$lib/utils/telegram';
+import { maskEmail } from '$lib/utils/mask';
 
 const createTicketSchema = z.object({
 	subject: z.string().min(1, 'Subject is required').max(255, 'Subject too long'),
@@ -28,6 +30,31 @@ export const POST: RequestHandler = async (event) => {
 			validated.message,
 			validated.priority,
 		);
+
+		// Best-effort Telegram notification.
+		// High-priority tickets fire to the critical channel so they're visible
+		// alongside genuine outages; low/medium go to the updates channel.
+		const priorityIcon = validated.priority === 'high' ? '🔥' : '🎫';
+		const safeSubject = String(validated.subject)
+			.slice(0, 120)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;');
+		const ticketMsg =
+			`${priorityIcon} New support ticket (${validated.priority})\n` +
+			`From: <code>${maskEmail(authUser.email)}</code>\n` +
+			`Subject: ${safeSubject}`;
+		try {
+			const dispatch =
+				validated.priority === 'high'
+					? notifyTelegram(ticketMsg, 'critical')
+					: notifyUpdate(ticketMsg);
+			dispatch.catch(() => {
+				/* swallow — alert path must not break ticket creation */
+			});
+		} catch {
+			/* swallow sync throw too */
+		}
 
 		return json({
 			success: true,

@@ -14,10 +14,25 @@
 
 	let showEmailModal = $state(false);
 	let email = $state('');
+	// Optional marketing opt-in. Required acknowledgements (age 18+, ToS,
+	// Privacy) are accepted implicitly by submitting — see notice line below.
+	let marketingConsent = $state(false);
 	let isSubmitting = $state(false);
 	let errorMessage = $state('');
 	let turnstileToken = $state<string | null>(null);
+	let needsInteraction = $state(false);
 	let turnstileRef = $state<any>(null);
+
+	async function waitForToken(): Promise<string | null> {
+		if (turnstileToken) return turnstileToken;
+		const start = Date.now();
+		while (!turnstileToken) {
+			const timeoutMs = needsInteraction ? 60000 : 8000;
+			if (Date.now() - start >= timeoutMs) break;
+			await new Promise((r) => setTimeout(r, 100));
+		}
+		return turnstileToken;
+	}
 
 	onMount(() => {
 		markVisitStart();
@@ -47,13 +62,18 @@
 			errorMessage = 'Please enter a valid email address';
 			return;
 		}
-		if (!turnstileToken) {
-			errorMessage = 'Please complete the verification';
-			return;
-		}
 
 		isSubmitting = true;
 		errorMessage = '';
+
+		const token = await waitForToken();
+		if (!token) {
+			isSubmitting = false;
+			errorMessage = needsInteraction
+				? 'Please complete the security check below.'
+				: 'Verification timed out. Please refresh and try again.';
+			return;
+		}
 
 		try {
 			const visitorId = getVisitorId();
@@ -64,7 +84,7 @@
 			const response = await fetch('/api/save-email', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email, visitorId, sessionId, utmParams, timeToConvert, turnstileToken })
+				body: JSON.stringify({ email, visitorId, sessionId, utmParams, timeToConvert, turnstileToken: token, marketingConsent })
 			});
 
 			const data = await response.json();
@@ -88,10 +108,12 @@
 
 	function handleTurnstileVerify(token: string) {
 		turnstileToken = token;
+		needsInteraction = false;
 		errorMessage = '';
 	}
 	function handleTurnstileError() { turnstileToken = null; }
 	function handleTurnstileExpire() { turnstileToken = null; }
+	function handleBeforeInteractive() { needsInteraction = true; }
 </script>
 
 <svelte:head>
@@ -295,20 +317,34 @@
 					</div>
 				{/if}
 
-				<div class="flex justify-center py-1">
+				<div class="flex flex-col items-center gap-2 py-1">
+					{#if needsInteraction}
+						<p class="text-sm text-amber-400">Please complete the security check below.</p>
+					{/if}
 					<Turnstile
 						bind:this={turnstileRef}
 						onVerify={handleTurnstileVerify}
 						onError={handleTurnstileError}
 						onExpire={handleTurnstileExpire}
+						onBeforeInteractive={handleBeforeInteractive}
 						theme="dark"
 						size="normal"
 					/>
 				</div>
 
+				<!-- Optional marketing opt-in (UNCHECKED by default per GDPR / DPDP) -->
+				<label class="flex items-start gap-2 cursor-pointer text-sm text-neutral-400 leading-relaxed">
+					<input
+						type="checkbox"
+						bind:checked={marketingConsent}
+						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+					/>
+					<span>Send me product updates and offers from EarnMaze.</span>
+				</label>
+
 				<button
 					type="submit"
-					disabled={isSubmitting || !turnstileToken}
+					disabled={isSubmitting}
 					class="btn-primary w-full !py-3.5 !text-base"
 				>
 					{#if isSubmitting}
@@ -322,6 +358,14 @@
 						<ArrowRight class="w-4 h-4" />
 					{/if}
 				</button>
+
+				<!-- Implicit consent notice — clicking Continue is the affirmative action. -->
+				<p class="text-xs text-neutral-500 text-center leading-relaxed">
+					By continuing you confirm you are 18+ and agree to our
+					<a href="/terms-of-service" class="link" target="_blank" rel="noopener">Terms</a>
+					and
+					<a href="/privacy-policy" class="link" target="_blank" rel="noopener">Privacy Policy</a>.
+				</p>
 			</form>
 
 			<p class="mt-4 text-[10px] text-center text-neutral-600">

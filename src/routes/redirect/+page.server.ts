@@ -8,6 +8,7 @@ import {
 	completeSurveyTransaction,
 } from '$lib/db/repositories/survey.repository.server';
 import { getGuestActivityByTransactionId, updateGuestSessionStats } from '$lib/db/repositories';
+import { notifyUpdate } from '$lib/utils/telegram';
 
 type CompletionStatus = 'completed' | 'terminated' | 'quota_full' | 'disqualified';
 
@@ -129,6 +130,19 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		);
 		if (!completedTransaction) {
 			throw error(500, 'Failed to update survey completion');
+		}
+
+		// Best-effort Telegram update — only for actual completions, not screen-outs.
+		if (status === 'completed') {
+			try {
+				notifyUpdate(
+					`✅ Survey completed: <code>${surveyData.title ?? transaction.surveyId}</code> · +${awardedPoints} pts`
+				).catch(() => {
+					/* swallow */
+				});
+			} catch {
+				/* swallow sync throw */
+			}
 		}
 
 		// Determine where to redirect the user.
