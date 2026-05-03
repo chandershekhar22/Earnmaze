@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="cc-bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#ff6b9d" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#c44569" stop-opacity="0.1"/>
+    </radialGradient>
+    <radialGradient id="cc-red" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#ff4757"/>
+      <stop offset="100%" stop-color="#c0392b"/>
+    </radialGradient>
+    <radialGradient id="cc-orange" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#ffa502"/>
+      <stop offset="100%" stop-color="#e67e22"/>
+    </radialGradient>
+    <radialGradient id="cc-pink" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#ff6b9d"/>
+      <stop offset="100%" stop-color="#e84393"/>
+    </radialGradient>
+    <radialGradient id="cc-yellow" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#ffeaa7"/>
+      <stop offset="100%" stop-color="#fdcb6e"/>
+    </radialGradient>
+    <radialGradient id="cc-purple" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#a29bfe"/>
+      <stop offset="100%" stop-color="#6c5ce7"/>
+    </radialGradient>
+    <radialGradient id="cc-green" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#55efc4"/>
+      <stop offset="100%" stop-color="#00b894"/>
+    </radialGradient>
+    <filter id="cc-glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="cc-shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <!-- Background sparkle field -->
+  <rect width="400" height="300" fill="url(#cc-bg)"/>
+  <!-- Sparkles -->
+  <g opacity="0.6">
+    <polygon points="50,30 52,38 60,38 54,43 56,51 50,46 44,51 46,43 40,38 48,38" fill="#fff"/>
+    <polygon points="350,50 351,54 355,54 352,57 353,61 350,58 347,61 348,57 345,54 349,54" fill="#fff"/>
+    <polygon points="180,20 181,24 185,24 182,27 183,31 180,28 177,31 178,27 175,24 179,24" fill="#fff"/>
+    <polygon points="320,250 321,254 325,254 322,257 323,261 320,258 317,261 318,257 315,254 319,254" fill="#fff"/>
+    <polygon points="70,260 71,264 75,264 72,267 73,271 70,268 67,271 68,267 65,264 69,264" fill="#fff"/>
+    <polygon points="200,280 201,283 204,283 202,285 203,288 200,286 197,288 198,285 196,283 199,283" fill="#fff"/>
+  </g>
+  <!-- Row 1 candies -->
+  <circle cx="80" cy="70" r="28" fill="url(#cc-red)" filter="url(#cc-shadow)"/>
+  <ellipse cx="72" cy="62" rx="8" ry="5" fill="#fff" opacity="0.4"/>
+  <circle cx="160" cy="55" r="25" fill="url(#cc-orange)" filter="url(#cc-shadow)"/>
+  <ellipse cx="153" cy="48" rx="7" ry="4" fill="#fff" opacity="0.4"/>
+  <rect x="225" y="40" width="45" height="45" rx="8" fill="url(#cc-pink)" filter="url(#cc-shadow)" transform="rotate(15 247 62)"/>
+  <rect x="237" y="48" width="12" height="6" rx="3" fill="#fff" opacity="0.35"/>
+  <circle cx="330" cy="65" r="26" fill="url(#cc-yellow)" filter="url(#cc-shadow)"/>
+  <ellipse cx="323" cy="57" rx="7" ry="5" fill="#fff" opacity="0.4"/>
+  <!-- Row 2 candies -->
+  <rect x="45" y="120" width="50" height="50" rx="10" fill="url(#cc-purple)" filter="url(#cc-shadow)" transform="rotate(-10 70 145)"/>
+  <rect x="58" y="128" width="14" height="7" rx="3" fill="#fff" opacity="0.35"/>
+  <!-- Diamond candy -->
+  <polygon points="160,110 185,145 160,180 135,145" fill="url(#cc-green)" filter="url(#cc-shadow)"/>
+  <polygon points="160,120 170,145 160,155 150,145" fill="#fff" opacity="0.15"/>
+  <circle cx="260" cy="140" r="30" fill="url(#cc-red)" filter="url(#cc-shadow)"/>
+  <ellipse cx="252" cy="130" rx="9" ry="6" fill="#fff" opacity="0.4"/>
+  <!-- Wrapped candy -->
+  <rect x="315" y="115" width="55" height="40" rx="12" fill="url(#cc-orange)" filter="url(#cc-shadow)"/>
+  <rect x="330" y="108" width="8" height="12" rx="4" fill="url(#cc-orange)"/>
+  <rect x="348" y="108" width="8" height="12" rx="4" fill="url(#cc-orange)"/>
+  <rect x="330" y="155" width="8" height="12" rx="4" fill="url(#cc-orange)"/>
+  <rect x="348" y="155" width="8" height="12" rx="4" fill="url(#cc-orange)"/>
+  <line x1="315" y1="135" x2="370" y2="135" stroke="#fff" stroke-width="2" opacity="0.3"/>
+  <!-- Row 3 candies -->
+  <circle cx="100" cy="230" r="27" fill="url(#cc-pink)" filter="url(#cc-shadow)"/>
+  <ellipse cx="93" cy="222" rx="8" ry="5" fill="#fff" opacity="0.4"/>
+  <rect x="170" y="210" width="48" height="48" rx="8" fill="url(#cc-yellow)" filter="url(#cc-shadow)" transform="rotate(20 194 234)"/>
+  <polygon points="280,200 305,235 280,270 255,235" fill="url(#cc-purple)" filter="url(#cc-shadow)"/>
+  <polygon points="280,212 292,235 280,258 268,235" fill="#fff" opacity="0.12"/>
+  <circle cx="355" cy="230" r="24" fill="url(#cc-green)" filter="url(#cc-shadow)"/>
+  <ellipse cx="349" cy="223" rx="7" ry="4" fill="#fff" opacity="0.4"/>
+  <!-- Extra sparkles -->
+  <g filter="url(#cc-glow)" opacity="0.8">
+    <circle cx="120" cy="160" r="3" fill="#fff"/>
+    <circle cx="210" cy="90" r="2" fill="#fff"/>
+    <circle cx="300" cy="190" r="2.5" fill="#fff"/>
+    <circle cx="50" cy="190" r="2" fill="#fff"/>
+    <circle cx="380" cy="160" r="2" fill="#fff"/>
+  </g>
+</svg>

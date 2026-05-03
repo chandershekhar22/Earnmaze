@@ -4,7 +4,7 @@
 	import { pointsStore } from '$lib/stores/points.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { LayoutDashboard, ClipboardList, Coins, Gift, User, HelpCircle, Users, X, LogOut, Sparkles } from '@lucide/svelte';
+	import { LayoutDashboard, ClipboardList, Coins, Gift, User, HelpCircle, Users, X, LogOut, Sparkles, Gamepad2 } from '@lucide/svelte';
 
 	let { isOpen = $bindable(false) }: { isOpen?: boolean } = $props();
 
@@ -26,6 +26,7 @@
 	const navItems = [
 		{ name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
 		{ name: 'Surveys', href: '/surveys', icon: ClipboardList },
+		{ name: 'Games', href: '/games', icon: Gamepad2 },
 		{ name: 'Points', href: '/points', icon: Coins },
 		{ name: 'Rewards', href: '/rewards', icon: Gift },
 		{ name: 'Referrals', href: '/referrals', icon: Users },

@@ -33,7 +33,8 @@ const ROUTE_CONFIG = {
     '/moderator',
     '/points',
     '/history',
-    '/rewards'
+    '/rewards',
+    '/games'
   ],
   publicPaths: [
     '/',

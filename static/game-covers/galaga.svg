@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#000"/>
+  <g fill="rgba(255,255,255,0.3)">
+    <rect x="30" y="30" width="1" height="1"/><rect x="80" y="100" width="1" height="1"/><rect x="150" y="50" width="1" height="1"/>
+    <rect x="220" y="80" width="1" height="1"/><rect x="290" y="40" width="1" height="1"/><rect x="350" y="120" width="1" height="1"/>
+    <rect x="60" y="200" width="1" height="1"/><rect x="180" y="180" width="1" height="1"/><rect x="320" y="220" width="1" height="1"/>
+    <rect x="100" y="280" width="1" height="1"/><rect x="250" y="240" width="1" height="1"/>
+  </g>
+  <!-- Formation -->
+  <g>
+    <g fill="#ff5f8f" transform="translate(80,60)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#ff5f8f" transform="translate(140,60)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#ff5f8f" transform="translate(200,60)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#ff5f8f" transform="translate(260,60)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#ff5f8f" transform="translate(320,60)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#ffd166" transform="translate(80,100)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#ffd166" transform="translate(140,100)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#ffd166" transform="translate(200,100)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#ffd166" transform="translate(260,100)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/><rect x="-3" y="-2" width="6" height="5" fill="#fff"/></g>
+    <g fill="#56a8ff" transform="translate(110,140)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/></g>
+    <g fill="#56a8ff" transform="translate(170,140)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/></g>
+    <g fill="#56a8ff" transform="translate(230,140)"><polygon points="0,-12 -14,10 -6,4 6,4 14,10"/></g>
+  </g>
+  <!-- diving enemy -->
+  <g fill="#ff3050" transform="translate(280,200) rotate(160)">
+    <polygon points="0,-12 -14,10 -6,4 6,4 14,10"/>
+    <line x1="0" y1="14" x2="280" y2="60" stroke="rgba(255,48,80,0.3)" stroke-width="2" stroke-dasharray="3 3"/>
+  </g>
+  <!-- bullets -->
+  <rect x="199" y="220" width="3" height="12" fill="#0ff"/>
+  <!-- player -->
+  <g fill="#fff" transform="translate(200,260)">
+    <polygon points="0,-14 -14,8 14,8"/>
+    <rect x="-6" y="-2" width="12" height="8" fill="#0ff"/>
+  </g>
+  <text x="20" y="20" font-family="monospace" font-size="11" fill="#0ff" font-weight="bold">SCORE 8420</text>
+  <text x="380" y="20" font-family="monospace" font-size="11" fill="#0ff" font-weight="bold" text-anchor="end">STAGE 03</text>
+</svg>

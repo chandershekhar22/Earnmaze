@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { User, Users, ClipboardList, Star, Mail, BarChart2, Settings, Coins, HelpCircle, Gift, ArrowRight, MessageSquareText, ArrowLeftRight, Globe, Share2 } from '@lucide/svelte';
+	import { User, Users, ClipboardList, Star, Mail, BarChart2, Settings, Coins, HelpCircle, Gift, ArrowRight, MessageSquareText, ArrowLeftRight, Globe, Share2, Sparkles, Flame, Brain, Trophy, Tag } from '@lucide/svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -250,6 +250,11 @@
 				{ href: '/admin/support', icon: HelpCircle, label: 'Support', color: 'fuchsia' },
 				{ href: '/admin/analytics', icon: BarChart2, label: 'Analytics', color: 'indigo' },
 				{ href: '/admin/geo-settings', icon: Globe, label: 'Geo Settings', color: 'teal' },
+				{ href: '/admin/artifacts', icon: Sparkles, label: 'Artifacts', color: 'green' },
+				{ href: '/admin/uploads/streaks', icon: Flame, label: 'Streaks', color: 'orange' },
+				{ href: '/admin/uploads/quizzes', icon: Brain, label: 'Quizzes', color: 'purple' },
+				{ href: '/admin/uploads/weekly-challenges', icon: Trophy, label: 'Weekly Challenges', color: 'yellow' },
+				{ href: '/admin/uploads/exclusive-deals', icon: Tag, label: 'Exclusive Deals', color: 'sky' },
 				{ href: '/admin/settings', icon: Settings, label: 'Settings', color: 'neutral' },
 			] as item}
 				<a

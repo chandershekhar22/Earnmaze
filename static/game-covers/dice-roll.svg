@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="dr-bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#3a1d4a"/>
+      <stop offset="100%" stop-color="#0a051a"/>
+    </radialGradient>
+    <linearGradient id="dr-face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d8d8d8"/>
+    </linearGradient>
+    <linearGradient id="dr-side" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8b8b8"/>
+      <stop offset="100%" stop-color="#707070"/>
+    </linearGradient>
+    <linearGradient id="dr-red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="100%" stop-color="#c62828"/>
+    </linearGradient>
+    <linearGradient id="dr-red-side" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c43535"/>
+      <stop offset="100%" stop-color="#7a1818"/>
+    </linearGradient>
+    <filter id="dr-sh"><feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.45"/></filter>
+    <filter id="dr-glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#dr-bg)"/>
+  <g opacity="0.15">
+    <circle cx="60" cy="60" r="2" fill="#ffd166"/><circle cx="340" cy="50" r="2" fill="#ffd166"/>
+    <circle cx="30" cy="250" r="2" fill="#ffd166"/><circle cx="370" cy="260" r="2" fill="#ffd166"/>
+  </g>
+  <!-- Left die (white showing 5) - isometric -->
+  <g filter="url(#dr-sh)" transform="translate(120,170) rotate(-10)">
+    <!-- top -->
+    <polygon points="0,-60 60,-40 0,-20 -60,-40" fill="url(#dr-face)"/>
+    <!-- right -->
+    <polygon points="60,-40 60,50 0,70 0,-20" fill="url(#dr-side)"/>
+    <!-- left -->
+    <polygon points="-60,-40 -60,50 0,70 0,-20" fill="#9a9a9a"/>
+    <!-- face markers (showing 5 on top face) -->
+    <g fill="#1a1a2e">
+      <circle cx="-24" cy="-40" r="4"/>
+      <circle cx="24" cy="-40" r="4"/>
+      <circle cx="0" cy="-40" r="4"/>
+      <circle cx="-24" cy="-52" r="4"/>
+      <circle cx="24" cy="-28" r="4"/>
+    </g>
+    <!-- right face (3) -->
+    <g fill="#1a1a2e">
+      <circle cx="20" cy="-10" r="4"/>
+      <circle cx="30" cy="10" r="4"/>
+      <circle cx="40" cy="30" r="4"/>
+    </g>
+    <!-- left face (2) -->
+    <g fill="#fff">
+      <circle cx="-20" cy="-5" r="4"/>
+      <circle cx="-40" cy="35" r="4"/>
+    </g>
+  </g>
+  <!-- Right die (red showing 6) - isometric -->
+  <g filter="url(#dr-glow)" transform="translate(280,140) rotate(12)">
+    <polygon points="0,-60 60,-40 0,-20 -60,-40" fill="url(#dr-red)"/>
+    <polygon points="60,-40 60,50 0,70 0,-20" fill="url(#dr-red-side)"/>
+    <polygon points="-60,-40 -60,50 0,70 0,-20" fill="#8b1f1f"/>
+    <g fill="#fff">
+      <circle cx="-28" cy="-48" r="4"/><circle cx="0" cy="-48" r="4"/><circle cx="28" cy="-48" r="4"/>
+      <circle cx="-28" cy="-32" r="4"/><circle cx="0" cy="-32" r="4"/><circle cx="28" cy="-32" r="4"/>
+    </g>
+    <g fill="#fff">
+      <circle cx="30" cy="10" r="4"/>
+    </g>
+    <g fill="#ffd4d4">
+      <circle cx="-30" cy="-5" r="4"/>
+      <circle cx="-20" cy="15" r="4"/>
+      <circle cx="-40" cy="35" r="4"/>
+      <circle cx="-30" cy="55" r="4"/>
+    </g>
+  </g>
+  <g font-family="monospace" fill="#fff" opacity="0.85">
+    <text x="20" y="30" font-size="11">ROLL</text>
+    <text x="20" y="55" font-size="26" font-weight="bold" fill="#ffd166">5 + 6</text>
+    <text x="20" y="76" font-size="13" fill="#35d39a">= 11</text>
+  </g>
+  <g font-family="monospace" fill="#fff" opacity="0.7" text-anchor="end">
+    <text x="380" y="30" font-size="11">LUCKY</text>
+    <text x="380" y="55" font-size="26" font-weight="bold" fill="#ff8fa8">7</text>
+  </g>
+</svg>

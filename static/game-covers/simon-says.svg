@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="ss-bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1a1f4a"/>
+      <stop offset="100%" stop-color="#06081a"/>
+    </radialGradient>
+    <radialGradient id="ss-green-lit" cx="50%" cy="50%"><stop offset="0%" stop-color="#7fffc8"/><stop offset="100%" stop-color="#1d8a5a"/></radialGradient>
+    <radialGradient id="ss-green-dim" cx="50%" cy="50%"><stop offset="0%" stop-color="#257c55"/><stop offset="100%" stop-color="#0e3a26"/></radialGradient>
+    <radialGradient id="ss-red-lit" cx="50%" cy="50%"><stop offset="0%" stop-color="#ff9a9a"/><stop offset="100%" stop-color="#c03030"/></radialGradient>
+    <radialGradient id="ss-red-dim" cx="50%" cy="50%"><stop offset="0%" stop-color="#8a2525"/><stop offset="100%" stop-color="#3a0e0e"/></radialGradient>
+    <radialGradient id="ss-yellow-lit" cx="50%" cy="50%"><stop offset="0%" stop-color="#ffe680"/><stop offset="100%" stop-color="#c99a10"/></radialGradient>
+    <radialGradient id="ss-yellow-dim" cx="50%" cy="50%"><stop offset="0%" stop-color="#8a6f1a"/><stop offset="100%" stop-color="#3a2f08"/></radialGradient>
+    <radialGradient id="ss-blue-lit" cx="50%" cy="50%"><stop offset="0%" stop-color="#8fc8ff"/><stop offset="100%" stop-color="#2b6bc4"/></radialGradient>
+    <radialGradient id="ss-blue-dim" cx="50%" cy="50%"><stop offset="0%" stop-color="#25558a"/><stop offset="100%" stop-color="#0e243a"/></radialGradient>
+    <filter id="ss-glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="ss-sh"><feDropShadow dx="1" dy="3" stdDeviation="2" flood-opacity="0.5"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#ss-bg)"/>
+  <g transform="translate(200,150)">
+    <!-- Outer ring -->
+    <circle r="130" fill="#2a2f5a" filter="url(#ss-sh)"/>
+    <circle r="128" fill="none" stroke="#1a1d40" stroke-width="2"/>
+    <!-- Green quadrant (LIT) -->
+    <g filter="url(#ss-glow)">
+      <path d="M0,0 L0,-125 A125,125 0 0,0 -125,0 Z" fill="url(#ss-green-lit)"/>
+    </g>
+    <!-- Red quadrant (dim) -->
+    <path d="M0,0 L125,0 A125,125 0 0,0 0,-125 Z" fill="url(#ss-red-dim)"/>
+    <!-- Yellow quadrant (dim) -->
+    <path d="M0,0 L-125,0 A125,125 0 0,0 0,125 Z" fill="url(#ss-yellow-dim)"/>
+    <!-- Blue quadrant (dim) -->
+    <path d="M0,0 L0,125 A125,125 0 0,0 125,0 Z" fill="url(#ss-blue-dim)"/>
+    <!-- Gaps between quadrants -->
+    <g stroke="#06081a" stroke-width="6">
+      <line x1="0" y1="-130" x2="0" y2="130"/>
+      <line x1="-130" y1="0" x2="130" y2="0"/>
+    </g>
+    <!-- Center -->
+    <circle r="42" fill="#1a1d40" stroke="#3a3f70" stroke-width="3"/>
+    <circle r="42" fill="none" stroke="#4a5080" stroke-width="1" opacity="0.5"/>
+    <text y="6" text-anchor="middle" font-family="'Segoe UI',Arial" font-size="20" font-weight="bold" fill="#ffd166">SIMON</text>
+  </g>
+  <!-- Sequence indicator -->
+  <g transform="translate(50,50)" font-family="monospace">
+    <text x="0" y="0" font-size="10" fill="#9d93ff">ROUND</text>
+    <text x="0" y="26" font-size="26" font-weight="bold" fill="#fff">07</text>
+  </g>
+  <g transform="translate(350,50)" text-anchor="end" font-family="monospace">
+    <text x="0" y="0" font-size="10" fill="#9d93ff">BEST</text>
+    <text x="0" y="26" font-size="26" font-weight="bold" fill="#ffd166">12</text>
+  </g>
+  <!-- Sequence dots at bottom -->
+  <g transform="translate(200,275)" text-anchor="middle">
+    <g>
+      <circle cx="-54" r="5" fill="#35d39a"/>
+      <circle cx="-36" r="5" fill="#ff5f8f"/>
+      <circle cx="-18" r="5" fill="#ffd166"/>
+      <circle r="5" fill="#56a8ff"/>
+      <circle cx="18" r="5" fill="#35d39a"/>
+      <circle cx="36" r="5" fill="#ffd166"/>
+      <circle cx="54" r="5" fill="#ff5f8f" opacity="0.4"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="hg-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a1e6e"/>
+      <stop offset="50%" stop-color="#c83a7a"/>
+      <stop offset="100%" stop-color="#ff8a3d"/>
+    </linearGradient>
+    <linearGradient id="hg-track" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a3a6a"/>
+      <stop offset="100%" stop-color="#0a1228"/>
+    </linearGradient>
+    <linearGradient id="hg-ship" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff5f8f"/>
+      <stop offset="100%" stop-color="#8a1a3a"/>
+    </linearGradient>
+    <linearGradient id="hg-glow-g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4ff0dc" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#4ff0dc"/>
+      <stop offset="100%" stop-color="#4ff0dc" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="hg-glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="hg-sh"><feDropShadow dx="1" dy="3" stdDeviation="2" flood-opacity="0.5"/></filter>
+  </defs>
+  <!-- Sky gradient -->
+  <rect width="400" height="180" fill="url(#hg-sky)"/>
+  <!-- Horizon line -->
+  <rect y="180" width="400" height="4" fill="#4ff0dc" filter="url(#hg-glow)"/>
+  <!-- Ground -->
+  <rect y="184" width="400" height="116" fill="#0a0c20"/>
+  <!-- Perspective track (hex-grid floor) -->
+  <g stroke="#4ff0dc" stroke-width="1" fill="none">
+    <line x1="200" y1="184" x2="0" y2="300" opacity="0.6"/>
+    <line x1="200" y1="184" x2="80" y2="300" opacity="0.6"/>
+    <line x1="200" y1="184" x2="160" y2="300" opacity="0.8"/>
+    <line x1="200" y1="184" x2="240" y2="300" opacity="0.8"/>
+    <line x1="200" y1="184" x2="320" y2="300" opacity="0.6"/>
+    <line x1="200" y1="184" x2="400" y2="300" opacity="0.6"/>
+  </g>
+  <g stroke="#4ff0dc" stroke-width="0.8" opacity="0.4" fill="none">
+    <line x1="100" y1="210" x2="300" y2="210"/>
+    <line x1="60" y1="240" x2="340" y2="240"/>
+    <line x1="20" y1="275" x2="380" y2="275"/>
+  </g>
+  <!-- Track (center lit strip) -->
+  <g filter="url(#hg-glow)">
+    <polygon points="200,184 190,200 210,200" fill="#4ff0dc" opacity="0.7"/>
+    <polygon points="190,200 172,230 228,230 210,200" fill="#4ff0dc" opacity="0.5"/>
+    <polygon points="172,230 140,275 260,275 228,230" fill="#4ff0dc" opacity="0.35"/>
+  </g>
+  <!-- Distant mountains -->
+  <g fill="#2a1040" opacity="0.85">
+    <polygon points="0,180 60,130 120,180"/>
+    <polygon points="100,180 160,120 220,180"/>
+    <polygon points="220,180 300,100 380,180"/>
+    <polygon points="340,180 400,130 400,180"/>
+  </g>
+  <!-- Sun glow -->
+  <g filter="url(#hg-glow)">
+    <circle cx="280" cy="110" r="32" fill="#ffeab0" opacity="0.6"/>
+    <circle cx="280" cy="110" r="20" fill="#ffffff"/>
+  </g>
+  <!-- Ship (futuristic) -->
+  <g transform="translate(200,230)" filter="url(#hg-sh)">
+    <polygon points="0,-24 36,14 28,24 -28,24 -36,14" fill="url(#hg-ship)" stroke="#ff8fa8" stroke-width="1"/>
+    <polygon points="0,-24 18,-4 -18,-4" fill="#fff" opacity="0.4"/>
+    <polygon points="0,-14 10,4 -10,4" fill="#4ff0dc" opacity="0.7"/>
+    <rect x="-30" y="18" width="60" height="4" rx="2" fill="#4ff0dc"/>
+    <!-- Engine trails -->
+    <g filter="url(#hg-glow)">
+      <rect x="-22" y="22" width="8" height="16" rx="2" fill="#ff8a3d"/>
+      <rect x="14" y="22" width="8" height="16" rx="2" fill="#ff8a3d"/>
+      <rect x="-20" y="25" width="4" height="10" rx="2" fill="#ffe066"/>
+      <rect x="16" y="25" width="4" height="10" rx="2" fill="#ffe066"/>
+    </g>
+  </g>
+  <!-- Speed streaks -->
+  <g stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.7">
+    <line x1="80" y1="260" x2="30" y2="285"/>
+    <line x1="320" y1="260" x2="370" y2="285"/>
+    <line x1="70" y1="220" x2="40" y2="235"/>
+    <line x1="330" y1="220" x2="360" y2="235"/>
+  </g>
+  <g font-family="monospace" font-weight="bold">
+    <text x="20" y="30" font-size="10" fill="#fff" opacity="0.7">SPEED</text>
+    <text x="20" y="54" font-size="22" fill="#4ff0dc">648 <tspan font-size="11" fill="#fff" opacity="0.6">km/h</tspan></text>
+    <text x="380" y="30" font-size="10" fill="#fff" opacity="0.7" text-anchor="end">LAP</text>
+    <text x="380" y="54" font-size="22" fill="#ffe066" text-anchor="end">2/3</text>
+  </g>
+</svg>

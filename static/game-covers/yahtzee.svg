@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="ya-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a1040"/><stop offset="100%" stop-color="#06081a"/></linearGradient>
+    <linearGradient id="ya-die" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#ddd"/></linearGradient>
+    <filter id="ya-sh"><feDropShadow dx="0" dy="4" stdDeviation="2" flood-opacity="0.5"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#ya-bg)"/>
+  <text x="200" y="40" font-family="system-ui" font-weight="800" font-size="22" fill="#ffd166" text-anchor="middle" letter-spacing="6">YAHTZEE</text>
+  <!-- 5 dice -->
+  <g filter="url(#ya-sh)">
+    <g transform="translate(60,100)"><rect x="0" y="0" width="60" height="60" rx="10" fill="url(#ya-die)" stroke="#ffd166" stroke-width="3"/><circle cx="30" cy="30" r="6" fill="#000"/></g>
+    <g transform="translate(140,90) rotate(-5 30 30)"><rect x="0" y="0" width="60" height="60" rx="10" fill="url(#ya-die)" stroke="#ffd166" stroke-width="3"/><circle cx="15" cy="15" r="5" fill="#000"/><circle cx="45" cy="45" r="5" fill="#000"/></g>
+    <g transform="translate(220,100) rotate(8 30 30)"><rect x="0" y="0" width="60" height="60" rx="10" fill="url(#ya-die)" stroke="#ffd166" stroke-width="3"/><circle cx="15" cy="15" r="5" fill="#000"/><circle cx="30" cy="30" r="5" fill="#000"/><circle cx="45" cy="45" r="5" fill="#000"/></g>
+    <g transform="translate(300,90)"><rect x="0" y="0" width="60" height="60" rx="10" fill="url(#ya-die)" stroke="#ffd166" stroke-width="3"/><circle cx="15" cy="15" r="5" fill="#000"/><circle cx="45" cy="15" r="5" fill="#000"/><circle cx="15" cy="45" r="5" fill="#000"/><circle cx="45" cy="45" r="5" fill="#000"/></g>
+    <g transform="translate(180,180)"><rect x="0" y="0" width="60" height="60" rx="10" fill="url(#ya-die)" stroke="#ffd166" stroke-width="3"/><circle cx="15" cy="15" r="5" fill="#000"/><circle cx="45" cy="15" r="5" fill="#000"/><circle cx="15" cy="30" r="5" fill="#000"/><circle cx="45" cy="30" r="5" fill="#000"/><circle cx="15" cy="45" r="5" fill="#000"/><circle cx="45" cy="45" r="5" fill="#000"/></g>
+  </g>
+  <text x="200" y="280" font-family="monospace" font-weight="bold" font-size="11" fill="#56a8ff" text-anchor="middle" letter-spacing="3">ROLL · HOLD · SCORE</text>
+</svg>

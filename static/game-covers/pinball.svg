@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="pb-bg" cx="0.5" cy="0.2"><stop offset="0%" stop-color="#2a1054"/><stop offset="100%" stop-color="#0a0420"/></radialGradient>
+    <radialGradient id="pb-r"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#ff3050"/><stop offset="100%" stop-color="#3a0010"/></radialGradient>
+    <radialGradient id="pb-b"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#56a8ff"/><stop offset="100%" stop-color="#0a2050"/></radialGradient>
+    <radialGradient id="pb-y"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#ffd166"/><stop offset="100%" stop-color="#3a2a00"/></radialGradient>
+    <radialGradient id="pb-g"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#35d39a"/><stop offset="100%" stop-color="#0a3020"/></radialGradient>
+    <radialGradient id="pb-ball"><stop offset="0%" stop-color="#fff"/><stop offset="60%" stop-color="#bbb"/><stop offset="100%" stop-color="#444"/></radialGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#pb-bg)"/>
+  <!-- side walls -->
+  <g stroke="#56a8ff" stroke-width="3" fill="none" opacity="0.8">
+    <path d="M 30 30 L 30 280"/>
+    <path d="M 370 30 L 370 200 L 350 220 L 350 280"/>
+    <path d="M 30 30 Q 200 -10 370 30"/>
+  </g>
+  <!-- bumpers -->
+  <circle cx="120" cy="100" r="22" fill="url(#pb-r)"/>
+  <circle cx="220" cy="80" r="22" fill="url(#pb-b)"/>
+  <circle cx="160" cy="160" r="26" fill="url(#pb-y)"/>
+  <circle cx="280" cy="130" r="22" fill="url(#pb-g)"/>
+  <circle cx="80" cy="200" r="18" fill="url(#pb-r)"/>
+  <circle cx="260" cy="220" r="18" fill="url(#pb-b)"/>
+  <!-- flippers -->
+  <g fill="#ffd166">
+    <ellipse cx="160" cy="260" rx="40" ry="6" transform="rotate(-20 160 260)"/>
+    <ellipse cx="240" cy="260" rx="40" ry="6" transform="rotate(20 240 260)"/>
+  </g>
+  <!-- ball -->
+  <circle cx="200" cy="190" r="9" fill="url(#pb-ball)"/>
+  <!-- launch chute -->
+  <rect x="355" y="220" width="10" height="60" fill="rgba(255,255,255,0.05)"/>
+  <text x="20" y="20" font-family="monospace" font-size="12" fill="#ffd166" font-weight="bold">SCORE 12,450</text>
+  <text x="380" y="20" font-family="monospace" font-size="12" fill="#ffd166" font-weight="bold" text-anchor="end">BALLS 2</text>
+</svg>

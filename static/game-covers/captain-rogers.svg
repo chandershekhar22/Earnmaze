@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="cr-bg" cx="50%" cy="50%" r="80%"><stop offset="0%" stop-color="#1a2a6a"/><stop offset="100%" stop-color="#030512"/></radialGradient>
+    <linearGradient id="cr-ship" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff5f8f"/><stop offset="100%" stop-color="#a01a3a"/></linearGradient>
+    <filter id="cr-glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#cr-bg)"/>
+  <g fill="#fff" opacity="0.8"><circle cx="30" cy="50" r="1"/><circle cx="130" cy="80" r="0.8"/><circle cx="240" cy="50" r="1"/><circle cx="340" cy="90" r="0.9"/><circle cx="50" cy="180" r="0.7"/><circle cx="280" cy="220" r="1"/><circle cx="370" cy="160" r="0.8"/></g>
+  <!-- Asteroids -->
+  <g fill="#6a5a48" stroke="#2a1f10" stroke-width="1"><polygon points="60,120 75,105 90,112 82,130 66,132"/><polygon points="320,170 335,160 348,170 340,188 325,186"/><polygon points="340,60 355,50 365,62 358,76 344,74"/><polygon points="80,230 95,220 106,232 98,248 84,246"/></g>
+  <!-- Ship -->
+  <g filter="url(#cr-glow)" transform="translate(180,150)">
+    <path d="M-30,0 L30,-20 L50,0 L30,20 Z" fill="url(#cr-ship)" stroke="#ff8fa8" stroke-width="1"/>
+    <circle cx="-10" cy="0" r="6" fill="#4ff0dc"/>
+    <rect x="-40" y="-4" width="12" height="8" rx="2" fill="#ff8a3d"/>
+    <rect x="-48" y="-2" width="8" height="4" fill="#ffe066"/>
+  </g>
+  <!-- Laser shot -->
+  <g stroke="#4ff0b5" stroke-width="3" stroke-linecap="round" filter="url(#cr-glow)"><line x1="230" y1="150" x2="290" y2="150"/></g>
+  <g font-family="monospace" fill="#4ff0b5" font-weight="bold"><text x="20" y="28" font-size="11">CAPT. ROGERS</text><text x="20" y="50" font-size="22">⭐ 42</text></g>
+  <g font-family="monospace" fill="#ff8fa8" text-anchor="end" font-weight="bold"><text x="380" y="28" font-size="11">DIST</text><text x="380" y="50" font-size="22">840</text></g>
+</svg>

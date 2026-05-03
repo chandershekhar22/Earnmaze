@@ -29,10 +29,14 @@
 
 	let isAuthPage = $derived(
 		$page.url.pathname.includes('/auth') ||
-		$page.url.pathname === '/login' ||
-		$page.url.pathname === '/register' ||
 		$page.url.pathname === '/forgot-password' ||
 		$page.url.pathname === '/reset-password'
+	);
+
+	let isStandalonePage = $derived(
+		$page.url.pathname === '/' ||
+		$page.url.pathname === '/login' ||
+		$page.url.pathname === '/register'
 	);
 
 	let isEarnMoneyPage = $derived($page.url.pathname === '/earn-points');
@@ -61,6 +65,9 @@
 				{@render children()}
 			</div>
 		</main>
+	{:else if isStandalonePage}
+		<!-- Home and auth pages render their own shell -->
+		{@render children()}
 	{:else}
 		<!-- Public pages layout -->
 		<div class="min-h-screen bg-surface">

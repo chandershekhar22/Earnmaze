@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="st-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#151a2e"/>
+      <stop offset="100%" stop-color="#0b0f1f"/>
+    </linearGradient>
+    <linearGradient id="st-key" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#37405c"/>
+      <stop offset="100%" stop-color="#1f2540"/>
+    </linearGradient>
+    <linearGradient id="st-key-on" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4ff0b5"/>
+      <stop offset="100%" stop-color="#1eaf7d"/>
+    </linearGradient>
+    <filter id="st-sh"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.45"/></filter>
+    <filter id="st-glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#st-bg)"/>
+  <g opacity="0.08" font-family="monospace" fill="#35d39a" font-size="11">
+    <text x="16" y="24">the quick brown fox jumps over the lazy dog</text>
+    <text x="16" y="42">pack my box with five dozen liquor jugs</text>
+    <text x="16" y="60">how razorback-jumping frogs can level six</text>
+  </g>
+  <g transform="translate(200,130)" text-anchor="middle">
+    <text font-family="monospace" font-size="20" fill="#5c5c72">sphinx of</text>
+    <text y="0" x="0" font-family="monospace" font-size="20" font-weight="bold">
+      <tspan fill="#35d39a">black</tspan><tspan fill="#5c5c72"> </tspan><tspan fill="#35d39a">qu</tspan><tspan fill="#f5f5fa">a</tspan><tspan fill="#5c5c72">rtz, judge my vow</tspan>
+    </text>
+    <rect x="-8" y="-16" width="2" height="22" fill="#35d39a">
+      <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+  <g transform="translate(40,180)" filter="url(#st-sh)">
+    <g>
+      <rect x="0" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="17" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">Q</text>
+      <rect x="38" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="55" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">W</text>
+      <rect x="76" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="93" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">E</text>
+      <rect x="114" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="131" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">R</text>
+      <rect x="152" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="169" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">T</text>
+      <rect x="190" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="207" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">Y</text>
+      <rect x="228" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="245" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">U</text>
+      <rect x="266" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="283" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">I</text>
+      <rect x="304" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="321" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">O</text>
+    </g>
+    <g transform="translate(16,40)">
+      <rect x="0" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="17" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">A</text>
+      <rect x="38" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="55" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">S</text>
+      <rect x="76" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="93" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">D</text>
+      <rect x="114" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="131" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">F</text>
+      <g filter="url(#st-glow)"><rect x="152" y="0" width="34" height="34" rx="4" fill="url(#st-key-on)"/></g>
+      <text x="169" y="22" font-family="monospace" font-size="14" fill="#06190f" text-anchor="middle" font-weight="bold">G</text>
+      <rect x="190" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="207" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">H</text>
+      <rect x="228" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="245" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">J</text>
+      <rect x="266" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="283" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">K</text>
+      <rect x="304" y="0" width="34" height="34" rx="4" fill="url(#st-key)"/><text x="321" y="22" font-family="monospace" font-size="14" fill="#9aa3bd" text-anchor="middle">L</text>
+    </g>
+  </g>
+  <g font-family="monospace">
+    <text x="20" y="26" font-size="10" fill="#5c5c72">WPM</text>
+    <text x="20" y="52" font-size="28" fill="#35d39a" font-weight="bold">87</text>
+    <text x="380" y="26" font-size="10" fill="#5c5c72" text-anchor="end">ACC</text>
+    <text x="380" y="52" font-size="28" fill="#ffd166" font-weight="bold" text-anchor="end">96%</text>
+  </g>
+</svg>

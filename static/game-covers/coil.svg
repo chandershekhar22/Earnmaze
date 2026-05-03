@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="cl-bg" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="#0a1a40"/><stop offset="100%" stop-color="#000"/></radialGradient>
+    <filter id="cl-glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#cl-bg)"/>
+  <!-- Enemies inside coil -->
+  <g filter="url(#cl-glow)" fill="#ff5f8f"><circle cx="190" cy="130" r="6"/><circle cx="220" cy="155" r="6"/><circle cx="180" cy="170" r="6"/></g>
+  <!-- Trail loop -->
+  <g fill="none" stroke="#4ff0dc" stroke-width="4" stroke-linecap="round" filter="url(#cl-glow)">
+    <path d="M100,180 Q100,80 200,80 Q300,80 300,180 Q300,230 200,230 Q150,230 160,200 Q175,170 200,180 Q225,190 210,160"/>
+  </g>
+  <!-- Player (head of trail) -->
+  <g filter="url(#cl-glow)"><circle cx="210" cy="160" r="8" fill="#ffe066"/></g>
+  <!-- Other enemies outside -->
+  <g filter="url(#cl-glow)" fill="#a77bff"><circle cx="80" cy="80" r="8"/><circle cx="330" cy="90" r="8"/><circle cx="60" cy="240" r="8"/><circle cx="340" cy="250" r="8"/></g>
+  <g font-family="monospace" fill="#4ff0dc" font-weight="bold"><text x="20" y="28" font-size="11">LEVEL</text><text x="20" y="50" font-size="22">04</text></g>
+  <g font-family="monospace" fill="#ffe066" text-anchor="end" font-weight="bold"><text x="380" y="28" font-size="11">SCORE</text><text x="380" y="50" font-size="22">2,400</text></g>
+</svg>

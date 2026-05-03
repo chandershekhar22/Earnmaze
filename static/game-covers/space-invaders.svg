@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#000"/>
+  <g fill="rgba(255,255,255,0.3)">
+    <rect x="30" y="30" width="1" height="1"/><rect x="80" y="100" width="1" height="1"/><rect x="150" y="50" width="1" height="1"/>
+    <rect x="220" y="80" width="1" height="1"/><rect x="290" y="40" width="1" height="1"/><rect x="350" y="120" width="1" height="1"/>
+    <rect x="60" y="200" width="1" height="1"/><rect x="180" y="180" width="1" height="1"/><rect x="320" y="220" width="1" height="1"/>
+  </g>
+  <g>
+    <!-- 3 rows of invaders -->
+    <g fill="#ff5f8f">
+      <rect x="60" y="50" width="20" height="14"/><rect x="56" y="62" width="4" height="4"/><rect x="80" y="62" width="4" height="4"/>
+      <rect x="120" y="50" width="20" height="14"/><rect x="116" y="62" width="4" height="4"/><rect x="140" y="62" width="4" height="4"/>
+      <rect x="180" y="50" width="20" height="14"/><rect x="176" y="62" width="4" height="4"/><rect x="200" y="62" width="4" height="4"/>
+      <rect x="240" y="50" width="20" height="14"/><rect x="236" y="62" width="4" height="4"/><rect x="260" y="62" width="4" height="4"/>
+      <rect x="300" y="50" width="20" height="14"/><rect x="296" y="62" width="4" height="4"/><rect x="320" y="62" width="4" height="4"/>
+    </g>
+    <g fill="#ffd166">
+      <rect x="60" y="90" width="20" height="14"/><rect x="56" y="102" width="4" height="4"/><rect x="80" y="102" width="4" height="4"/>
+      <rect x="120" y="90" width="20" height="14"/><rect x="116" y="102" width="4" height="4"/><rect x="140" y="102" width="4" height="4"/>
+      <rect x="180" y="90" width="20" height="14"/><rect x="176" y="102" width="4" height="4"/><rect x="200" y="102" width="4" height="4"/>
+      <rect x="240" y="90" width="20" height="14"/><rect x="236" y="102" width="4" height="4"/><rect x="260" y="102" width="4" height="4"/>
+    </g>
+    <g fill="#56a8ff">
+      <rect x="80" y="130" width="20" height="14"/><rect x="76" y="142" width="4" height="4"/><rect x="100" y="142" width="4" height="4"/>
+      <rect x="140" y="130" width="20" height="14"/><rect x="136" y="142" width="4" height="4"/><rect x="160" y="142" width="4" height="4"/>
+      <rect x="200" y="130" width="20" height="14"/><rect x="196" y="142" width="4" height="4"/><rect x="220" y="142" width="4" height="4"/>
+    </g>
+  </g>
+  <!-- bullets -->
+  <rect x="199" y="200" width="2" height="10" fill="#fff"/>
+  <rect x="180" y="180" width="2" height="10" fill="#ff3050"/>
+  <!-- player -->
+  <g fill="#0f0">
+    <rect x="180" y="250" width="40" height="4"/>
+    <rect x="188" y="242" width="24" height="8"/>
+    <rect x="198" y="236" width="4" height="6"/>
+  </g>
+  <text x="200" y="290" font-family="monospace" font-weight="bold" font-size="11" fill="#0f0" text-anchor="middle" letter-spacing="3">SCORE 1340 · WAVE 03</text>
+</svg>

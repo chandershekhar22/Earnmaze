@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="tt-cyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4dd0e1"/>
+      <stop offset="100%" stop-color="#00acc1"/>
+    </linearGradient>
+    <linearGradient id="tt-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#42a5f5"/>
+      <stop offset="100%" stop-color="#1565c0"/>
+    </linearGradient>
+    <linearGradient id="tt-orange" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffa726"/>
+      <stop offset="100%" stop-color="#e65100"/>
+    </linearGradient>
+    <linearGradient id="tt-yellow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffee58"/>
+      <stop offset="100%" stop-color="#f9a825"/>
+    </linearGradient>
+    <linearGradient id="tt-green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#66bb6a"/>
+      <stop offset="100%" stop-color="#2e7d32"/>
+    </linearGradient>
+    <linearGradient id="tt-purple" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ab47bc"/>
+      <stop offset="100%" stop-color="#6a1b9a"/>
+    </linearGradient>
+    <linearGradient id="tt-red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ef5350"/>
+      <stop offset="100%" stop-color="#b71c1c"/>
+    </linearGradient>
+    <filter id="tt-shadow">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity="0.3"/>
+    </filter>
+    <filter id="tt-glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="#1a1a2e" fill-opacity="0.2"/>
+  <!-- Playing field outline -->
+  <rect x="110" y="5" width="220" height="290" rx="3" fill="#0a0a1a" fill-opacity="0.3" stroke="#333" stroke-width="1.5"/>
+  <!-- Grid lines (subtle) -->
+  <g stroke="#222" stroke-width="0.3" opacity="0.4">
+    <line x1="132" y1="5" x2="132" y2="295"/><line x1="154" y1="5" x2="154" y2="295"/>
+    <line x1="176" y1="5" x2="176" y2="295"/><line x1="198" y1="5" x2="198" y2="295"/>
+    <line x1="220" y1="5" x2="220" y2="295"/><line x1="242" y1="5" x2="242" y2="295"/>
+    <line x1="264" y1="5" x2="264" y2="295"/><line x1="286" y1="5" x2="286" y2="295"/>
+    <line x1="308" y1="5" x2="308" y2="295"/>
+  </g>
+  <!-- Settled blocks at bottom -->
+  <!-- Row (bottom) - almost complete line -->
+  <g filter="url(#tt-shadow)">
+    <!-- Bottom row -->
+    <rect x="110" y="273" width="22" height="22" rx="2" fill="url(#tt-cyan)" stroke="#00838f" stroke-width="0.5"/>
+    <rect x="132" y="273" width="22" height="22" rx="2" fill="url(#tt-blue)" stroke="#0d47a1" stroke-width="0.5"/>
+    <rect x="154" y="273" width="22" height="22" rx="2" fill="url(#tt-orange)" stroke="#bf360c" stroke-width="0.5"/>
+    <rect x="176" y="273" width="22" height="22" rx="2" fill="url(#tt-green)" stroke="#1b5e20" stroke-width="0.5"/>
+    <rect x="198" y="273" width="22" height="22" rx="2" fill="url(#tt-red)" stroke="#8e0000" stroke-width="0.5"/>
+    <rect x="220" y="273" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#4a148c" stroke-width="0.5"/>
+    <rect x="242" y="273" width="22" height="22" rx="2" fill="url(#tt-yellow)" stroke="#f57f17" stroke-width="0.5"/>
+    <rect x="264" y="273" width="22" height="22" rx="2" fill="url(#tt-cyan)" stroke="#00838f" stroke-width="0.5"/>
+    <rect x="286" y="273" width="22" height="22" rx="2" fill="url(#tt-blue)" stroke="#0d47a1" stroke-width="0.5"/>
+    <!-- Second row - partial -->
+    <rect x="110" y="251" width="22" height="22" rx="2" fill="url(#tt-red)" stroke="#8e0000" stroke-width="0.5"/>
+    <rect x="132" y="251" width="22" height="22" rx="2" fill="url(#tt-red)" stroke="#8e0000" stroke-width="0.5"/>
+    <rect x="154" y="251" width="22" height="22" rx="2" fill="url(#tt-green)" stroke="#1b5e20" stroke-width="0.5"/>
+    <rect x="176" y="251" width="22" height="22" rx="2" fill="url(#tt-green)" stroke="#1b5e20" stroke-width="0.5"/>
+    <rect x="264" y="251" width="22" height="22" rx="2" fill="url(#tt-orange)" stroke="#bf360c" stroke-width="0.5"/>
+    <rect x="286" y="251" width="22" height="22" rx="2" fill="url(#tt-orange)" stroke="#bf360c" stroke-width="0.5"/>
+    <rect x="308" y="251" width="22" height="22" rx="2" fill="url(#tt-orange)" stroke="#bf360c" stroke-width="0.5"/>
+    <!-- Third row - sparse -->
+    <rect x="110" y="229" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#4a148c" stroke-width="0.5"/>
+    <rect x="286" y="229" width="22" height="22" rx="2" fill="url(#tt-yellow)" stroke="#f57f17" stroke-width="0.5"/>
+    <rect x="308" y="229" width="22" height="22" rx="2" fill="url(#tt-yellow)" stroke="#f57f17" stroke-width="0.5"/>
+  </g>
+  <!-- Falling T-piece -->
+  <g filter="url(#tt-glow)">
+    <rect x="198" y="120" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#7b1fa2" stroke-width="1"/>
+    <rect x="176" y="142" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#7b1fa2" stroke-width="1"/>
+    <rect x="198" y="142" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#7b1fa2" stroke-width="1"/>
+    <rect x="220" y="142" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#7b1fa2" stroke-width="1"/>
+    <!-- Shine on each block -->
+    <rect x="200" y="122" width="8" height="3" rx="1" fill="#fff" opacity="0.3"/>
+    <rect x="178" y="144" width="8" height="3" rx="1" fill="#fff" opacity="0.3"/>
+    <rect x="200" y="144" width="8" height="3" rx="1" fill="#fff" opacity="0.3"/>
+    <rect x="222" y="144" width="8" height="3" rx="1" fill="#fff" opacity="0.3"/>
+  </g>
+  <!-- Ghost piece (where it will land) -->
+  <g opacity="0.2">
+    <rect x="198" y="207" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#7b1fa2" stroke-width="1"/>
+    <rect x="176" y="229" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#7b1fa2" stroke-width="1"/>
+    <rect x="198" y="229" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#7b1fa2" stroke-width="1"/>
+    <rect x="220" y="229" width="22" height="22" rx="2" fill="url(#tt-purple)" stroke="#7b1fa2" stroke-width="1"/>
+  </g>
+  <!-- Next piece preview (I-piece) -->
+  <g transform="translate(50, 30)">
+    <text x="0" y="0" font-family="monospace" font-size="9" fill="#888" opacity="0.6">NEXT</text>
+    <rect x="-5" y="8" width="16" height="16" rx="2" fill="url(#tt-cyan)" stroke="#00838f" stroke-width="0.5" opacity="0.7"/>
+    <rect x="-5" y="26" width="16" height="16" rx="2" fill="url(#tt-cyan)" stroke="#00838f" stroke-width="0.5" opacity="0.7"/>
+    <rect x="-5" y="44" width="16" height="16" rx="2" fill="url(#tt-cyan)" stroke="#00838f" stroke-width="0.5" opacity="0.7"/>
+    <rect x="-5" y="62" width="16" height="16" rx="2" fill="url(#tt-cyan)" stroke="#00838f" stroke-width="0.5" opacity="0.7"/>
+  </g>
+  <!-- Score -->
+  <g transform="translate(345, 30)">
+    <text x="0" y="0" font-family="monospace" font-size="9" fill="#888" opacity="0.6" text-anchor="end">SCORE</text>
+    <text x="0" y="16" font-family="monospace" font-size="14" fill="#4dd0e1" opacity="0.7" text-anchor="end" font-weight="bold">28400</text>
+    <text x="0" y="35" font-family="monospace" font-size="9" fill="#888" opacity="0.6" text-anchor="end">LINES</text>
+    <text x="0" y="51" font-family="monospace" font-size="14" fill="#66bb6a" opacity="0.7" text-anchor="end" font-weight="bold">42</text>
+  </g>
+</svg>

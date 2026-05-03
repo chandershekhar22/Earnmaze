@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bt-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a1830"/><stop offset="100%" stop-color="#020a18"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bt-bg)"/>
+  <text x="200" y="32" font-family="system-ui" font-weight="800" font-size="20" fill="#56a8ff" text-anchor="middle" letter-spacing="6">BATTLESHIP</text>
+  <!-- two boards -->
+  <g>
+    <text x="80" y="58" font-family="monospace" font-size="9" fill="#56a8ff" text-anchor="middle">YOUR FLEET</text>
+    <g transform="translate(20,65)">
+      <g>
+        <!-- 6x6 grid -->
+        <g fill="#0e2a4a" stroke="#1f4070">
+          <rect x="0" y="0" width="20" height="20"/><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+          <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+          <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+          <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+          <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+          <rect x="0" y="100" width="20" height="20"/><rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+        </g>
+        <!-- ships -->
+        <g fill="#345580" stroke="#5a8fc8">
+          <rect x="0" y="0" width="80" height="20"/>
+          <rect x="0" y="40" width="20" height="60"/>
+        </g>
+        <!-- hits/misses -->
+        <text x="50" y="55" font-size="22" fill="#56a8ff" text-anchor="middle">·</text>
+        <text x="90" y="35" font-size="22" fill="#56a8ff" text-anchor="middle">·</text>
+        <rect x="0" y="40" width="20" height="20" fill="#ff3050"/>
+      </g>
+    </g>
+    <text x="320" y="58" font-family="monospace" font-size="9" fill="#56a8ff" text-anchor="middle">ENEMY WATERS</text>
+    <g transform="translate(260,65)">
+      <g fill="#0e2a4a" stroke="#1f4070">
+        <rect x="0" y="0" width="20" height="20"/><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+        <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+        <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+        <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+        <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+        <rect x="0" y="100" width="20" height="20"/><rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+      </g>
+      <rect x="20" y="0" width="20" height="20" fill="#ff3050"/>
+      <rect x="40" y="60" width="20" height="20" fill="#5a0a18"/>
+      <rect x="60" y="60" width="20" height="20" fill="#5a0a18"/>
+      <text x="30" y="35" font-size="22" fill="#56a8ff" text-anchor="middle">·</text>
+      <text x="90" y="115" font-size="22" fill="#56a8ff" text-anchor="middle">·</text>
+    </g>
+  </g>
+  <text x="200" y="280" font-family="monospace" font-size="11" fill="#ffd166" text-anchor="middle" font-weight="bold">SHOTS 12 · HITS 4 · SUNK 1</text>
+</svg>

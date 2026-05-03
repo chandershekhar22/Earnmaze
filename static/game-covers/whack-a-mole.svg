@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="wm-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6eb854"/>
+      <stop offset="100%" stop-color="#2f5e1b"/>
+    </linearGradient>
+    <radialGradient id="wm-hole" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#1f1208"/>
+      <stop offset="100%" stop-color="#0a0502"/>
+    </radialGradient>
+    <linearGradient id="wm-dirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7d5230"/>
+      <stop offset="100%" stop-color="#4a2f18"/>
+    </linearGradient>
+    <linearGradient id="wm-mole" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c19070"/>
+      <stop offset="100%" stop-color="#7a5538"/>
+    </linearGradient>
+    <linearGradient id="wm-hammer-h" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="100%" stop-color="#a01a1a"/>
+    </linearGradient>
+    <filter id="wm-sh"><feDropShadow dx="1" dy="3" stdDeviation="2" flood-opacity="0.4"/></filter>
+    <filter id="wm-glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#wm-bg)"/>
+  <!-- Grass texture -->
+  <g stroke="#98e07a" stroke-width="1" opacity="0.3">
+    <line x1="30" y1="60" x2="34" y2="50"/><line x1="120" y1="60" x2="124" y2="50"/>
+    <line x1="250" y1="40" x2="254" y2="30"/><line x1="360" y1="60" x2="364" y2="50"/>
+    <line x1="200" y1="140" x2="204" y2="130"/><line x1="60" y1="210" x2="64" y2="200"/>
+  </g>
+  <!-- Holes 3x2 -->
+  <g>
+    <!-- Hole (empty) -->
+    <g transform="translate(80,100)" filter="url(#wm-sh)">
+      <ellipse rx="46" ry="18" fill="url(#wm-dirt)"/>
+      <ellipse rx="38" ry="12" fill="url(#wm-hole)"/>
+    </g>
+    <!-- Hole (with mole popping) -->
+    <g transform="translate(200,90)">
+      <g filter="url(#wm-sh)">
+        <ellipse rx="50" ry="18" fill="url(#wm-dirt)"/>
+        <ellipse rx="40" ry="12" fill="url(#wm-hole)"/>
+      </g>
+      <g filter="url(#wm-sh)" transform="translate(0,-6)">
+        <ellipse cy="10" rx="30" ry="14" fill="#4a2f18" opacity="0.4"/>
+        <circle cy="-10" r="28" fill="url(#wm-mole)"/>
+        <ellipse cx="-16" cy="-14" rx="7" ry="5" fill="#fff"/>
+        <ellipse cx="16" cy="-14" rx="7" ry="5" fill="#fff"/>
+        <circle cx="-14" cy="-13" r="3" fill="#1a1208"/>
+        <circle cx="18" cy="-13" r="3" fill="#1a1208"/>
+        <ellipse cx="0" cy="-5" rx="6" ry="4" fill="#6b3d1c"/>
+        <path d="M-8,2 Q0,8 8,2" stroke="#3a1f08" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M-3,4 L-3,10 M3,4 L3,10" stroke="#fff" stroke-width="1.5"/>
+      </g>
+    </g>
+    <!-- Hole (with another mole) -->
+    <g transform="translate(320,110)">
+      <g filter="url(#wm-sh)">
+        <ellipse rx="46" ry="18" fill="url(#wm-dirt)"/>
+        <ellipse rx="38" ry="12" fill="url(#wm-hole)"/>
+      </g>
+      <g transform="translate(0,-2)" opacity="0.95">
+        <circle cy="0" r="20" fill="url(#wm-mole)"/>
+        <circle cx="-8" cy="-4" r="2.5" fill="#1a1208"/>
+        <circle cx="8" cy="-4" r="2.5" fill="#1a1208"/>
+        <ellipse cx="0" cy="3" rx="4" ry="3" fill="#6b3d1c"/>
+      </g>
+    </g>
+    <!-- Bottom row holes -->
+    <g transform="translate(90,210)" filter="url(#wm-sh)">
+      <ellipse rx="46" ry="18" fill="url(#wm-dirt)"/>
+      <ellipse rx="38" ry="12" fill="url(#wm-hole)"/>
+    </g>
+    <g transform="translate(310,220)" filter="url(#wm-sh)">
+      <ellipse rx="46" ry="18" fill="url(#wm-dirt)"/>
+      <ellipse rx="38" ry="12" fill="url(#wm-hole)"/>
+    </g>
+    <!-- Middle bottom with stars (hit) -->
+    <g transform="translate(200,220)">
+      <g filter="url(#wm-sh)">
+        <ellipse rx="50" ry="18" fill="url(#wm-dirt)"/>
+        <ellipse rx="40" ry="12" fill="url(#wm-hole)"/>
+      </g>
+      <g font-size="20" text-anchor="middle" filter="url(#wm-glow)">
+        <text x="-10" y="-15" fill="#ffd166">★</text>
+        <text x="12" y="-25" fill="#fff">★</text>
+        <text x="-22" y="-32" fill="#ff5f8f">★</text>
+      </g>
+    </g>
+  </g>
+  <!-- Hammer -->
+  <g filter="url(#wm-glow)" transform="translate(200,65) rotate(-25)">
+    <rect x="-8" y="0" width="16" height="60" rx="4" fill="#7d4a1f"/>
+    <rect x="-28" y="-22" width="56" height="32" rx="6" fill="url(#wm-hammer-h)" stroke="#5a0a0a" stroke-width="2"/>
+    <rect x="-24" y="-20" width="18" height="6" rx="2" fill="#fff" opacity="0.4"/>
+  </g>
+  <!-- Impact burst -->
+  <g transform="translate(210,80)" filter="url(#wm-glow)">
+    <g stroke="#ffd166" stroke-width="3" stroke-linecap="round">
+      <line x1="0" y1="0" x2="-10" y2="-14"/>
+      <line x1="0" y1="0" x2="12" y2="-12"/>
+      <line x1="0" y1="0" x2="-16" y2="2"/>
+      <line x1="0" y1="0" x2="16" y2="4"/>
+    </g>
+  </g>
+  <g font-family="monospace" fill="#fff">
+    <text x="20" y="30" font-size="12" font-weight="bold">🔨 HITS 14</text>
+    <text x="380" y="30" font-size="14" font-weight="bold" fill="#ffd166" text-anchor="end">⏱ 0:22</text>
+  </g>
+</svg>

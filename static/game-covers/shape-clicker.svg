@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="sc-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0c1a3a"/>
+      <stop offset="100%" stop-color="#1a2d5c"/>
+    </linearGradient>
+    <linearGradient id="sc-c1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff5f8f"/><stop offset="100%" stop-color="#b12052"/></linearGradient>
+    <linearGradient id="sc-c2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#56a8ff"/><stop offset="100%" stop-color="#1b5ab5"/></linearGradient>
+    <linearGradient id="sc-c3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#35d39a"/><stop offset="100%" stop-color="#147a55"/></linearGradient>
+    <linearGradient id="sc-c4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd166"/><stop offset="100%" stop-color="#b07c10"/></linearGradient>
+    <linearGradient id="sc-c5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8f7cff"/><stop offset="100%" stop-color="#4b3eb0"/></linearGradient>
+    <filter id="sc-sh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.4"/></filter>
+    <filter id="sc-glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#sc-bg)"/>
+  <!-- Circle -->
+  <g filter="url(#sc-sh)">
+    <circle cx="90" cy="90" r="36" fill="url(#sc-c1)"/>
+    <circle cx="78" cy="76" r="10" fill="#fff" opacity="0.35"/>
+  </g>
+  <!-- Square -->
+  <g filter="url(#sc-sh)" transform="translate(220,70) rotate(12)">
+    <rect x="-34" y="-34" width="68" height="68" rx="6" fill="url(#sc-c2)"/>
+    <rect x="-28" y="-28" width="24" height="6" rx="2" fill="#fff" opacity="0.3"/>
+  </g>
+  <!-- Triangle (target - glowing) -->
+  <g filter="url(#sc-glow)">
+    <polygon points="340,50 378,120 302,120" fill="url(#sc-c3)"/>
+    <polygon points="340,58 365,110 315,110" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.4"/>
+  </g>
+  <!-- Star -->
+  <g filter="url(#sc-sh)" transform="translate(110,200)">
+    <polygon points="0,-34 10,-10 34,-10 14,5 22,28 0,14 -22,28 -14,5 -34,-10 -10,-10" fill="url(#sc-c4)"/>
+    <polygon points="0,-22 6,-6 22,-6 10,4 14,18 0,10 -14,18 -10,4 -22,-6 -6,-6" fill="none" stroke="#fff" stroke-width="1" opacity="0.4"/>
+  </g>
+  <!-- Hexagon -->
+  <g filter="url(#sc-sh)" transform="translate(280,200)">
+    <polygon points="0,-38 33,-19 33,19 0,38 -33,19 -33,-19" fill="url(#sc-c5)"/>
+    <polygon points="-18,-22 18,-22" stroke="#fff" stroke-width="1.5" opacity="0.3"/>
+  </g>
+  <!-- Small extra shapes -->
+  <g opacity="0.65">
+    <circle cx="40" cy="160" r="10" fill="url(#sc-c3)"/>
+    <rect x="180" y="150" width="16" height="16" rx="3" fill="url(#sc-c1)"/>
+    <polygon points="365,230 376,250 354,250" fill="url(#sc-c4)"/>
+    <circle cx="200" cy="255" r="8" fill="url(#sc-c5)"/>
+  </g>
+  <!-- Cursor near triangle -->
+  <g filter="url(#sc-glow)" transform="translate(355,100)">
+    <polygon points="0,0 0,18 5,14 10,22 12,20 8,13 15,13" fill="#fff"/>
+  </g>
+  <g font-family="monospace" fill="#fff" opacity="0.85">
+    <text x="20" y="30" font-size="10">TARGET</text>
+    <text x="20" y="54" font-size="20" font-weight="bold" fill="#35d39a">▲ TRIANGLE</text>
+  </g>
+  <g font-family="monospace" fill="#ffd166" opacity="0.85" text-anchor="end">
+    <text x="380" y="30" font-size="10">COMBO</text>
+    <text x="380" y="54" font-size="22" font-weight="bold">x12</text>
+  </g>
+</svg>

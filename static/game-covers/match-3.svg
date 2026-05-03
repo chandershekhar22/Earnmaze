@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="m3-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a1040"/><stop offset="100%" stop-color="#0a0420"/></linearGradient>
+    <linearGradient id="m3-p" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#ff5f8f"/><stop offset="100%" stop-color="#3a0a18"/></linearGradient>
+    <linearGradient id="m3-b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#56a8ff"/><stop offset="100%" stop-color="#0a2050"/></linearGradient>
+    <linearGradient id="m3-y" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#ffd166"/><stop offset="100%" stop-color="#5a3a0a"/></linearGradient>
+    <linearGradient id="m3-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#35d39a"/><stop offset="100%" stop-color="#0a3020"/></linearGradient>
+    <linearGradient id="m3-pu" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#8f7cff"/><stop offset="100%" stop-color="#1a0a50"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#m3-bg)"/>
+  <g stroke="rgba(255,255,255,0.15)" stroke-width="1">
+    <!-- diamond gems in 6x4 grid -->
+    <g transform="translate(80,40)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-p)"/></g>
+    <g transform="translate(140,40)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-b)"/></g>
+    <g transform="translate(200,40)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-y)"/></g>
+    <g transform="translate(260,40)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-g)"/></g>
+    <g transform="translate(320,40)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-pu)"/></g>
+    <g transform="translate(80,100)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-y)"/></g>
+    <g transform="translate(140,100)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-y)"/></g>
+    <g transform="translate(200,100)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-y)"/></g>
+    <g transform="translate(260,100)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-b)"/></g>
+    <g transform="translate(320,100)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-p)"/></g>
+    <g transform="translate(80,160)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-pu)"/></g>
+    <g transform="translate(140,160)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-g)"/></g>
+    <g transform="translate(200,160)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-g)"/></g>
+    <g transform="translate(260,160)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-g)"/></g>
+    <g transform="translate(320,160)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-y)"/></g>
+    <g transform="translate(80,220)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-b)"/></g>
+    <g transform="translate(140,220)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-p)"/></g>
+    <g transform="translate(200,220)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-y)"/></g>
+    <g transform="translate(260,220)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-pu)"/></g>
+    <g transform="translate(320,220)"><polygon points="0,-22 22,0 0,22 -22,0" fill="url(#m3-b)"/></g>
+  </g>
+  <text x="20" y="290" font-family="monospace" font-size="12" fill="#56a8ff" font-weight="bold">MOVES 18</text>
+  <text x="380" y="290" font-family="monospace" font-size="12" fill="#ffd166" font-weight="bold" text-anchor="end">SCORE 4,280</text>
+</svg>

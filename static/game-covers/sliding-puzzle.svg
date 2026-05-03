@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="sp-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1f294c"/>
+      <stop offset="100%" stop-color="#0a0e24"/>
+    </linearGradient>
+    <linearGradient id="sp-tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#56a8ff"/>
+      <stop offset="100%" stop-color="#1e5aa8"/>
+    </linearGradient>
+    <linearGradient id="sp-tile-hover" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7fc4ff"/>
+      <stop offset="100%" stop-color="#2b7fd8"/>
+    </linearGradient>
+    <linearGradient id="sp-board" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a3458"/>
+      <stop offset="100%" stop-color="#141a2e"/>
+    </linearGradient>
+    <filter id="sp-sh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.4"/></filter>
+    <filter id="sp-glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#sp-bg)"/>
+  <!-- Board -->
+  <g transform="translate(120,30)">
+    <rect width="240" height="240" rx="10" fill="url(#sp-board)" stroke="#3a4670" stroke-width="2" filter="url(#sp-sh)"/>
+    <!-- Grid 4x4 of 55-wide tiles with 4px gap at origin 10,10 -->
+    <g filter="url(#sp-sh)">
+      <g font-family="'Segoe UI',Arial" font-size="26" font-weight="bold" text-anchor="middle">
+        <!-- Row 1 -->
+        <g transform="translate(10,10)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">1</text></g>
+        <g transform="translate(69,10)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">2</text></g>
+        <g transform="translate(128,10)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">3</text></g>
+        <g transform="translate(187,10)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">4</text></g>
+        <!-- Row 2 -->
+        <g transform="translate(10,69)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">5</text></g>
+        <g transform="translate(69,69)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">6</text></g>
+        <g transform="translate(128,69)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">7</text></g>
+        <g transform="translate(187,69)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">8</text></g>
+        <!-- Row 3 -->
+        <g transform="translate(10,128)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">9</text></g>
+        <g transform="translate(69,128)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">10</text></g>
+        <g transform="translate(128,128)" filter="url(#sp-glow)"><rect width="54" height="54" rx="6" fill="url(#sp-tile-hover)"/><text x="27" y="35" fill="#fff">11</text></g>
+        <g transform="translate(187,128)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">12</text></g>
+        <!-- Row 4: 13, 14, 15, [empty] -->
+        <g transform="translate(10,187)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">13</text></g>
+        <g transform="translate(69,187)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">14</text></g>
+        <g transform="translate(128,187)"><rect width="54" height="54" rx="6" fill="url(#sp-tile)"/><text x="27" y="35" fill="#fff">15</text></g>
+        <!-- Empty slot -->
+        <rect x="187" y="187" width="54" height="54" rx="6" fill="#0d1228" stroke="#3a4670" stroke-width="1" stroke-dasharray="4 3"/>
+      </g>
+    </g>
+    <!-- Arrow showing move direction -->
+    <g transform="translate(214,214)" filter="url(#sp-glow)">
+      <path d="M0,0 L-18,0 M-10,-6 L-18,0 L-10,6" stroke="#4ff0b5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+  </g>
+  <g font-family="monospace" fill="#fff" opacity="0.85">
+    <text x="20" y="30" font-size="10">MOVES</text>
+    <text x="20" y="54" font-size="22" font-weight="bold">48</text>
+    <text x="20" y="275" font-size="10">TIME</text>
+    <text x="20" y="296" font-size="16" font-weight="bold" fill="#35d39a">01:24</text>
+  </g>
+  <g font-family="monospace" fill="#ffd166" opacity="0.85" text-anchor="end">
+    <text x="380" y="30" font-size="10">BEST</text>
+    <text x="380" y="54" font-size="22" font-weight="bold">38</text>
+  </g>
+</svg>

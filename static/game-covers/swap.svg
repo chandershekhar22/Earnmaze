@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="sw-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a3a5a"/><stop offset="100%" stop-color="#050a18"/></linearGradient>
+    <filter id="sw-sh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.4"/></filter>
+    <filter id="sw-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#sw-bg)"/>
+  <!-- Grid -->
+  <g filter="url(#sw-sh)">
+    <!-- tiles 5x3 -->
+    <g transform="translate(80,60)">
+      <rect x="0" y="0" width="48" height="48" rx="3" fill="#4a6a8a"/>
+      <rect x="56" y="0" width="48" height="48" rx="3" fill="#ff5f8f"/>
+      <rect x="112" y="0" width="48" height="48" rx="3" fill="#4a6a8a"/>
+      <rect x="168" y="0" width="48" height="48" rx="3" fill="#4ff0b5"/>
+      <rect x="224" y="0" width="48" height="48" rx="3" fill="#4a6a8a"/>
+      <rect x="0" y="56" width="48" height="48" rx="3" fill="#ff5f8f"/>
+      <rect x="56" y="56" width="48" height="48" rx="3" fill="#4a6a8a"/>
+      <rect x="112" y="56" width="48" height="48" rx="3" fill="#4ff0b5"/>
+      <rect x="168" y="56" width="48" height="48" rx="3" fill="#4a6a8a"/>
+      <rect x="224" y="56" width="48" height="48" rx="3" fill="#ff5f8f"/>
+      <rect x="0" y="112" width="48" height="48" rx="3" fill="#4a6a8a"/>
+      <rect x="56" y="112" width="48" height="48" rx="3" fill="#4ff0b5"/>
+      <rect x="112" y="112" width="48" height="48" rx="3" fill="#4a6a8a"/>
+      <rect x="168" y="112" width="48" height="48" rx="3" fill="#ff5f8f"/>
+      <rect x="224" y="112" width="48" height="48" rx="3" fill="#4a6a8a"/>
+    </g>
+  </g>
+  <!-- Swap indicator -->
+  <g transform="translate(192,140)" filter="url(#sw-glow)">
+    <path d="M-20,0 L-8,-10 L-8,-3 L20,-3 L20,3 L-8,3 L-8,10 Z" fill="#ffe066"/>
+  </g>
+  <g font-family="monospace" fill="#ff5f8f" font-weight="bold"><text x="20" y="28" font-size="11">SWAPS</text><text x="20" y="50" font-size="22">05</text></g>
+  <g font-family="monospace" fill="#4ff0b5" text-anchor="end" font-weight="bold"><text x="380" y="28" font-size="11">LEVEL</text><text x="380" y="50" font-size="22">08</text></g>
+</svg>

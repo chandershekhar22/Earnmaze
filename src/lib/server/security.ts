@@ -91,7 +91,9 @@ export async function csrfMiddleware(event: RequestEvent): Promise<Response | nu
  * Set comprehensive security headers
  */
 export function setSecurityHeaders(headers: Headers): void {
-	headers.set('X-Frame-Options', 'DENY');
+	// SAMEORIGIN (not DENY) so admin-uploaded artifact HTML can be embedded
+	// in same-origin iframes on /artifacts/[id] and /[kind=section]/[id] pages.
+	headers.set('X-Frame-Options', 'SAMEORIGIN');
 	headers.set('X-Content-Type-Options', 'nosniff');
 	headers.set('X-XSS-Protection', '1; mode=block');
 	headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -108,7 +110,7 @@ export function setSecurityHeaders(headers: Headers): void {
 			"img-src 'self' data: https:",
 			"font-src 'self' data: https://fonts.gstatic.com",
 			"connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com https://*.clarity.ms https://c.bing.com",
-			"frame-src https://challenges.cloudflare.com",
+			"frame-src 'self' https://challenges.cloudflare.com",
 			"base-uri 'self'",
 			"form-action 'self'",
 			"object-src 'none'",

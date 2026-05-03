@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="fb-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4fc3f7" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#81d4fa" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="fb-pipe" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#43a047"/>
+      <stop offset="15%" stop-color="#66bb6a"/>
+      <stop offset="50%" stop-color="#4caf50"/>
+      <stop offset="85%" stop-color="#388e3c"/>
+      <stop offset="100%" stop-color="#2e7d32"/>
+    </linearGradient>
+    <linearGradient id="fb-piperim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#388e3c"/>
+      <stop offset="15%" stop-color="#66bb6a"/>
+      <stop offset="50%" stop-color="#4caf50"/>
+      <stop offset="85%" stop-color="#2e7d32"/>
+      <stop offset="100%" stop-color="#1b5e20"/>
+    </linearGradient>
+    <radialGradient id="fb-bird" cx="40%" cy="35%">
+      <stop offset="0%" stop-color="#ffd54f"/>
+      <stop offset="100%" stop-color="#f9a825"/>
+    </radialGradient>
+    <filter id="fb-shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#fb-sky)"/>
+  <!-- Clouds -->
+  <g fill="#fff" opacity="0.5">
+    <ellipse cx="60" cy="40" rx="35" ry="15"/><ellipse cx="85" cy="35" rx="25" ry="12"/>
+    <ellipse cx="300" cy="50" rx="40" ry="16"/><ellipse cx="330" cy="45" rx="28" ry="12"/>
+    <ellipse cx="180" cy="30" rx="30" ry="11"/><ellipse cx="200" cy="26" rx="20" ry="9"/>
+  </g>
+  <!-- Left pipe (top) -->
+  <g filter="url(#fb-shadow)">
+    <rect x="90" y="0" width="55" height="95" fill="url(#fb-pipe)"/>
+    <rect x="82" y="90" width="71" height="28" rx="4" fill="url(#fb-piperim)"/>
+    <line x1="105" y1="5" x2="105" y2="90" stroke="#66bb6a" stroke-width="2" opacity="0.4"/>
+  </g>
+  <!-- Left pipe (bottom) -->
+  <g filter="url(#fb-shadow)">
+    <rect x="82" y="185" width="71" height="28" rx="4" fill="url(#fb-piperim)"/>
+    <rect x="90" y="210" width="55" height="90" fill="url(#fb-pipe)"/>
+    <line x1="105" y1="215" x2="105" y2="300" stroke="#66bb6a" stroke-width="2" opacity="0.4"/>
+  </g>
+  <!-- Right pipe (top) -->
+  <g filter="url(#fb-shadow)">
+    <rect x="270" y="0" width="55" height="120" fill="url(#fb-pipe)"/>
+    <rect x="262" y="115" width="71" height="28" rx="4" fill="url(#fb-piperim)"/>
+    <line x1="285" y1="5" x2="285" y2="115" stroke="#66bb6a" stroke-width="2" opacity="0.4"/>
+  </g>
+  <!-- Right pipe (bottom) -->
+  <g filter="url(#fb-shadow)">
+    <rect x="262" y="220" width="71" height="28" rx="4" fill="url(#fb-piperim)"/>
+    <rect x="270" y="245" width="55" height="55" fill="url(#fb-pipe)"/>
+    <line x1="285" y1="250" x2="285" y2="300" stroke="#66bb6a" stroke-width="2" opacity="0.4"/>
+  </g>
+  <!-- Bird -->
+  <g transform="translate(195, 148)" filter="url(#fb-shadow)">
+    <!-- Body -->
+    <ellipse cx="0" cy="0" rx="22" ry="18" fill="url(#fb-bird)"/>
+    <!-- Belly -->
+    <ellipse cx="3" cy="6" rx="14" ry="10" fill="#fff8e1" opacity="0.6"/>
+    <!-- Wing -->
+    <ellipse cx="-10" cy="-2" rx="14" ry="8" fill="#f57f17" opacity="0.8" transform="rotate(-15 -10 -2)"/>
+    <!-- Eye (white) -->
+    <circle cx="10" cy="-6" r="8" fill="#fff" stroke="#333" stroke-width="1"/>
+    <!-- Pupil -->
+    <circle cx="13" cy="-6" r="4" fill="#111"/>
+    <circle cx="14" cy="-7" r="1.5" fill="#fff"/>
+    <!-- Beak top -->
+    <path d="M18,-2 L32,-1 L20,4Z" fill="#ff6f00"/>
+    <!-- Beak bottom -->
+    <path d="M18,4 L28,6 L20,8Z" fill="#e65100"/>
+    <!-- Tail feathers -->
+    <path d="M-20,-4 L-30,-10 L-22,-2Z" fill="#f9a825"/>
+    <path d="M-20,0 L-32,0 L-22,4Z" fill="#f57f17"/>
+  </g>
+  <!-- Ground -->
+  <rect x="0" y="285" width="400" height="15" fill="#8d6e63" opacity="0.4"/>
+  <g fill="#a1887f" opacity="0.3">
+    <rect x="0" y="285" width="20" height="4"/><rect x="25" y="285" width="20" height="4"/>
+    <rect x="50" y="285" width="20" height="4"/><rect x="75" y="285" width="20" height="4"/>
+    <rect x="100" y="285" width="20" height="4"/><rect x="125" y="285" width="20" height="4"/>
+    <rect x="150" y="285" width="20" height="4"/><rect x="175" y="285" width="20" height="4"/>
+    <rect x="200" y="285" width="20" height="4"/><rect x="225" y="285" width="20" height="4"/>
+    <rect x="250" y="285" width="20" height="4"/><rect x="275" y="285" width="20" height="4"/>
+    <rect x="300" y="285" width="20" height="4"/><rect x="325" y="285" width="20" height="4"/>
+    <rect x="350" y="285" width="20" height="4"/><rect x="375" y="285" width="20" height="4"/>
+  </g>
+  <!-- Score -->
+  <text x="200" y="28" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="28" fill="#fff" font-weight="bold" opacity="0.7" stroke="#333" stroke-width="1">7</text>
+</svg>

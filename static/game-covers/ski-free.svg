@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="sk-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#aee4ff"/><stop offset="100%" stop-color="#f5fbff"/></linearGradient>
+    <linearGradient id="sk-snow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#b8d4e8"/></linearGradient>
+    <filter id="sk-sh"><feDropShadow dx="1" dy="2" stdDeviation="1" flood-opacity="0.3"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#sk-sky)"/>
+  <rect y="110" width="400" height="190" fill="url(#sk-snow)"/>
+  <g fill="#e8f2fa"><circle cx="60" cy="160" r="6"/><circle cx="180" cy="220" r="5"/><circle cx="320" cy="250" r="7"/><circle cx="100" cy="260" r="4"/></g>
+  <g fill="#2a6d3a" filter="url(#sk-sh)">
+    <polygon points="60,180 50,220 70,220"/><polygon points="60,165 52,195 68,195"/>
+    <polygon points="340,170 328,215 352,215"/><polygon points="340,155 330,190 350,190"/>
+    <polygon points="260,200 250,240 270,240"/>
+  </g>
+  <g filter="url(#sk-sh)" transform="translate(200,160)">
+    <ellipse cy="42" rx="18" ry="4" fill="#000" opacity="0.25"/>
+    <rect x="-14" y="-30" width="28" height="42" rx="8" fill="#e03a3a"/>
+    <circle cy="-36" r="14" fill="#ffd6a8"/>
+    <rect x="-16" y="-50" width="32" height="16" rx="4" fill="#2a4a8a"/>
+    <line x1="-22" y1="42" x2="22" y2="42" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+    <line x1="-24" y1="48" x2="24" y2="48" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <g stroke="#b8d4e8" stroke-width="3" stroke-linecap="round" opacity="0.7"><line x1="170" y1="250" x2="150" y2="290"/><line x1="230" y1="250" x2="250" y2="290"/></g>
+  <g font-family="monospace" fill="#1a3a5a"><text x="20" y="28" font-size="11">DISTANCE</text><text x="20" y="50" font-size="22" font-weight="bold">1,420m</text></g>
+  <g font-family="monospace" fill="#1a3a5a" text-anchor="end"><text x="380" y="28" font-size="11">⏱ 0:42</text></g>
+</svg>

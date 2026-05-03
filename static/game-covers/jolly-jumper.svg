@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="jj-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd96a"/><stop offset="100%" stop-color="#ff8a3d"/></linearGradient>
+    <filter id="jj-sh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.35"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#jj-bg)"/>
+  <g fill="#fff" opacity="0.6"><ellipse cx="80" cy="50" rx="22" ry="8"/><ellipse cx="300" cy="70" rx="28" ry="10"/></g>
+  <!-- Platforms -->
+  <g filter="url(#jj-sh)">
+    <rect x="50" y="230" width="80" height="14" rx="3" fill="#5a7d2a"/>
+    <rect x="180" y="190" width="80" height="14" rx="3" fill="#5a7d2a"/>
+    <rect x="260" y="140" width="80" height="14" rx="3" fill="#5a7d2a"/>
+    <rect x="80" y="110" width="60" height="14" rx="3" fill="#5a7d2a"/>
+  </g>
+  <!-- Spring -->
+  <g filter="url(#jj-sh)" transform="translate(220,190)"><rect x="-10" y="-8" width="20" height="8" fill="#c2c7d1"/><path d="M-10,0 Q0,-4 10,0 Q0,4 -10,0 M-10,3 Q0,-1 10,3 Q0,7 -10,3" stroke="#6a6f7a" stroke-width="1.5" fill="none"/></g>
+  <!-- Coin -->
+  <g filter="url(#jj-sh)" transform="translate(300,130)"><circle r="10" fill="#ffd166"/><circle r="7" fill="#ffe8a0"/><text y="4" text-anchor="middle" font-family="'Segoe UI'" font-size="10" font-weight="bold" fill="#8a6308">$</text></g>
+  <!-- Jumper character -->
+  <g filter="url(#jj-sh)" transform="translate(110,90)">
+    <circle cy="0" r="18" fill="#ff5f8f"/>
+    <circle cx="-6" cy="-4" r="3" fill="#fff"/>
+    <circle cx="6" cy="-4" r="3" fill="#fff"/>
+    <circle cx="-6" cy="-4" r="1.5" fill="#000"/>
+    <circle cx="6" cy="-4" r="1.5" fill="#000"/>
+    <path d="M-6,6 Q0,10 6,6" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- Jump lines -->
+  <g stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.7" fill="none">
+    <path d="M90,150 Q100,130 110,110"/><path d="M130,150 Q120,130 110,110"/>
+  </g>
+  <g font-family="monospace" fill="#3a1a08" font-weight="bold"><text x="20" y="28" font-size="11">HEIGHT</text><text x="20" y="50" font-size="22">1,240</text></g>
+  <g font-family="monospace" fill="#3a1a08" text-anchor="end" font-weight="bold"><text x="380" y="28" font-size="11">COINS</text><text x="380" y="50" font-size="22">32</text></g>
+</svg>

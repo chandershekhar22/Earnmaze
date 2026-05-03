@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="mr-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5c94fc"/><stop offset="100%" stop-color="#8bb5fc"/></linearGradient>
+    <linearGradient id="mr-brick" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c84c1c"/><stop offset="100%" stop-color="#8a2a0a"/></linearGradient>
+    <filter id="mr-sh"><feDropShadow dx="1" dy="1" stdDeviation="1" flood-opacity="0.35"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#mr-sky)"/>
+  <g fill="#fff" opacity="0.85"><ellipse cx="80" cy="60" rx="18" ry="8"/><ellipse cx="70" cy="55" rx="10" ry="6"/><ellipse cx="290" cy="40" rx="20" ry="8"/><ellipse cx="280" cy="34" rx="12" ry="6"/></g>
+  <rect y="240" width="400" height="60" fill="#f09020"/>
+  <g fill="#8b4008" opacity="0.5"><rect y="240" width="400" height="4"/></g>
+  <!-- Pipes -->
+  <g filter="url(#mr-sh)"><rect x="300" y="180" width="50" height="60" fill="#0a9a0a"/><rect x="294" y="170" width="62" height="16" fill="#0a9a0a"/><rect x="294" y="170" width="62" height="4" fill="#5ee85e"/><rect x="300" y="186" width="6" height="52" fill="#5ee85e" opacity="0.5"/></g>
+  <!-- Question block -->
+  <g filter="url(#mr-sh)" transform="translate(160,120)"><rect width="32" height="32" fill="#ffcc00" stroke="#8a6a08" stroke-width="2"/><text x="16" y="24" text-anchor="middle" font-family="'Courier New'" font-size="22" font-weight="bold" fill="#8a2a08">?</text></g>
+  <!-- Bricks -->
+  <g filter="url(#mr-sh)">
+    <rect x="80" y="140" width="32" height="18" fill="url(#mr-brick)" stroke="#4a1405" stroke-width="1"/>
+    <rect x="112" y="140" width="32" height="18" fill="url(#mr-brick)" stroke="#4a1405" stroke-width="1"/>
+    <rect x="200" y="120" width="32" height="18" fill="url(#mr-brick)" stroke="#4a1405" stroke-width="1"/>
+    <rect x="232" y="120" width="32" height="18" fill="url(#mr-brick)" stroke="#4a1405" stroke-width="1"/>
+  </g>
+  <!-- Goomba -->
+  <g filter="url(#mr-sh)" transform="translate(110,224)"><ellipse cx="0" cy="0" rx="14" ry="10" fill="#a0522d"/><circle cx="-5" cy="-4" r="2.5" fill="#fff"/><circle cx="5" cy="-4" r="2.5" fill="#fff"/><circle cx="-5" cy="-4" r="1.5" fill="#000"/><circle cx="5" cy="-4" r="1.5" fill="#000"/><rect x="-9" y="8" width="6" height="4" fill="#3a1a0a"/><rect x="3" y="8" width="6" height="4" fill="#3a1a0a"/></g>
+  <!-- Mario -->
+  <g filter="url(#mr-sh)" transform="translate(250,210)">
+    <rect x="-12" y="-30" width="24" height="10" fill="#e03a3a"/>
+    <rect x="-10" y="-36" width="20" height="8" fill="#e03a3a"/>
+    <rect x="-6" y="-22" width="12" height="10" fill="#ffd6a8"/>
+    <rect x="-12" y="-12" width="24" height="14" fill="#e03a3a"/>
+    <rect x="-14" y="-2" width="28" height="12" fill="#2a4a8a"/>
+    <rect x="-8" y="8" width="6" height="6" fill="#3a1e08"/>
+    <rect x="2" y="8" width="6" height="6" fill="#3a1e08"/>
+  </g>
+  <g font-family="monospace" fill="#fff" font-weight="bold"><text x="20" y="28" font-size="11">MARIO</text><text x="20" y="50" font-size="22">042500</text></g>
+  <g font-family="monospace" fill="#fff" text-anchor="end"><text x="380" y="28" font-size="11">WORLD</text><text x="380" y="50" font-size="22" font-weight="bold">1-1</text></g>
+</svg>

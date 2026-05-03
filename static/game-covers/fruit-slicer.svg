@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="fs-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5c1a3a"/>
+      <stop offset="100%" stop-color="#1a0812"/>
+    </linearGradient>
+    <radialGradient id="fs-apple" cx="35%" cy="35%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#8c1515"/></radialGradient>
+    <radialGradient id="fs-apple-in" cx="50%" cy="50%"><stop offset="0%" stop-color="#ffe6cc"/><stop offset="100%" stop-color="#f4b080"/></radialGradient>
+    <radialGradient id="fs-orange" cx="35%" cy="35%"><stop offset="0%" stop-color="#ffb347"/><stop offset="100%" stop-color="#b85e00"/></radialGradient>
+    <radialGradient id="fs-watermelon" cx="50%" cy="50%"><stop offset="0%" stop-color="#ff7a7a"/><stop offset="70%" stop-color="#d13232"/><stop offset="85%" stop-color="#f0f0dc"/><stop offset="100%" stop-color="#2e8a1a"/></radialGradient>
+    <radialGradient id="fs-kiwi" cx="50%" cy="50%"><stop offset="0%" stop-color="#e0ef94"/><stop offset="70%" stop-color="#90b53d"/><stop offset="100%" stop-color="#5a4a1f"/></radialGradient>
+    <filter id="fs-sh"><feDropShadow dx="2" dy="3" stdDeviation="2" flood-opacity="0.45"/></filter>
+    <filter id="fs-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#fs-bg)"/>
+  <!-- Splash arc trail -->
+  <g filter="url(#fs-glow)">
+    <path d="M40,250 Q180,40 360,240" fill="none" stroke="#fff" stroke-width="4" opacity="0.85" stroke-linecap="round"/>
+    <path d="M50,245 Q180,55 350,235" fill="none" stroke="#ff5f8f" stroke-width="2" opacity="0.6" stroke-linecap="round"/>
+  </g>
+  <!-- Watermelon sliced (left half flying) -->
+  <g filter="url(#fs-sh)" transform="translate(95,130) rotate(-25)">
+    <path d="M-42,0 A42,42 0 0,1 42,0 L34,2 A34,34 0 0,0 -34,2 Z" fill="#2e8a1a"/>
+    <path d="M-34,2 A34,34 0 0,1 34,2 L30,4 A30,30 0 0,0 -30,4 Z" fill="#f0f0dc"/>
+    <path d="M-30,4 A30,30 0 0,1 30,4 Z" fill="url(#fs-watermelon)"/>
+    <g fill="#2a0808">
+      <ellipse cx="-14" cy="-6" rx="1.5" ry="3"/>
+      <ellipse cx="0" cy="-10" rx="1.5" ry="3"/>
+      <ellipse cx="14" cy="-6" rx="1.5" ry="3"/>
+      <ellipse cx="-8" cy="-18" rx="1.5" ry="3"/>
+      <ellipse cx="8" cy="-18" rx="1.5" ry="3"/>
+    </g>
+  </g>
+  <g filter="url(#fs-sh)" transform="translate(155,105) rotate(35)">
+    <path d="M-42,0 A42,42 0 0,0 42,0 L34,-2 A34,34 0 0,1 -34,-2 Z" fill="#2e8a1a"/>
+    <path d="M-34,-2 A34,34 0 0,0 34,-2 L30,-4 A30,30 0 0,1 -30,-4 Z" fill="#f0f0dc"/>
+    <path d="M-30,-4 A30,30 0 0,0 30,-4 Z" fill="url(#fs-watermelon)"/>
+    <g fill="#2a0808">
+      <ellipse cx="-14" cy="6" rx="1.5" ry="3"/>
+      <ellipse cx="0" cy="10" rx="1.5" ry="3"/>
+      <ellipse cx="14" cy="6" rx="1.5" ry="3"/>
+    </g>
+  </g>
+  <!-- Whole apple -->
+  <g filter="url(#fs-sh)" transform="translate(280,90)">
+    <circle r="32" fill="url(#fs-apple)"/>
+    <path d="M0,-30 Q2,-38 -4,-40" stroke="#4a2808" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M0,-30 Q8,-36 14,-32" fill="#35d39a"/>
+    <circle cx="-10" cy="-10" r="6" fill="#fff" opacity="0.35"/>
+  </g>
+  <!-- Kiwi whole -->
+  <g filter="url(#fs-sh)" transform="translate(310,200)">
+    <ellipse rx="28" ry="30" fill="url(#fs-kiwi)"/>
+    <g fill="#2a0808" opacity="0.7">
+      <ellipse cx="-8" cy="-8" rx="1.5" ry="2"/>
+      <ellipse cx="6" cy="-6" rx="1.5" ry="2"/>
+      <ellipse cx="0" cy="3" rx="1.5" ry="2"/>
+      <ellipse cx="-10" cy="10" rx="1.5" ry="2"/>
+      <ellipse cx="8" cy="12" rx="1.5" ry="2"/>
+    </g>
+  </g>
+  <!-- Orange with leaf -->
+  <g filter="url(#fs-sh)" transform="translate(80,225)">
+    <circle r="28" fill="url(#fs-orange)"/>
+    <path d="M0,-26 Q6,-34 14,-32" fill="#35d39a"/>
+    <circle cx="-9" cy="-8" r="5" fill="#fff" opacity="0.35"/>
+  </g>
+  <!-- Juice drops -->
+  <g filter="url(#fs-glow)" fill="#ff5f8f">
+    <circle cx="190" cy="60" r="4"/>
+    <circle cx="220" cy="75" r="3"/>
+    <circle cx="170" cy="80" r="3"/>
+    <circle cx="210" cy="45" r="2.5"/>
+  </g>
+  <!-- Blade tip -->
+  <g filter="url(#fs-glow)" transform="translate(365,235)">
+    <polygon points="-8,8 8,-8 16,-2 0,14" fill="#ccd4e8"/>
+    <polygon points="-8,8 8,-8 4,-12 -12,4" fill="#fff"/>
+  </g>
+  <g font-family="monospace" fill="#fff" opacity="0.9">
+    <text x="20" y="30" font-size="11">SLICED</text>
+    <text x="20" y="54" font-size="22" font-weight="bold" fill="#ff5f8f">32</text>
+  </g>
+  <g font-family="monospace" fill="#ffd166" opacity="0.9" text-anchor="end">
+    <text x="380" y="30" font-size="11">COMBO</text>
+    <text x="380" y="54" font-size="22" font-weight="bold">x5!</text>
+  </g>
+</svg>

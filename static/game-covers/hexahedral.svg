@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="hh-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a3a5a"/><stop offset="100%" stop-color="#0a1020"/></linearGradient>
+    <linearGradient id="hh-top" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8fb5ff"/><stop offset="100%" stop-color="#4a78d0"/></linearGradient>
+    <linearGradient id="hh-right" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5478c0"/><stop offset="100%" stop-color="#2a4a90"/></linearGradient>
+    <linearGradient id="hh-left" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a5aa0"/><stop offset="100%" stop-color="#1a3070"/></linearGradient>
+    <filter id="hh-sh"><feDropShadow dx="1" dy="3" stdDeviation="2" flood-opacity="0.4"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#hh-bg)"/>
+  <!-- Isometric cubes grid 4x3 -->
+  <g filter="url(#hh-sh)">
+    <!-- cube size 40, positions layered -->
+    <g transform="translate(160,80)"><polygon points="0,-40 35,-20 0,0 -35,-20" fill="url(#hh-top)"/><polygon points="0,0 35,-20 35,20 0,40" fill="url(#hh-right)"/><polygon points="0,0 -35,-20 -35,20 0,40" fill="url(#hh-left)"/></g>
+    <g transform="translate(220,100)"><polygon points="0,-40 35,-20 0,0 -35,-20" fill="url(#hh-top)"/><polygon points="0,0 35,-20 35,20 0,40" fill="url(#hh-right)"/><polygon points="0,0 -35,-20 -35,20 0,40" fill="url(#hh-left)"/></g>
+    <g transform="translate(100,120)"><polygon points="0,-40 35,-20 0,0 -35,-20" fill="url(#hh-top)"/><polygon points="0,0 35,-20 35,20 0,40" fill="url(#hh-right)"/><polygon points="0,0 -35,-20 -35,20 0,40" fill="url(#hh-left)"/></g>
+    <g transform="translate(280,150)"><polygon points="0,-40 35,-20 0,0 -35,-20" fill="url(#hh-top)"/><polygon points="0,0 35,-20 35,20 0,40" fill="url(#hh-right)"/><polygon points="0,0 -35,-20 -35,20 0,40" fill="url(#hh-left)"/></g>
+    <g transform="translate(160,160)"><polygon points="0,-20 20,-10 0,0 -20,-10" fill="#35d39a" opacity="0.6"/></g>
+    <g transform="translate(220,200)"><polygon points="0,-40 35,-20 0,0 -35,-20" fill="#4ff0b5" opacity="0.6"/><polygon points="0,0 35,-20 35,20 0,40" fill="#1aa078" opacity="0.6"/><polygon points="0,0 -35,-20 -35,20 0,40" fill="#1a8660" opacity="0.6"/></g>
+  </g>
+  <!-- Arrow cursor -->
+  <g transform="translate(160,40)" fill="#ffe066" filter="url(#hh-sh)"><polygon points="0,0 8,18 -8,18"/></g>
+  <g font-family="monospace" fill="#8fb5ff" font-weight="bold"><text x="20" y="28" font-size="11">LEVEL</text><text x="20" y="50" font-size="22">12</text></g>
+  <g font-family="monospace" fill="#ffe066" text-anchor="end" font-weight="bold"><text x="380" y="28" font-size="11">MOVES</text><text x="380" y="50" font-size="22">08</text></g>
+</svg>

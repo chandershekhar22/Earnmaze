@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#000"/>
+  <!-- mushrooms -->
+  <g>
+    <g transform="translate(50,80)"><path d="M -10 0 A 10 10 0 0 1 10 0 Z" fill="#ff5fff"/><rect x="-3" y="0" width="6" height="8" fill="#fff"/></g>
+    <g transform="translate(120,60)"><path d="M -10 0 A 10 10 0 0 1 10 0 Z" fill="#ff5fff"/><rect x="-3" y="0" width="6" height="8" fill="#fff"/></g>
+    <g transform="translate(220,80)"><path d="M -10 0 A 10 10 0 0 1 10 0 Z" fill="#ff5fff" opacity="0.5"/><rect x="-3" y="0" width="6" height="8" fill="#fff" opacity="0.5"/></g>
+    <g transform="translate(330,100)"><path d="M -10 0 A 10 10 0 0 1 10 0 Z" fill="#ff5fff"/><rect x="-3" y="0" width="6" height="8" fill="#fff"/></g>
+    <g transform="translate(80,160)"><path d="M -10 0 A 10 10 0 0 1 10 0 Z" fill="#ff5fff"/><rect x="-3" y="0" width="6" height="8" fill="#fff"/></g>
+    <g transform="translate(180,180)"><path d="M -10 0 A 10 10 0 0 1 10 0 Z" fill="#ff5fff"/><rect x="-3" y="0" width="6" height="8" fill="#fff"/></g>
+    <g transform="translate(290,160)"><path d="M -10 0 A 10 10 0 0 1 10 0 Z" fill="#ff5fff"/><rect x="-3" y="0" width="6" height="8" fill="#fff"/></g>
+  </g>
+  <!-- centipede segments -->
+  <g>
+    <circle cx="50" cy="40" r="13" fill="#ff3050"/>
+    <rect x="44" y="36" width="3" height="3" fill="#fff"/><rect x="52" y="36" width="3" height="3" fill="#fff"/>
+    <circle cx="80" cy="40" r="13" fill="#ffd166"/>
+    <rect x="74" y="36" width="3" height="3" fill="#fff"/><rect x="82" y="36" width="3" height="3" fill="#fff"/>
+    <circle cx="110" cy="40" r="13" fill="#ffd166"/>
+    <rect x="104" y="36" width="3" height="3" fill="#fff"/><rect x="112" y="36" width="3" height="3" fill="#fff"/>
+    <circle cx="140" cy="40" r="13" fill="#ffd166"/>
+    <rect x="134" y="36" width="3" height="3" fill="#fff"/><rect x="142" y="36" width="3" height="3" fill="#fff"/>
+    <circle cx="170" cy="40" r="13" fill="#ffd166"/>
+    <rect x="164" y="36" width="3" height="3" fill="#fff"/><rect x="172" y="36" width="3" height="3" fill="#fff"/>
+    <circle cx="200" cy="40" r="13" fill="#ffd166"/>
+  </g>
+  <!-- spider -->
+  <g transform="translate(280,220)">
+    <circle r="14" fill="#ff8a3d"/>
+    <line x1="-12" y1="0" x2="-22" y2="10" stroke="#ff8a3d" stroke-width="2"/>
+    <line x1="-6" y1="0" x2="-12" y2="14" stroke="#ff8a3d" stroke-width="2"/>
+    <line x1="6" y1="0" x2="12" y2="14" stroke="#ff8a3d" stroke-width="2"/>
+    <line x1="12" y1="0" x2="22" y2="10" stroke="#ff8a3d" stroke-width="2"/>
+  </g>
+  <!-- player -->
+  <g fill="#0f0" transform="translate(200,260)">
+    <rect x="-12" y="-2" width="24" height="8"/>
+    <rect x="-3" y="-12" width="6" height="12"/>
+    <rect x="-1" y="-14" width="2" height="4" fill="#fff"/>
+  </g>
+  <!-- bullet -->
+  <rect x="199" y="200" width="2" height="10" fill="#fff"/>
+  <text x="20" y="20" font-family="monospace" font-size="11" fill="#0f0" font-weight="bold">SCORE 6240</text>
+  <text x="380" y="20" font-family="monospace" font-size="11" fill="#0f0" font-weight="bold" text-anchor="end">LIVES 3</text>
+</svg>
