@@ -197,7 +197,7 @@
                 <span class="tag {a.cat}">{a.cat?.toUpperCase()}</span>
               </div>
               <div class="a-tags-r">
-                {#each (a.tags || []).filter(t => t === 'TRENDING' || t === 'NEW') as t}
+                {#each (a.tags || []).filter((t: string) => t === 'TRENDING' || t === 'NEW') as t}
                   <span class="tag {t.toLowerCase()}">{t}</span>
                 {/each}
               </div>

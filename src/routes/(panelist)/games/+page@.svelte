@@ -393,7 +393,7 @@
     <div class="modal">
       <div class="modal-head">
         <div class="modal-head-l">
-          <div class="modal-ic" style="background:var(--gg)">{openGame.emoji}</div>
+          <div class="modal-ic" style="background:var(--gg)"></div>
           <div>
             <div class="modal-title">{openGame.name}</div>
             <div class="modal-sub">Earn {openGame.reward} points</div>
