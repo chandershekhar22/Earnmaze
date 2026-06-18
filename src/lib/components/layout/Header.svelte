@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { Menu, Copy, Check } from '@lucide/svelte';
+	import { Menu, Copy, Check, Bell } from '@lucide/svelte';
 
 	let { onMenuClick }: { onMenuClick?: () => void } = $props();
 
@@ -18,11 +18,12 @@
 	}
 
 	function getPageInfo(routeId: string | null): { title: string; description: string } {
-		if (!routeId) return { title: 'Dashboard', description: 'Overview of your survey activities' };
+		if (!routeId) return { title: 'Dashboard', description: 'Your activity overview' };
 
 		const pageMap: Record<string, { title: string; description: string }> = {
 			'/(panelist)/dashboard': { title: 'Dashboard', description: 'Your activity overview' },
 			'/(panelist)/surveys': { title: 'Surveys', description: 'Earn points by completing surveys' },
+			'/(panelist)/games': { title: 'Games', description: 'Play and earn instantly' },
 			'/(panelist)/points': { title: 'Points', description: 'Track your earnings' },
 			'/(panelist)/rewards': { title: 'Rewards', description: 'Redeem your points' },
 			'/(panelist)/profile': { title: 'Profile', description: 'Manage your account' },
@@ -35,8 +36,8 @@
 	}
 </script>
 
-<header class="bg-surface-50/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-30">
-	<div class="flex items-center justify-between px-4 md:px-6 lg:px-8 h-14">
+<header class="sticky top-0 z-30 bg-surface/80 backdrop-blur-xl border-b border-white/[0.07]">
+	<div class="flex items-center justify-between gap-3 px-4 md:px-8 py-4">
 		<div class="flex items-center gap-3 min-w-0">
 			<button
 				onclick={onMenuClick}
@@ -47,27 +48,37 @@
 			</button>
 
 			<div class="min-w-0">
-				<h1 class="text-sm font-bold text-white truncate">{pageInfo.title}</h1>
-				<p class="text-[10px] text-neutral-600 truncate hidden sm:block">{pageInfo.description}</p>
+				<h1 class="text-[20px] font-bold text-white tracking-tight truncate">{pageInfo.title}</h1>
+				<p class="text-[13px] text-neutral-500 truncate hidden sm:block">{pageInfo.description}</p>
 			</div>
 		</div>
 
-		<!-- Panelist ID -->
-		{#if shortId}
+		<div class="flex items-center gap-2.5 flex-shrink-0">
+			{#if shortId}
+				<button
+					onclick={copyId}
+					class="group inline-flex items-center gap-2 px-3 py-[7px] bg-white/[0.03] border border-white/[0.07] rounded-full hover:border-white/[0.13] transition-colors"
+					title="Click to copy full ID: {userId}"
+				>
+					<span class="font-mono text-[11px] text-neutral-400 group-hover:text-neutral-300">
+						<span class="hidden sm:inline">ID:</span>{shortId}
+					</span>
+					{#if copied}
+						<Check class="w-3.5 h-3.5 text-primary-400" />
+					{:else}
+						<Copy class="w-3.5 h-3.5 text-neutral-500 group-hover:text-primary-400 transition-colors" />
+					{/if}
+				</button>
+			{/if}
+
 			<button
-				onclick={copyId}
-				class="flex items-center gap-2 px-3 py-1.5 bg-primary-500/10 border border-primary-500/20 rounded-lg hover:bg-primary-500/15 hover:border-primary-500/30 transition-colors group flex-shrink-0"
-				title="Click to copy full ID: {userId}"
+				class="relative w-[38px] h-[38px] rounded-full bg-white/[0.03] border border-white/[0.07] grid place-items-center text-neutral-400 hover:text-white hover:border-white/[0.13] transition-all"
+				title="Notifications"
+				aria-label="Notifications"
 			>
-				<span class="text-[11px] font-mono font-semibold text-primary-300">
-					<span class="hidden sm:inline">ID: </span>{shortId}
-				</span>
-				{#if copied}
-					<Check class="w-3.5 h-3.5 text-emerald-400" />
-				{:else}
-					<Copy class="w-3.5 h-3.5 text-primary-400 group-hover:text-primary-300 transition-colors" />
-				{/if}
+				<Bell class="w-[15px] h-[15px]" />
+				<span class="absolute top-[8px] right-[9px] w-[7px] h-[7px] rounded-full bg-rose-400 ring-2 ring-surface"></span>
 			</button>
-		{/if}
+		</div>
 	</div>
 </header>

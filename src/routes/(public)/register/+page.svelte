@@ -72,8 +72,10 @@
 		isLoading = false;
 
 		if (result.success && authStore.state.user) {
+			// Full navigation so the server hook can route new panelists through
+			// the dashboard chooser (/welcome) on their first visit.
 			const targetUrl = redirectUrl || getDashboardUrl(authStore.state.user.userType);
-			goto(targetUrl);
+			window.location.href = targetUrl;
 		} else {
 			turnstileRef?.reset();
 			turnstileToken = null;
@@ -91,8 +93,15 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	{@html `<style>
+</svelte:head>
+
+<!--
+  Injected in the component body (not <svelte:head>): {@html} styles inside
+  <svelte:head> are unreliably retained across SvelteKit navigation / hover
+  preload. As a body-level component-owned node, Svelte manages it reliably.
+-->
+<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+{@html `<style>
 	*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 	:root{
 		--bg:#07090c;--bg-2:#0c1014;--bg-card:#0e1217;
@@ -104,7 +113,7 @@
 		--danger:#ff6b81;
 		--grad-headline:linear-gradient(90deg,#bff345 0%,#67e8f9 45%,#c4b5fd 100%);
 		--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-2xl:24px;--r-full:999px;
-		--f:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+		--f:'Inter','Inter Fallback',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
 		--ease:cubic-bezier(.16,1,.3,1);
 	}
 	html{font-size:16px}
@@ -241,7 +250,6 @@
 		.rg-footer-rating{justify-self:center}
 	}
 	</style>`}
-</svelte:head>
 
 <div class="rg-shell">
 	<div class="rg-bg"></div>

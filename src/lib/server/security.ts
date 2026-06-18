@@ -123,6 +123,44 @@ export function setSecurityHeaders(headers: Headers): void {
 	}
 }
 
+/**
+ * Relaxed headers for embedded, sandboxed artifact/section/game HTML served
+ * from the /*-content endpoints.
+ *
+ * These are admin-curated, self-contained documents that routinely pull
+ * libraries (Chart.js, D3, three.js, …) from public CDNs and use inline
+ * scripts. The strict app CSP only whitelists a few hosts, so it blocks those
+ * CDNs and breaks the artifact (e.g. a blank chart). We therefore allow scripts
+ * / styles / images / fonts / connections / frames from any https source for
+ * these responses only.
+ *
+ * The content runs inside a sandboxed, same-origin iframe and uploads are
+ * admin-only, so this broader policy is an acceptable, contained tradeoff. The
+ * surrounding app pages keep the strict CSP from setSecurityHeaders(). We keep
+ * framing/sniff protections; 'unsafe-eval' is allowed because some embeds need
+ * it and the blast radius is the sandboxed document.
+ */
+export function setEmbeddedContentHeaders(headers: Headers): void {
+	headers.set('X-Frame-Options', 'SAMEORIGIN');
+	headers.set('X-Content-Type-Options', 'nosniff');
+	headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+	headers.set(
+		'Content-Security-Policy',
+		[
+			"default-src 'self' https: data: blob:",
+			"script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:",
+			"style-src 'self' 'unsafe-inline' https:",
+			"img-src 'self' data: blob: https:",
+			"font-src 'self' data: https:",
+			"connect-src 'self' https: data: blob:",
+			"media-src 'self' https: data: blob:",
+			"frame-src 'self' https:",
+			"base-uri 'self'",
+			"object-src 'none'",
+		].join('; '),
+	);
+}
+
 // ==================== Request Signing (API Authentication) ====================
 
 interface SignedRequest {

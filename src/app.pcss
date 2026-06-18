@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Metrics-adjusted fallback for Inter. Until the Google-hosted Inter webfont
+ * loads, text renders in local Arial sized to match Inter's metrics, so the
+ * font swap causes no layout shift (CLS). Used everywhere the 'Inter' stack
+ * appears (app.pcss html, Tailwind font-sans, and the per-page injected styles).
+ */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  ascent-override: 90.20%;
+  descent-override: 22.48%;
+  line-gap-override: 0.00%;
+  size-adjust: 107.40%;
+}
+
 /* Global navigation progress bar */
 @keyframes nav-progress {
   0% { width: 0%; }
@@ -16,7 +31,7 @@
 
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', 'Inter Fallback', system-ui, sans-serif;
     @apply antialiased;
   }
 
@@ -40,7 +55,7 @@
 
   /* Selection color */
   ::selection {
-    @apply bg-primary-500/30 text-white;
+    @apply bg-primary-400 text-surface;
   }
 
   /* Global focus-visible for interactive elements */
@@ -59,7 +74,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-gradient-to-r from-primary-600 to-primary-500 border-primary-500/20 text-white hover:from-primary-500 hover:to-primary-400 focus-visible:ring-primary-500 shadow-lg shadow-primary-500/20 hover:shadow-xl hover:shadow-primary-500/30;
+    @apply btn bg-primary-400 border-primary-400/30 text-surface hover:bg-primary-500 hover:-translate-y-0.5 focus-visible:ring-primary-500 shadow-lg shadow-primary-500/20 hover:shadow-xl hover:shadow-primary-500/30;
   }
 
   .btn-secondary {
@@ -140,17 +155,17 @@
     @apply badge bg-white/5 text-neutral-400 ring-1 ring-white/10;
   }
 
-  /* ─── Tabs ─── */
+  /* ─── Tabs (segmented pill, EarnMaze ref) ─── */
   .tab-group {
-    @apply flex gap-1 p-1 bg-surface-100 border border-white/[0.06] rounded-xl;
+    @apply inline-flex gap-1 p-1 bg-white/[0.03] border border-white/[0.06] rounded-full;
   }
 
   .tab {
-    @apply flex-1 px-4 py-2.5 text-sm font-medium text-neutral-500 rounded-lg transition-all duration-200 hover:text-neutral-300 cursor-pointer;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-[13px] font-medium text-neutral-500 rounded-full transition-all duration-200 hover:text-neutral-200 cursor-pointer;
   }
 
   .tab-active {
-    @apply tab bg-white/[0.06] text-white shadow-sm;
+    @apply tab bg-primary-400 text-surface font-semibold shadow-sm hover:text-surface;
   }
 
   /* ─── Stat cards ─── */
@@ -209,5 +224,42 @@
 
   .table-row {
     @apply border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors;
+  }
+
+  /* ─── EarnMaze reference: panels, banners, info tiles ─── */
+  .em-panel {
+    @apply rounded-2xl bg-surface-50 border border-white/[0.07] overflow-hidden;
+  }
+
+  .em-panel-h {
+    @apply flex items-center justify-between px-5 py-4 border-b border-white/[0.06];
+  }
+
+  .em-panel-title {
+    @apply flex items-center gap-2.5 text-[14px] font-semibold tracking-tight;
+  }
+
+  .em-banner {
+    @apply flex items-start gap-3 px-4 py-3 rounded-xl bg-primary-400/[0.05] border border-primary-400/15 text-[13.5px] text-neutral-400 leading-relaxed;
+  }
+
+  .em-banner-info {
+    @apply flex items-start gap-3 px-4 py-3 rounded-xl bg-sky-400/[0.05] border border-sky-400/15 text-[13.5px] text-neutral-400 leading-relaxed;
+  }
+
+  .em-banner-pos {
+    @apply flex items-start gap-3 px-4 py-3 rounded-xl bg-emerald-400/[0.05] border border-emerald-400/15 text-[13.5px] text-neutral-400 leading-relaxed;
+  }
+
+  .em-stat {
+    @apply relative overflow-hidden rounded-2xl bg-surface-50 border border-white/[0.07] p-5 transition-all duration-200 hover:border-white/[0.13] hover:-translate-y-0.5;
+  }
+
+  .em-empty {
+    @apply flex flex-col items-center justify-center text-center px-6 py-14 gap-1.5;
+  }
+
+  .em-empty-icon {
+    @apply w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.07] grid place-items-center text-neutral-500 mb-3;
   }
 }

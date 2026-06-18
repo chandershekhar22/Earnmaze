@@ -5,6 +5,7 @@
 	import { Logger } from '$lib/utils/app-logger';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
+	import DashboardViewToggle from '$lib/components/DashboardViewToggle.svelte';
 	import { page } from '$app/stores';
 	import { afterNavigate } from '$app/navigation';
 	import type { Snippet } from 'svelte';
@@ -15,6 +16,15 @@
 	let authChecked = $state(false);
 	let isSidebarOpen = $state(false);
 	let mainEl: HTMLElement;
+
+	// Discover dashboard gets a different sidebar; both dashboards show the
+	// quick view toggle so users can flip between them.
+	let dashboardView = $derived<'surveys' | 'discover'>(
+		$page.url.pathname.startsWith('/discover') ? 'discover' : 'surveys'
+	);
+	let isDashboardRoute = $derived(
+		$page.url.pathname === '/dashboard' || $page.url.pathname.startsWith('/discover')
+	);
 
 	// Scroll to top on page navigation
 	afterNavigate(() => {
@@ -70,7 +80,7 @@
 
 {#if mounted && authStore.state.user}
 	<div class="flex h-screen bg-surface overflow-hidden">
-		<Sidebar bind:isOpen={isSidebarOpen} />
+		<Sidebar bind:isOpen={isSidebarOpen} variant={dashboardView} />
 		<div class="flex-1 flex flex-col overflow-hidden w-full lg:w-auto">
 			<Header onMenuClick={toggleSidebar} />
 			<main bind:this={mainEl} class="flex-1 overflow-x-hidden overflow-y-auto bg-surface p-4 md:p-6 lg:p-8">
@@ -79,6 +89,9 @@
 				</div>
 			</main>
 		</div>
+		{#if isDashboardRoute}
+			<DashboardViewToggle current={dashboardView} />
+		{/if}
 	</div>
 {:else}
 	<!-- Branded loading screen -->

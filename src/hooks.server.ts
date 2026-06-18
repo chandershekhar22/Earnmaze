@@ -3,9 +3,15 @@ import { redirect } from '@sveltejs/kit';
 import { validateSession } from '$lib/db';
 import { validateGuestSession } from '$lib/db/repositories/guest-session.repository.server';
 import { getDashboardUrl, canAccessRoute } from '$lib/utils/dashboard-routing';
+import { getDashboardPreference } from '$lib/db/repositories/panelist-profile.repository.server';
 import { checkGeoRestriction, logGeoRestrictionEvent } from '$lib/server/geo-restriction';
 import { generateRayId, Logger } from '$lib/utils/app-logger';
-import { csrfMiddleware, generateCsrfToken, setSecurityHeaders } from '$lib/server/security';
+import {
+  csrfMiddleware,
+  generateCsrfToken,
+  setSecurityHeaders,
+  setEmbeddedContentHeaders,
+} from '$lib/server/security';
 import { verifyToken } from '$lib/server/jwt';
 import { db } from '$lib/db';
 import { session as sessionTable, passwordReset } from '$lib/db/schema/auth';
@@ -26,6 +32,8 @@ const ROUTE_CONFIG = {
   ],
   protectedPages: [
     '/dashboard',
+    '/discover',
+    '/welcome',
     '/profile',
     '/surveys',
     '/admin',
@@ -33,8 +41,7 @@ const ROUTE_CONFIG = {
     '/moderator',
     '/points',
     '/history',
-    '/rewards',
-    '/games'
+    '/rewards'
   ],
   publicPaths: [
     '/',
@@ -43,6 +50,7 @@ const ROUTE_CONFIG = {
     '/about',
     '/geo-blocked',
     '/earn-points',
+    '/games',
     '/guest/dashboard',
     '/guest/upgrade',
     '/privacy-policy',
@@ -361,7 +369,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Redirect users to their appropriate dashboard when accessing /dashboard directly
   if (pathname === '/dashboard' && event.locals.user) {
     const userType = event.locals.user.userType;
-    
+
     // Non-panelist users should go to their own dashboards
     if (userType === 'admin') {
       throw redirect(302, '/admin/dashboard');
@@ -370,12 +378,33 @@ export const handle: Handle = async ({ event, resolve }) => {
     } else if (userType === 'moderator') {
       throw redirect(302, '/moderator/dashboard');
     }
-    // Panelists stay on /dashboard
+
+    // Panelists: route through the dashboard chooser on first visit, then
+    // honour their saved preference (surveys stays here, discover redirects).
+    const pref = await getDashboardPreference(event.locals.user.id);
+    if (!pref.dashboardOnboarded) {
+      throw redirect(302, '/welcome');
+    }
+    if (pref.dashboardView === 'discover') {
+      throw redirect(302, '/discover');
+    }
+    // Surveys view stays on /dashboard
   }
 
   // Resolve the request and add security headers
   const response = await resolve(event);
-  setSecurityHeaders(response.headers);
+  // Embedded artifact/section/game HTML (served from the /*-content endpoints
+  // and rendered in a sandboxed iframe) needs a relaxed CSP so it can load
+  // libraries from CDNs; everything else gets the strict app policy.
+  if (
+    pathname.startsWith('/artifact-content/') ||
+    pathname.startsWith('/section-content/') ||
+    pathname.startsWith('/game-content/')
+  ) {
+    setEmbeddedContentHeaders(response.headers);
+  } else {
+    setSecurityHeaders(response.headers);
+  }
   withCorrelation(response);
   return response;
 };

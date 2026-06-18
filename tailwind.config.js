@@ -6,7 +6,7 @@ export default {
 	// cannot see them. Keep this list in sync with the colors used.
 	safelist: [
 		{
-			pattern: /(bg|text|border|from|to)-(violet|fuchsia|emerald|cyan|amber|sky|rose|primary)-(300|400|500)(\/(?:10|15|20|25|30|40))?/,
+			pattern: /(bg|text|border|from|to)-(violet|fuchsia|emerald|cyan|amber|sky|rose|primary|lime)-(300|400|500)(\/(?:10|15|20|25|30|40))?/,
 			variants: ['hover', 'group-hover']
 		}
 	],
@@ -14,28 +14,28 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				// Surfaces — dark with subtle blue tint
+				// Surfaces — deep neutral (EarnMaze reference)
 				surface: {
-					DEFAULT: '#0a0a12',
-					50: '#12121c',
-					100: '#1a1a27',
-					200: '#242433',
-					300: '#2e2e3f',
-					400: '#3b3b4f',
+					DEFAULT: '#0a0c10',
+					50: '#0e1117',
+					100: '#141821',
+					200: '#1b202c',
+					300: '#242a38',
+					400: '#2e3545',
 				},
-				// Brand violet
+				// Brand lime/acc (EarnMaze reference)
 				primary: {
-					50: '#f5f3ff',
-					100: '#ede9fe',
-					200: '#ddd6fe',
-					300: '#c4b5fd',
-					400: '#a78bfa',
-					500: '#8b5cf6',
-					600: '#7c3aed',
-					700: '#6d28d9',
-					800: '#5b21b6',
-					900: '#4c1d95',
-					950: '#2e1065'
+					50: '#f6fce0',
+					100: '#ecf9c1',
+					200: '#dff59a',
+					300: '#d4f17e',
+					400: '#c7f463',
+					500: '#9bd136',
+					600: '#82b22a',
+					700: '#688f1f',
+					800: '#506b18',
+					900: '#3a4d12',
+					950: '#202b09'
 				},
 				// Neutrals
 				neutral: {
@@ -69,7 +69,7 @@ export default {
 				}
 			},
 			fontFamily: {
-				sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+				sans: ['Inter', 'Inter Fallback', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
 				mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
 			},
 			boxShadow: {
@@ -78,8 +78,8 @@ export default {
 				'md': '0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3)',
 				'lg': '0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3)',
 				'xl': '0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4)',
-				'glow': '0 0 20px -5px rgb(139 92 246 / 0.4)',
-				'glow-sm': '0 0 10px -3px rgb(139 92 246 / 0.3)',
+				'glow': '0 0 20px -5px rgb(199 244 99 / 0.4)',
+				'glow-sm': '0 0 10px -3px rgb(199 244 99 / 0.3)',
 				'glow-emerald': '0 0 20px -5px rgb(16 185 129 / 0.4)',
 				'glow-pink': '0 0 20px -5px rgb(236 72 153 / 0.4)',
 				'glow-cyan': '0 0 20px -5px rgb(6 182 212 / 0.4)',

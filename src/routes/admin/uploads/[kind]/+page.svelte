@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { Sparkles, Upload, Trash2, ExternalLink, Loader2, X, CheckCircle2, Image as ImageIcon } from '@lucide/svelte';
+	import { Sparkles, Upload, Trash2, ExternalLink, Loader2, X, CheckCircle2, Image as ImageIcon, Heart, Share2 } from '@lucide/svelte';
 
 	let { data } = $props<{ data: { items: any[]; kind: string; kindLabel: string } }>();
 
@@ -258,7 +258,15 @@
 							</div>
 						</div>
 						<div class="flex items-center justify-between pt-2 border-t border-white/[0.04]">
-							<div class="text-[11px] text-neutral-500 font-mono">{a.readTime}</div>
+							<div class="flex items-center gap-3 text-[11px] font-mono">
+								<span class="text-neutral-500">{a.readTime}</span>
+								<span class="inline-flex items-center gap-1 text-rose-300" title="Likes">
+									<Heart class="w-3 h-3" /> {a.likes}
+								</span>
+								<span class="inline-flex items-center gap-1 text-sky-300" title="Shares">
+									<Share2 class="w-3 h-3" /> {a.shares}
+								</span>
+							</div>
 							<div class="flex gap-1">
 								<a href={a.file} target="_blank" rel="noopener"
 									class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-200 hover:bg-surface-300 text-xs text-white rounded-md transition">

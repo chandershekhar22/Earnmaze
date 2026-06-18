@@ -25,6 +25,7 @@ export const load: PageServerLoad = async (event) => {
 				smsNotifications: (preferences?.notificationChannels as string[] | null)?.includes('sms') ?? false,
 				surveyCategories: (preferences?.surveyTopicsInterest as string[]) ?? [],
 			},
+			dashboardView: (preferences?.dashboardView as 'surveys' | 'discover') ?? 'surveys',
 		},
 	};
 };

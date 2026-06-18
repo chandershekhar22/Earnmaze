@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { User, Users, ClipboardList, Star, Mail, BarChart2, Settings, Coins, HelpCircle, Gift, ArrowRight, MessageSquareText, ArrowLeftRight, Globe, Share2, Sparkles, Flame, Brain, Trophy, Tag } from '@lucide/svelte';
+	import { User, Users, ClipboardList, Star, Mail, BarChart2, Settings, Coins, HelpCircle, Gift, ArrowRight, MessageSquareText, ArrowLeftRight, Globe, Share2, Sparkles, Flame, Brain, Trophy, Tag, Gamepad2 } from '@lucide/svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -251,6 +251,7 @@
 				{ href: '/admin/analytics', icon: BarChart2, label: 'Analytics', color: 'indigo' },
 				{ href: '/admin/geo-settings', icon: Globe, label: 'Geo Settings', color: 'teal' },
 				{ href: '/admin/artifacts', icon: Sparkles, label: 'Artifacts', color: 'green' },
+				{ href: '/admin/games', icon: Gamepad2, label: 'Games', color: 'rose' },
 				{ href: '/admin/uploads/streaks', icon: Flame, label: 'Streaks', color: 'orange' },
 				{ href: '/admin/uploads/quizzes', icon: Brain, label: 'Quizzes', color: 'purple' },
 				{ href: '/admin/uploads/weekly-challenges', icon: Trophy, label: 'Weekly Challenges', color: 'yellow' },

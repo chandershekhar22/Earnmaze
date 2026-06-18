@@ -1,0 +1,2 @@
+ALTER TABLE "panelist_preferences" ADD COLUMN "dashboard_view" varchar(20) DEFAULT 'surveys' NOT NULL;--> statement-breakpoint
+ALTER TABLE "panelist_preferences" ADD COLUMN "dashboard_onboarded" boolean DEFAULT false NOT NULL;

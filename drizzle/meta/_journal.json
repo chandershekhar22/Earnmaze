@@ -64,6 +64,13 @@
       "when": 1775187863304,
       "tag": "0008_watery_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781693825855,
+      "tag": "0009_rainy_mandroid",
+      "breakpoints": true
     }
   ]
 }

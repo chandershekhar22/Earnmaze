@@ -2,10 +2,10 @@
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import { Logger } from '$lib/utils/app-logger';
 	import type { AvailableSurveyItem, SurveyTransactionsResponse } from '$types/api-responses';
-	import { ClipboardList, Clock, House, FileText, ArrowRight, CircleCheckBig, CircleX, Zap, Rocket, Coins, Sparkles, Search } from '@lucide/svelte';
+	import { ClipboardList, Clock, House, FileText, ArrowRight, CircleCheckBig, CircleX, Zap, Rocket, Coins, Search } from '@lucide/svelte';
 	import InfoBanner from '$lib/components/InfoBanner.svelte';
 	import { page } from '$app/stores';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 
 	let { data }: { data: {
@@ -33,7 +33,6 @@
 	let celebrationPts = $state(0);
 	let celebrationStatus = $state('');
 
-	// Check for survey completion redirect params
 	onMount(() => {
 		const completed = $page.url.searchParams.get('completed');
 		const pts = $page.url.searchParams.get('pts');
@@ -41,14 +40,11 @@
 			celebrationStatus = completed;
 			celebrationPts = parseInt(pts) || 0;
 			showCelebration = true;
-			// Clean URL without reload
 			const url = new URL($page.url);
 			url.searchParams.delete('completed');
 			url.searchParams.delete('pts');
 			history.replaceState({}, '', url.pathname);
-			// Auto-dismiss after 5s
 			setTimeout(() => showCelebration = false, 5000);
-			// Show toast
 			if (celebrationPts > 0) {
 				toastStore.success('Points Earned!', `You earned ${celebrationPts} points!`);
 			} else if (completed === 'disqualified') {
@@ -58,22 +54,9 @@
 			}
 		}
 
-		// Auto-refresh surveys every 60 seconds
 		const refreshInterval = setInterval(() => invalidateAll(), 60_000);
 		return () => clearInterval(refreshInterval);
 	});
-
-	// Rotating accent colors for cards
-	const accents = [
-		{ from: 'from-violet-500', to: 'to-fuchsia-500', bg: 'bg-violet-500/10', border: 'border-violet-500/20', text: 'text-violet-400', shadow: 'shadow-violet-500/10' },
-		{ from: 'from-cyan-500', to: 'to-blue-500', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', text: 'text-cyan-400', shadow: 'shadow-cyan-500/10' },
-		{ from: 'from-emerald-500', to: 'to-teal-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', shadow: 'shadow-emerald-500/10' },
-		{ from: 'from-amber-500', to: 'to-orange-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-400', shadow: 'shadow-amber-500/10' },
-		{ from: 'from-pink-500', to: 'to-rose-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', text: 'text-pink-400', shadow: 'shadow-pink-500/10' },
-		{ from: 'from-indigo-500', to: 'to-violet-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-400', shadow: 'shadow-indigo-500/10' },
-	];
-
-	function getAccent(i: number) { return accents[i % accents.length]; }
 
 	async function startSurvey(surveyId: string) {
 		try {
@@ -99,7 +82,7 @@
 	function getStatusStyle(status: string) {
 		switch (status) {
 			case 'completed': return { class: 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20', icon: CircleCheckBig };
-			case 'started': return { class: 'bg-primary-500/15 text-primary-400 ring-1 ring-primary-500/20', icon: Zap };
+			case 'started': return { class: 'bg-primary-400/15 text-primary-400 ring-1 ring-primary-400/20', icon: Zap };
 			case 'disqualified': return { class: 'bg-rose-500/15 text-rose-400 ring-1 ring-rose-500/20', icon: CircleX };
 			case 'expired': return { class: 'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20', icon: Clock };
 			default: return { class: 'bg-white/5 text-neutral-400 ring-1 ring-white/10', icon: Clock };
@@ -110,38 +93,25 @@
 <svelte:head>
 	<title>Surveys - EarnMaze</title>
 	<meta name="description" content="Browse available surveys and view your survey completion history." />
-	<style>
-		@keyframes survey-glow {
-			0%, 100% { box-shadow: 0 0 0 0 rgba(244,63,94,0); border-color: rgba(244,63,94,0.2); }
-			50% { box-shadow: 0 0 24px 4px rgba(244,63,94,0.25); border-color: rgba(244,63,94,0.5); }
-		}
-		.survey-pulse { animation: survey-glow 2s ease-in-out infinite; }
-	</style>
 </svelte:head>
 
-<style>
-	@keyframes card-in { 0% { opacity:0; transform:translateY(16px) scale(.97) } 100% { opacity:1; transform:translateY(0) scale(1) } }
-	.card-in { animation: card-in .45s ease-out both }
-</style>
-
-<div class="space-y-5 animate-fade-in">
+<div class="space-y-[22px] animate-fade-in">
 	<InfoBanner id="survey-how" message="Click 'Start' on any survey to begin earning. You'll be redirected to the survey — once done, points are credited automatically. Partial credit may apply for terminated or quota-full surveys." color="primary" />
 
-	<!-- Tabs -->
-	<div class="tab-group max-w-sm">
+	<!-- Segmented tabs -->
+	<div class="tab-group">
 		<button onclick={() => activeTab = 'available'} class={activeTab === 'available' ? 'tab-active' : 'tab'}>
-			<ClipboardList class="w-4 h-4 mr-2 inline" />
-			Available ({availableSurveyData.length})
+			<ClipboardList class="w-[15px] h-[15px]" />
+			Available <span class="font-mono text-[11px] opacity-80">{availableSurveyData.length}</span>
 		</button>
 		<button onclick={() => activeTab = 'history'} class={activeTab === 'history' ? 'tab-active' : 'tab'}>
-			<Clock class="w-4 h-4 mr-2 inline" />
-			History ({transactions.length})
+			<Clock class="w-[15px] h-[15px]" />
+			History <span class="font-mono text-[11px] opacity-80">{transactions.length}</span>
 		</button>
 	</div>
 
-	<!-- Celebration banner -->
 	{#if showCelebration}
-		<div class="relative overflow-hidden bg-gradient-to-r from-emerald-500/15 to-cyan-500/10 border border-emerald-500/20 rounded-2xl p-4 animate-scale-in">
+		<div class="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/[0.12] to-primary-400/[0.06] p-4 animate-scale-in">
 			<div class="absolute -top-10 -right-10 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl"></div>
 			<div class="relative flex items-center gap-4">
 				<div class="p-3 bg-emerald-500/15 rounded-xl flex-shrink-0">
@@ -163,10 +133,9 @@
 	{/if}
 
 	{#if activeTab === 'available'}
-		<!-- Search bar (shown when 5+ surveys) -->
 		{#if showSearch}
 			<div class="relative">
-				<Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600" />
+				<Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
 				<input
 					type="text"
 					bind:value={searchQuery}
@@ -174,7 +143,7 @@
 					class="input !pl-10 !pr-9 !py-2.5 !text-sm"
 				/>
 				{#if searchQuery}
-					<button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-neutral-600 hover:text-white transition-colors" aria-label="Clear search">
+					<button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-neutral-500 hover:text-white transition-colors" aria-label="Clear search">
 						<CircleX class="w-4 h-4" />
 					</button>
 				{/if}
@@ -182,95 +151,80 @@
 		{/if}
 
 		{#if availableSurveyData.length === 0}
-			<div class="card text-center py-20">
-				<div class="w-16 h-16 bg-white/[0.04] rounded-2xl flex items-center justify-center mx-auto mb-4">
-					<ClipboardList class="w-8 h-8 text-neutral-600" />
+			<div class="em-panel">
+				<div class="em-empty">
+					<span class="em-empty-icon"><ClipboardList class="w-[30px] h-[30px]" /></span>
+					<h4 class="text-[17px] font-semibold text-white tracking-tight">No surveys right now</h4>
+					<p class="text-[13.5px] text-neutral-400 mb-4">Check back later for new earning opportunities.</p>
+					<a href="/dashboard" class="btn-secondary"><House class="w-4 h-4" /> Back to dashboard</a>
 				</div>
-				<h3 class="text-lg font-bold text-white mb-2">No surveys right now</h3>
-				<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">Check back later for new earning opportunities.</p>
-				<a href="/dashboard" class="btn-secondary">
-					<House class="w-4 h-4" />
-					Back to Dashboard
-				</a>
 			</div>
 		{:else if filteredSurveys.length === 0}
-			<div class="card text-center py-12">
-				<Search class="w-8 h-8 text-neutral-600 mx-auto mb-3" />
-				<p class="text-sm font-semibold text-white/40">No surveys match "{searchQuery}"</p>
-				<button onclick={() => searchQuery = ''} class="text-xs text-primary-400 hover:text-primary-300 mt-2 transition-colors">Clear search</button>
+			<div class="em-panel">
+				<div class="em-empty">
+					<span class="em-empty-icon"><Search class="w-[24px] h-[24px]" /></span>
+					<p class="text-sm font-semibold text-white/60">No surveys match "{searchQuery}"</p>
+					<button onclick={() => searchQuery = ''} class="text-xs text-primary-400 hover:text-primary-300 mt-1 transition-colors">Clear search</button>
+				</div>
 			</div>
 		{:else}
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
 				{#each filteredSurveys as survey, i}
-					{@const a = getAccent(i)}
 					<div
-						class="group relative bg-surface-100 border rounded-2xl overflow-hidden hover:shadow-xl hover:{a.shadow} transition-all duration-300 hover:-translate-y-1 active:translate-y-0 card-in {survey.priority === 'high' ? 'border-rose-500/30 ring-1 ring-rose-500/20 survey-pulse' : 'border-white/[0.06] hover:border-white/[0.12]'}"
-						style="animation-delay: {i * 60}ms"
+						class="group em-stat flex flex-col gap-4 animate-fade-in"
+						style="animation-delay: {i * 50}ms"
 					>
-						<!-- Top gradient accent bar -->
-						<div class="h-1 bg-gradient-to-r {survey.priority === 'high' ? 'from-rose-500 to-amber-500' : `${a.from} ${a.to}`}"></div>
-
-						<div class="p-5">
-							<!-- Icon + Points badge + Priority -->
-							<div class="flex items-start justify-between mb-4">
-								<div class="flex items-center gap-2">
-									<div class="p-2.5 {a.bg} rounded-xl group-hover:scale-110 transition-transform duration-300">
-										<FileText class="w-5 h-5 {a.text}" />
-									</div>
-									{#if survey.priority === 'high'}
-										<span class="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-rose-500/15 text-rose-400 ring-1 ring-rose-500/25 animate-pulse">Hot</span>
-									{/if}
-								</div>
-								<div class="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 rounded-full ring-1 ring-emerald-500/20">
-									<Coins class="w-3 h-3 text-emerald-400" />
-									<span class="text-xs font-black text-emerald-400">+{survey.points}</span>
-								</div>
+						<span class="absolute top-0 left-0 right-0 h-[2px] bg-primary-400 opacity-85"></span>
+						<div class="flex items-start justify-between gap-2">
+							<span class="w-[42px] h-[42px] rounded-[11px] bg-primary-400/12 text-primary-400 grid place-items-center group-hover:scale-105 transition-transform">
+								<FileText class="w-[18px] h-[18px]" />
+							</span>
+							<div class="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 rounded-full ring-1 ring-emerald-500/20">
+								<Coins class="w-3 h-3 text-emerald-400" />
+								<span class="font-mono text-[11px] font-bold text-emerald-400">+{survey.points}</span>
 							</div>
+						</div>
 
-							<!-- Title -->
-							<h3 class="text-sm font-bold text-white mb-1.5 line-clamp-2 leading-snug group-hover:text-white/90 transition-colors">
+						<div class="flex-1">
+							<h3 class="text-[15px] font-semibold text-white leading-snug tracking-tight line-clamp-2 mb-1.5">
 								{survey.title || 'Untitled Survey'}
 							</h3>
-
-							<!-- Description -->
 							{#if survey.description}
-								<p class="text-xs text-neutral-500 line-clamp-2 leading-relaxed mb-4">{survey.description}</p>
+								<p class="text-[12.5px] text-neutral-400 line-clamp-2 leading-relaxed">{survey.description}</p>
 							{:else}
-								<p class="text-xs text-neutral-600 mb-4">Complete this survey to earn points.</p>
+								<p class="text-[12.5px] text-neutral-500">Complete this survey to earn points.</p>
 							{/if}
-
-							<!-- CTA Button -->
-							<button
-								onclick={() => startSurvey(survey.id)}
-								class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r {a.from} {a.to} text-white text-sm font-bold rounded-xl opacity-90 group-hover:opacity-100 shadow-lg {a.shadow} hover:shadow-xl transition-all duration-200 active:scale-[0.98]"
-							>
-								Start Survey
-								<ArrowRight class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-							</button>
 						</div>
+
+						<button
+							onclick={() => startSurvey(survey.id)}
+							class="btn-primary w-full"
+						>
+							Start survey <ArrowRight class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+						</button>
+
+						{#if survey.priority === 'high'}
+							<span class="absolute top-3 left-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-rose-500/15 text-rose-400 ring-1 ring-rose-500/25 animate-pulse">Hot</span>
+						{/if}
 					</div>
 				{/each}
 			</div>
 		{/if}
 	{:else}
 		{#if transactions.length === 0}
-			<div class="card text-center py-20">
-				<div class="w-16 h-16 bg-white/[0.04] rounded-2xl flex items-center justify-center mx-auto mb-4">
-					<Clock class="w-8 h-8 text-neutral-600" />
+			<div class="em-panel">
+				<div class="em-empty">
+					<span class="em-empty-icon"><Clock class="w-[30px] h-[30px]" /></span>
+					<h4 class="text-[17px] font-semibold text-white tracking-tight">No history yet</h4>
+					<p class="text-[13.5px] text-neutral-400 mb-4">Complete your first survey to build your history.</p>
+					<button onclick={() => activeTab = 'available'} class="btn-primary"><Rocket class="w-4 h-4" /> Browse surveys</button>
 				</div>
-				<h3 class="text-lg font-bold text-white mb-2">No history yet</h3>
-				<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">Complete your first survey to build your history.</p>
-				<button onclick={() => activeTab = 'available'} class="btn-primary">
-					<Rocket class="w-4 h-4" />
-					Browse Surveys
-				</button>
 			</div>
 		{:else}
-			<!-- History as cards on mobile, table on desktop -->
 			<div class="block md:hidden space-y-2.5">
 				{#each transactions as tx}
 					{@const ss = getStatusStyle(tx.status)}
-					<div class="bg-surface-100 border border-white/[0.06] rounded-xl p-4">
+					<div class="bg-surface-50 border border-white/[0.07] rounded-xl p-4">
 						<div class="flex items-start justify-between mb-2">
 							<div class="text-sm font-semibold text-white flex-1 min-w-0 truncate">{tx.surveyTitle}</div>
 							<span class="badge {ss.class} ml-2 flex-shrink-0">
@@ -286,7 +240,7 @@
 				{/each}
 			</div>
 
-			<div class="hidden md:block card !p-0 overflow-hidden">
+			<div class="hidden md:block em-panel">
 				<div class="overflow-x-auto">
 					<table class="min-w-full">
 						<thead>

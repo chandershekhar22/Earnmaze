@@ -1,12 +1,21 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { isUploadKind, readUploads, KIND_META } from '$lib/server/uploads-store';
+import { getKindStats } from '$lib/server/engagement-store';
 
 export const load: PageServerLoad = async ({ params }) => {
 	if (!isUploadKind(params.kind)) throw error(404, 'Not found');
-	const items = await readUploads(params.kind);
+	const [items, stats] = await Promise.all([
+		readUploads(params.kind),
+		getKindStats(params.kind),
+	]);
+	const withStats = items.map((a) => ({
+		...a,
+		likes: stats[a.id]?.likes ?? 0,
+		shares: stats[a.id]?.shares ?? 0,
+	}));
 	return {
-		items,
+		items: withStats,
 		kind: params.kind,
 		kindLabel: KIND_META[params.kind].label,
 		accent: KIND_META[params.kind].accent,
