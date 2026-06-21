@@ -115,12 +115,12 @@
 		{:else if guestStore.data}
 			<!-- Welcome Back Banner (after survey) -->
 			{#if showWelcomeBack}
-				<div class="bg-emerald-500/10 border-l-4 border-emerald-500 p-4 mb-6 animate-fade-in rounded-r-xl">
+				<div class="bg-emerald-500/10 border-s-4 border-emerald-500 p-4 mb-6 animate-fade-in rounded-e-xl">
 					<div class="flex items-start">
 						<div class="flex-shrink-0">
 							<CircleCheck class="h-6 w-6 text-emerald-400" />
 						</div>
-						<div class="ml-3 flex-1">
+						<div class="ms-3 flex-1">
 							<h3 class="text-sm font-medium text-emerald-300">Welcome back!</h3>
 							<p class="mt-1 text-sm text-emerald-400/80">
 								Great job completing the survey! Your progress has been saved. Check out more surveys below to earn more points.
@@ -132,12 +132,12 @@
 
 			<!-- First Visit Banner -->
 			{#if isFirstVisit}
-				<div class="bg-violet-500/10 border-l-4 border-violet-500 p-4 mb-6 animate-fade-in rounded-r-xl">
+				<div class="bg-violet-500/10 border-s-4 border-violet-500 p-4 mb-6 animate-fade-in rounded-e-xl">
 					<div class="flex items-start">
 						<div class="flex-shrink-0">
 							<Info class="h-6 w-6 text-violet-400" />
 						</div>
-						<div class="ml-3 flex-1">
+						<div class="ms-3 flex-1">
 							<h3 class="text-sm font-medium text-violet-300">Welcome to EarnMaze!</h3>
 							<p class="mt-1 text-sm text-violet-400/80">
 								Your account has been created! Complete surveys to earn points. Create a full account later to redeem rewards and save your progress permanently.
@@ -148,12 +148,12 @@
 			{/if}
 
 			<!-- Session Info Banner -->
-			<div class="bg-amber-500/10 border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl">
+			<div class="bg-amber-500/10 border-s-4 border-amber-500 p-4 mb-6 rounded-e-xl">
 				<div class="flex items-start">
 					<div class="flex-shrink-0">
 						<AlertTriangle class="h-5 w-5 text-amber-400" />
 					</div>
-					<div class="ml-3 flex-1">
+					<div class="ms-3 flex-1">
 						<p class="text-sm text-amber-300/90">
 							<strong>Guest Session</strong> - You're viewing a limited dashboard.
 							<button onclick={handleUpgradeClick} class="underline font-semibold hover:text-amber-200">
@@ -171,7 +171,7 @@
 						<h1 class="text-2xl font-bold text-white">Guest Dashboard</h1>
 						<p class="text-neutral-400 mt-1">{guestStore.data.email}</p>
 					</div>
-					<div class="text-right">
+					<div class="text-end">
 						<p class="text-sm text-neutral-500">Session expires in</p>
 						<p class="text-lg font-semibold text-white">{timeRemaining}</p>
 						<button
@@ -191,7 +191,7 @@
 						<div class="flex-shrink-0 bg-violet-500/10 rounded-xl p-3">
 							<CircleDollarSign class="h-6 w-6 text-violet-400" />
 						</div>
-						<div class="ml-5">
+						<div class="ms-5">
 							<p class="text-sm font-medium text-neutral-500">Session Points</p>
 							<p class="text-2xl font-semibold text-white">{guestStore.data.sessionPoints}</p>
 						</div>
@@ -203,7 +203,7 @@
 						<div class="flex-shrink-0 bg-emerald-500/10 rounded-xl p-3">
 							<Eye class="h-6 w-6 text-emerald-400" />
 						</div>
-						<div class="ml-5">
+						<div class="ms-5">
 							<p class="text-sm font-medium text-neutral-500">Surveys Viewed</p>
 							<p class="text-2xl font-semibold text-white">{guestStore.data.surveysViewed}</p>
 						</div>
@@ -215,7 +215,7 @@
 						<div class="flex-shrink-0 bg-indigo-500/10 rounded-xl p-3">
 							<ClipboardList class="h-6 w-6 text-indigo-400" />
 						</div>
-						<div class="ml-5">
+						<div class="ms-5">
 							<p class="text-sm font-medium text-neutral-500">Surveys Completed</p>
 							<p class="text-2xl font-semibold text-white">{guestStore.data.surveysCompleted}</p>
 						</div>

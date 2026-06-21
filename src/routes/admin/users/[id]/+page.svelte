@@ -74,7 +74,7 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
 	<!-- Back -->
 	<a href="/admin/users" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-white mb-6 transition-colors">
-		<ArrowLeft class="w-3.5 h-3.5" /> Back to Users
+		<ArrowLeft class="w-3.5 h-3.5 rtl:-scale-x-100" /> Back to Users
 	</a>
 
 	<!-- Profile Header -->
@@ -171,19 +171,19 @@
 	<!-- Tabs -->
 	<div class="tab-group max-w-md mb-5">
 		<button onclick={() => activeTab = 'transactions'} class={activeTab === 'transactions' ? 'tab-active' : 'tab'}>
-			<Coins class="w-3.5 h-3.5 mr-1.5 inline" /> Transactions ({data.transactions.length})
+			<Coins class="w-3.5 h-3.5 me-1.5 inline" /> Transactions ({data.transactions.length})
 		</button>
 		<button onclick={() => activeTab = 'surveys'} class={activeTab === 'surveys' ? 'tab-active' : 'tab'}>
-			<ClipboardList class="w-3.5 h-3.5 mr-1.5 inline" /> Surveys ({data.surveys.length})
+			<ClipboardList class="w-3.5 h-3.5 me-1.5 inline" /> Surveys ({data.surveys.length})
 		</button>
 		<button onclick={() => activeTab = 'tickets'} class={activeTab === 'tickets' ? 'tab-active' : 'tab'}>
-			<HelpCircle class="w-3.5 h-3.5 mr-1.5 inline" /> Tickets ({data.tickets.length})
+			<HelpCircle class="w-3.5 h-3.5 me-1.5 inline" /> Tickets ({data.tickets.length})
 		</button>
 		<button onclick={() => activeTab = 'referrals'} class={activeTab === 'referrals' ? 'tab-active' : 'tab'}>
-			<Share2 class="w-3.5 h-3.5 mr-1.5 inline" /> Referrals ({data.referrals.length})
+			<Share2 class="w-3.5 h-3.5 me-1.5 inline" /> Referrals ({data.referrals.length})
 		</button>
 		<button onclick={() => activeTab = 'consent'} class={activeTab === 'consent' ? 'tab-active' : 'tab'}>
-			<Shield class="w-3.5 h-3.5 mr-1.5 inline" /> Consent
+			<Shield class="w-3.5 h-3.5 me-1.5 inline" /> Consent
 		</button>
 	</div>
 
@@ -202,8 +202,8 @@
 							<tr class="table-header">
 								<th class="table-th">Type</th>
 								<th class="table-th">Description</th>
-								<th class="table-th text-right">Points</th>
-								<th class="table-th text-right">Balance</th>
+								<th class="table-th text-end">Points</th>
+								<th class="table-th text-end">Balance</th>
 								<th class="table-th">Ref</th>
 								<th class="table-th">Date</th>
 							</tr>
@@ -214,8 +214,8 @@
 								<tr class="table-row">
 									<td class="table-td"><span class="badge {s.bg} {s.color} text-[10px]">{tx.type}</span></td>
 									<td class="table-td text-sm text-neutral-300 max-w-[200px] truncate">{tx.description}</td>
-									<td class="table-td text-right font-bold {tx.points > 0 ? 'text-emerald-400' : 'text-rose-400'}">{tx.points > 0 ? '+' : ''}{tx.points}</td>
-									<td class="table-td text-right text-neutral-500">{tx.currentBalance}</td>
+									<td class="table-td text-end font-bold {tx.points > 0 ? 'text-emerald-400' : 'text-rose-400'}">{tx.points > 0 ? '+' : ''}{tx.points}</td>
+									<td class="table-td text-end text-neutral-500">{tx.currentBalance}</td>
 									<td class="table-td text-[10px] text-neutral-600 font-mono">{tx.referenceType || '--'}</td>
 									<td class="table-td text-xs text-neutral-500 whitespace-nowrap">{formatDate(tx.createdAt)}</td>
 								</tr>
@@ -242,7 +242,7 @@
 							<tr class="table-header">
 								<th class="table-th">Survey ID</th>
 								<th class="table-th">Status</th>
-								<th class="table-th text-right">Points</th>
+								<th class="table-th text-end">Points</th>
 								<th class="table-th">Started</th>
 								<th class="table-th">Completed</th>
 							</tr>
@@ -252,7 +252,7 @@
 								<tr class="table-row">
 									<td class="table-td text-xs font-mono text-neutral-400">{s.surveyId?.slice(0, 8) ?? '--'}...</td>
 									<td class="table-td"><span class="badge {getSurveyStatusStyle(s.status)} text-[10px]">{s.status}</span></td>
-									<td class="table-td text-right font-bold text-white">{s.awardedPoints ?? 0}</td>
+									<td class="table-td text-end font-bold text-white">{s.awardedPoints ?? 0}</td>
 									<td class="table-td text-xs text-neutral-500 whitespace-nowrap">{formatDate(s.startedAt)}</td>
 									<td class="table-td text-xs text-neutral-500 whitespace-nowrap">{formatDate(s.completedAt)}</td>
 								</tr>

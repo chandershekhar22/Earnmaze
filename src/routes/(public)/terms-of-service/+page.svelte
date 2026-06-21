@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let mounted = $state(false);
 
@@ -281,7 +282,7 @@
 		<!-- Footer Navigation -->
 		<div class="mt-16 pt-8 border-t border-white/[0.06] flex justify-between items-center">
 			<a href="/" class="link">← Back to Home</a>
-			<a href="/privacy-policy" class="link">Privacy Policy →</a>
+			<a href={localizeHref('/privacy-policy')} class="link">Privacy Policy →</a>
 		</div>
 	</div>
 </div>

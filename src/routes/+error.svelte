@@ -46,7 +46,7 @@
 				Go to Dashboard
 			</a>
 			<button onclick={() => history.back()} class="btn-secondary">
-				<ArrowLeft class="w-4 h-4" />
+				<ArrowLeft class="w-4 h-4 rtl:-scale-x-100" />
 				Go Back
 			</button>
 		</div>

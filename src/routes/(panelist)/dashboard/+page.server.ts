@@ -7,6 +7,7 @@ import { user as userTable } from '$lib/db/schema/auth';
 import { panelistStats } from '$lib/db/schema/panelist-stats';
 import { panelistQuality } from '$lib/db/schema/panelist-profile';
 import { eq } from 'drizzle-orm';
+import { signedTransactionPoints } from '$lib/constants/constants';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requirePanelist(event);
@@ -63,7 +64,8 @@ export const load: PageServerLoad = async (event) => {
 		recentActivity: (recentTxs ?? []).map((tx) => ({
 			id: tx.id,
 			type: tx.type,
-			amount: tx.points,
+			// DB stores `points` as positive magnitude; type encodes direction.
+			amount: signedTransactionPoints(tx.type, tx.points),
 			description: tx.description,
 			createdAt: tx.createdAt,
 			category: tx.referenceType ?? 'general',

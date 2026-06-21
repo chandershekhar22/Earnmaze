@@ -415,7 +415,7 @@
 								searchInput = '';
 								handleSearch();
 							}}
-							class="hover:text-primary-300 ml-1"
+							class="hover:text-primary-300 ms-1"
 						>
 							&times;
 						</button>
@@ -429,7 +429,7 @@
 								statusFilter = 'all';
 								handleFilterChange();
 							}}
-							class="hover:text-primary-300 ml-1"
+							class="hover:text-primary-300 ms-1"
 						>
 							&times;
 						</button>
@@ -443,7 +443,7 @@
 								typeFilter = 'all';
 								handleFilterChange();
 							}}
-							class="hover:text-primary-300 ml-1"
+							class="hover:text-primary-300 ms-1"
 						>
 							&times;
 						</button>
@@ -465,7 +465,7 @@
 						<th class="table-th">Stock</th>
 						<th class="table-th">Redemptions</th>
 						<th class="table-th">Status</th>
-						<th class="table-th text-right">Actions</th>
+						<th class="table-th text-end">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -524,7 +524,7 @@
 									<div>
 										<span class="font-medium text-white">{reward.totalRedemptions}</span>
 										{#if reward.pendingRedemptions > 0}
-											<span class="text-amber-400 text-xs ml-1"
+											<span class="text-amber-400 text-xs ms-1"
 												>({reward.pendingRedemptions} pending)</span
 											>
 										{/if}
@@ -539,7 +539,7 @@
 										{reward.isActive ? 'Active' : 'Inactive'}
 									</span>
 								</td>
-								<td class="table-td whitespace-nowrap text-right text-sm font-medium">
+								<td class="table-td whitespace-nowrap text-end text-sm font-medium">
 									<div class="flex items-center justify-end gap-2">
 										<button
 											onclick={() => openEditModal(reward)}

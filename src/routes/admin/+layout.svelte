@@ -41,7 +41,10 @@
 	let isActive = $derived.by(() => (href: string) => $page.url.pathname.startsWith(href));
 </script>
 
-<div class="min-h-screen bg-surface">
+<!-- Admin UI is English-only and always LTR. Force dir=ltr so RTL locales
+     (Arabic) don't flip the admin layout — admins may have an em_locale
+     cookie set from earlier visits to public pages. -->
+<div class="min-h-screen bg-surface" dir="ltr">
 	<!-- Admin Header -->
 	<header class="bg-surface-50/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-40">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

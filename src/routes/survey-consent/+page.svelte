@@ -99,15 +99,6 @@
 					to handle it under their own privacy terms.
 				</p>
 			</section>
-
-			<section>
-				<p class="text-xs text-neutral-500">
-					This consent is required by data-protection law (GDPR Art. 6, India DPDP
-					§7). The full list of survey providers and their privacy practices is in
-					our
-					<a href="/privacy-policy" class="link">Privacy Policy</a>.
-				</p>
-			</section>
 		</div>
 
 		{#if error}
@@ -124,7 +115,7 @@
 				disabled={isAccepting}
 				class="btn-secondary flex-1 flex items-center justify-center gap-2"
 			>
-				<ArrowLeft class="w-4 h-4" />
+				<ArrowLeft class="w-4 h-4 rtl:-scale-x-100" />
 				Not now
 			</button>
 			<button

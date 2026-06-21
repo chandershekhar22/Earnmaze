@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, index, pgEnum, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, index, pgEnum, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { user } from "./auth";
 
@@ -51,11 +51,16 @@ export const ticketNote = pgTable("ticket_notes", {
 	index("idx_ticket_note_author_id").on(table.authorId),
 ]);
 
+// Per-non-base-locale overrides for FAQ content. Missing locales or fields
+// fall back to the base columns (question/answer), so partial coverage is fine.
+export type FaqTranslations = Record<string, { question?: string; answer?: string }>;
+
 // FAQ table — admin-managed, shown on panelist support page
 export const faq = pgTable("faqs", {
 	id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
 	question: varchar("question", { length: 500 }).notNull(),
 	answer: text("answer").notNull(),
+	translations: jsonb("translations").$type<FaqTranslations>().notNull().default(sql`'{}'::jsonb`),
 	sortOrder: integer("sort_order").notNull().default(0),
 	isActive: boolean("is_active").notNull().default(true),
 	createdBy: uuid("created_by"),

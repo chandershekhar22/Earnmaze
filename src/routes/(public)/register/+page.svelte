@@ -6,6 +6,8 @@
 	import { onMount } from 'svelte';
 	import Turnstile from '$lib/components/Turnstile.svelte';
 	import { AlertTriangle, Loader, UserPlus, Check, X } from '@lucide/svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	// Read tracking params from URL
 	let referralCode = $derived($page.url.searchParams.get('ref') || undefined);
@@ -43,10 +45,10 @@
 	let passwordTouched = $derived(password.length > 0);
 
 	let pwRules = $derived([
-		{ label: 'At least 8 characters', met: password.length >= 8 },
-		{ label: 'One uppercase letter', met: /[A-Z]/.test(password) },
-		{ label: 'One lowercase letter', met: /[a-z]/.test(password) },
-		{ label: 'One number', met: /[0-9]/.test(password) },
+		{ label: m.auth_pw_rule_min_length(), met: password.length >= 8 },
+		{ label: m.auth_pw_rule_uppercase(), met: /[A-Z]/.test(password) },
+		{ label: m.auth_pw_rule_lowercase(), met: /[a-z]/.test(password) },
+		{ label: m.auth_pw_rule_number(), met: /[0-9]/.test(password) },
 	]);
 	let allRulesMet = $derived(pwRules.every(r => r.met));
 
@@ -92,8 +94,8 @@
 		if (!token) {
 			isLoading = false;
 			authStore.state.error = needsInteraction
-				? 'Please complete the security check below.'
-				: 'Verification timed out. Please refresh and try again.';
+				? m.auth_security_check_msg()
+				: m.auth_verification_timeout();
 			return;
 		}
 
@@ -143,11 +145,8 @@
 </script>
 
 <svelte:head>
-	<title>Sign Up - EarnMaze Panel</title>
-	<meta
-		name="description"
-		content="Create your EarnMaze account and start earning rewards by participating in surveys."
-	/>
+	<title>{m.auth_register_meta_title()}</title>
+	<meta name="description" content={m.auth_register_meta_description()} />
 </svelte:head>
 
 <div class="w-full max-w-md space-y-8 animate-fade-in">
@@ -156,8 +155,8 @@
 		<div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary-500/20 mb-6">
 			<UserPlus class="w-7 h-7 text-white" />
 		</div>
-		<h1 class="text-2xl font-bold text-white">Create your account</h1>
-		<p class="text-neutral-500 mt-2">Join EarnMaze and start earning rewards</p>
+		<h1 class="text-2xl font-bold text-white">{m.auth_register_heading()}</h1>
+		<p class="text-neutral-500 mt-2">{m.auth_register_subheading()}</p>
 	</div>
 
 	<!-- Form Card -->
@@ -174,41 +173,41 @@
 
 			<!-- Email Field -->
 			<div>
-				<label for="email" class="label">Email address</label>
+				<label for="email" class="label">{m.common_email()}</label>
 				<input
 					id="email"
 					type="email"
 					bind:value={email}
 					required
 					class="input"
-					placeholder="you@example.com"
+					placeholder={m.auth_email_placeholder()}
 				/>
 			</div>
 
 			<!-- Name Field -->
 			<div>
 				<label for="name" class="label">
-					Full name <span class="text-neutral-600 font-normal">(optional)</span>
+					{m.auth_full_name_label()} <span class="text-neutral-600 font-normal">{m.auth_optional()}</span>
 				</label>
 				<input
 					id="name"
 					type="text"
 					bind:value={name}
 					class="input"
-					placeholder="John Doe"
+					placeholder={m.auth_full_name_placeholder()}
 				/>
 			</div>
 
 			<!-- Password Field -->
 			<div>
-				<label for="password" class="label">Password</label>
+				<label for="password" class="label">{m.common_password()}</label>
 				<input
 					id="password"
 					type="password"
 					bind:value={password}
 					required
 					class="input {passwordTouched && !allRulesMet ? 'border-amber-500/30 focus:border-amber-500/50 focus:ring-amber-500/20' : passwordTouched && allRulesMet ? 'border-emerald-500/30 focus:border-emerald-500/50 focus:ring-emerald-500/20' : ''}"
-					placeholder="Create a strong password"
+					placeholder={m.auth_password_placeholder_create()}
 				/>
 				{#if passwordTouched}
 					<div class="mt-2.5 space-y-1.5">
@@ -233,19 +232,19 @@
 
 			<!-- Confirm Password Field -->
 			<div>
-				<label for="confirmPassword" class="label">Confirm password</label>
+				<label for="confirmPassword" class="label">{m.common_confirm_password()}</label>
 				<input
 					id="confirmPassword"
 					type="password"
 					bind:value={confirmPassword}
 					required
 					class="input {passwordMismatch ? 'input-error' : ''}"
-					placeholder="Confirm your password"
+					placeholder={m.auth_confirm_password_placeholder()}
 				/>
 				{#if passwordMismatch}
 					<p class="text-xs text-rose-400 font-medium mt-1.5 flex items-center gap-1">
 						<AlertTriangle class="w-3.5 h-3.5" />
-						Passwords do not match
+						{m.auth_passwords_no_match()}
 					</p>
 				{/if}
 			</div>
@@ -260,7 +259,7 @@
 						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
 					/>
 					<span class="text-sm text-neutral-400 leading-relaxed">
-						I confirm I am at least 18 years old.
+						{m.auth_consent_age()}
 					</span>
 				</label>
 				<label class="flex items-start gap-3 cursor-pointer">
@@ -271,9 +270,9 @@
 						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
 					/>
 					<span class="text-sm text-neutral-400 leading-relaxed">
-						I agree to the
-						<a href="/terms-of-service" class="link" target="_blank" rel="noopener">
-							Terms of Service
+						{m.auth_consent_tos_prefix()}
+						<a href={localizeHref('/terms-of-service')} class="link" target="_blank" rel="noopener">
+							{m.footer_terms()}
 						</a>.
 					</span>
 				</label>
@@ -285,9 +284,9 @@
 						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
 					/>
 					<span class="text-sm text-neutral-400 leading-relaxed">
-						I agree to the
-						<a href="/privacy-policy" class="link" target="_blank" rel="noopener">
-							Privacy Policy
+						{m.auth_consent_privacy_prefix()}
+						<a href={localizeHref('/privacy-policy')} class="link" target="_blank" rel="noopener">
+							{m.footer_privacy()}
 						</a>.
 					</span>
 				</label>
@@ -302,8 +301,7 @@
 						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
 					/>
 					<span class="text-sm text-neutral-400 leading-relaxed">
-						Send me product updates and offers from EarnMaze. You can opt out
-						any time.
+						{m.auth_consent_marketing()}
 					</span>
 				</label>
 			</div>
@@ -311,7 +309,7 @@
 			<!-- Cloudflare Turnstile -->
 			<div class="flex flex-col items-center gap-2">
 				{#if needsInteraction}
-					<p class="text-sm text-amber-400">Please complete the security check below.</p>
+					<p class="text-sm text-amber-400">{m.auth_security_check_msg()}</p>
 				{/if}
 				<Turnstile
 					bind:this={turnstileRef}
@@ -332,10 +330,10 @@
 			>
 				{#if isLoading}
 					<Loader class="w-4 h-4 animate-spin" />
-					Creating account...
+					{m.auth_register_button_loading()}
 				{:else}
 					<UserPlus class="w-4 h-4" />
-					Create account
+					{m.auth_register_button()}
 				{/if}
 			</button>
 		</form>
@@ -343,17 +341,17 @@
 		<!-- Sign In Link -->
 		<div class="mt-6 pt-6 border-t border-white/[0.06]">
 			<p class="text-center text-sm text-neutral-500">
-				Already have an account?
-				<a href="/login" class="link ml-1">Sign in here →</a>
+				{m.auth_have_account()}
+				<a href={localizeHref('/login')} class="link ms-1">{m.auth_signin_link()}</a>
 			</p>
 		</div>
 
 		<!-- Legal Links Footer -->
 		<div class="relative text-center pt-4 mt-4">
 			<div class="text-xs text-neutral-600 space-x-4">
-				<a href="/privacy-policy" class="hover:text-primary-400 transition-colors">Privacy Policy</a>
+				<a href={localizeHref('/privacy-policy')} class="hover:text-primary-400 transition-colors">{m.footer_privacy()}</a>
 				<span>•</span>
-				<a href="/terms-of-service" class="hover:text-primary-400 transition-colors">Terms of Service</a>
+				<a href={localizeHref('/terms-of-service')} class="hover:text-primary-400 transition-colors">{m.footer_terms()}</a>
 			</div>
 		</div>
 	</div>

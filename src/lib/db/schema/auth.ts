@@ -60,6 +60,9 @@ export const user = pgTable("users", {
     // GDPR Art. 6/7 — informed consent before sharing demographic data with
     // external survey providers. Null = never accepted, value = acceptance date.
     surveyDataSharingAcceptedAt: timestamp("survey_data_sharing_accepted_at"),
+    // Preferred UI language. Used by the worker for email templates and by
+    // the client for panelist pages (public pages use URL prefix instead).
+    locale: varchar("locale", { length: 10 }).default("en").notNull(),
     isActive: boolean("is_active").default(true).notNull(),
     status: userStatusEnum("status").notNull().default("active"),
     isDeleted: boolean("is_deleted").default(false),

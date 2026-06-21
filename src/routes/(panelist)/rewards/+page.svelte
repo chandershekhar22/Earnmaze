@@ -2,6 +2,8 @@
 	import { Logger } from '$lib/utils/app-logger';
 	import { Gift, ClipboardList, AlertTriangle, Loader2, Lightbulb, Check, Coins, Lock, Rocket, X, Clock, CircleCheckBig, CircleX, ChevronDown, ChevronUp, Shield } from '@lucide/svelte';
 	import InfoBanner from '$lib/components/InfoBanner.svelte';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
+	import * as m from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 
 	interface Reward {
@@ -58,11 +60,11 @@
 				otpError = '';
 				otpModal = { reward };
 			} else {
-				errorModal = result.message || 'Failed to send verification code.';
+				errorModal = result.message || m.rwd_error_send_otp();
 			}
 		} catch (error) {
 			Logger.root.error({ context: 'errors', error }, 'Failed to send redemption OTP');
-			errorModal = 'Network error. Please try again.';
+			errorModal = m.rwd_error_network();
 		} finally {
 			redeeming = null;
 		}
@@ -89,10 +91,10 @@
 				redemptions = [{ id: result.data.redemptionId, type: 'gift_card', provider: reward.provider, amount: reward.pointsCost, value: reward.originalPrice ?? 0, status: 'pending', rewardName: reward.title, createdAt: new Date().toISOString(), completedAt: null }, ...redemptions];
 				successModal = { rewardName: reward.title, points: reward.pointsCost, redemptionId: result.data.redemptionId };
 			} else {
-				otpError = result.message || 'Invalid code. Please try again.';
+				otpError = result.message || m.rwd_error_invalid_otp();
 			}
 		} catch {
-			otpError = 'Network error. Please try again.';
+			otpError = m.rwd_error_network();
 		} finally {
 			otpSending = false;
 		}
@@ -101,7 +103,7 @@
 	let cancellingId = $state<string | null>(null);
 
 	async function cancelRedemption(id: string, amount: number) {
-		if (!confirm('Cancel this redemption? Your points will be refunded.')) return;
+		if (!confirm(m.rwd_confirm_cancel_msg())) return;
 		cancellingId = id;
 		try {
 			const res = await fetch(`/api/rewards/redeem/${id}`, { method: 'DELETE' });
@@ -110,13 +112,24 @@
 				redemptions = redemptions.map(r => r.id === id ? { ...r, status: 'cancelled' } : r);
 				userPoints += amount;
 			} else {
-				errorModal = result.message || 'Failed to cancel redemption.';
+				errorModal = result.message || m.rwd_error_cancel_failed();
 			}
 		} catch {
-			errorModal = 'Network error. Please try again.';
+			errorModal = m.rwd_error_network();
 		} finally {
 			cancellingId = null;
 		}
+	}
+
+	function statusLabel(status: string) {
+		const labels: Record<string, string> = {
+			pending: m.rwd_status_pending(),
+			processing: m.rwd_status_processing(),
+			completed: m.rwd_status_completed(),
+			failed: m.rwd_status_failed(),
+			cancelled: m.rwd_status_cancelled(),
+		};
+		return labels[status] || status;
 	}
 
 	function canAfford(pointsCost: number) { return userPoints >= pointsCost; }
@@ -131,15 +144,15 @@
 		}
 	}
 
-	function formatDate(d: string) { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+	function formatDate(d: string) { return new Date(d).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); }
 </script>
 
 <svelte:head>
-	<title>Rewards - EarnMaze</title>
+	<title>{m.rwd_meta_title()}</title>
 </svelte:head>
 
 <div class="space-y-6 animate-fade-in">
-	<InfoBanner id="rewards-how" message="Click 'Redeem' on any reward to submit a redemption request. Our team reviews requests and processes them within 24-48 hours. Track your request status in 'My Redemptions'." color="emerald" />
+	<InfoBanner id="rewards-how" message={m.rwd_info()} color="emerald" />
 
 	<!-- Balance Bar -->
 	<div class="flex items-center justify-between bg-surface-100 border border-white/[0.06] rounded-2xl px-5 py-4">
@@ -148,18 +161,18 @@
 				<Coins class="w-5 h-5 text-emerald-400" />
 			</div>
 			<div>
-				<div class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Your Balance</div>
-				<div class="text-xl font-black text-white">{userPoints.toLocaleString()} <span class="text-sm font-medium text-neutral-600">pts</span></div>
+				<div class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">{m.rwd_your_balance()}</div>
+				<div class="text-xl font-black text-white">{userPoints.toLocaleString()} <span class="text-sm font-medium text-neutral-600">{m.rwd_pts()}</span></div>
 			</div>
 		</div>
 		<div class="flex items-center gap-2">
 			{#if redemptions.length > 0}
 				<button onclick={() => showRedemptions = !showRedemptions} class="btn-secondary !text-xs !py-2">
-					{showRedemptions ? 'Hide' : 'My Redemptions'} ({redemptions.length})
+					{showRedemptions ? m.rwd_hide_redemptions() : m.rwd_show_redemptions()} ({redemptions.length})
 				</button>
 			{/if}
-			<a href="/surveys" class="btn-primary !text-xs !py-2">
-				<Rocket class="w-3.5 h-3.5" /> Earn More
+			<a href={localizeHref('/surveys')} class="btn-primary !text-xs !py-2">
+				<Rocket class="w-3.5 h-3.5" /> {m.rwd_earn_more()}
 			</a>
 		</div>
 	</div>
@@ -168,7 +181,7 @@
 	{#if showRedemptions && redemptions.length > 0}
 		<div class="card !p-0 overflow-hidden animate-scale-in">
 			<div class="px-5 py-3 border-b border-white/[0.06]">
-				<h2 class="text-sm font-bold text-white">My Redemptions</h2>
+				<h2 class="text-sm font-bold text-white">{m.rwd_my_redemptions_title()}</h2>
 			</div>
 			<div class="divide-y divide-white/[0.04] max-h-64 overflow-y-auto">
 				{#each redemptions as r}
@@ -181,17 +194,17 @@
 							<div class="text-sm font-medium text-white truncate">{r.rewardName}</div>
 							<div class="text-[10px] text-neutral-600">{formatDate(r.createdAt)}</div>
 						</div>
-						<div class="text-right flex-shrink-0 flex items-center gap-2">
+						<div class="text-end flex-shrink-0 flex items-center gap-2">
 							<div>
-								<div class="text-xs font-bold text-white">{r.amount.toLocaleString()} pts</div>
-								<span class="badge {ss.class} text-[9px]">{r.status}</span>
+								<div class="text-xs font-bold text-white">{r.amount.toLocaleString()} {m.rwd_pts()}</div>
+								<span class="badge {ss.class} text-[9px]">{statusLabel(r.status)}</span>
 							</div>
 							{#if r.status === 'pending'}
 								<button
 									onclick={() => cancelRedemption(r.id, r.amount)}
 									disabled={cancellingId === r.id}
 									class="p-1.5 rounded-lg text-neutral-600 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-									title="Cancel redemption"
+									title={m.rwd_cancel_title()}
 								>
 									{#if cancellingId === r.id}
 										<Loader2 class="w-3.5 h-3.5 animate-spin" />
@@ -213,9 +226,9 @@
 			<div class="w-16 h-16 bg-white/[0.04] rounded-2xl flex items-center justify-center mx-auto mb-4">
 				<Gift class="w-8 h-8 text-neutral-600" />
 			</div>
-			<h3 class="text-lg font-bold text-white mb-2">No rewards available</h3>
-			<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">Check back later for new reward opportunities.</p>
-			<a href="/surveys" class="btn-primary"><ClipboardList class="w-4 h-4" /> Earn Points</a>
+			<h3 class="text-lg font-bold text-white mb-2">{m.rwd_no_rewards_title()}</h3>
+			<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">{m.rwd_no_rewards_desc()}</p>
+			<a href={localizeHref('/surveys')} class="btn-primary"><ClipboardList class="w-4 h-4" /> {m.rwd_earn_points_btn()}</a>
 		</div>
 	{:else}
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -242,15 +255,15 @@
 						<div class="flex items-center justify-between mb-4">
 							<div class="flex items-baseline gap-1.5">
 								<span class="text-xl font-black text-primary-400">{reward.pointsCost.toLocaleString()}</span>
-								<span class="text-xs text-neutral-600 font-medium">pts</span>
+								<span class="text-xs text-neutral-600 font-medium">{m.rwd_pts()}</span>
 							</div>
 							{#if reward.originalPrice}
-								<span class="badge-neutral text-[10px]">Value: ${reward.originalPrice}</span>
+								<span class="badge-neutral text-[10px]">{m.rwd_value_label({ price: reward.originalPrice })}</span>
 							{/if}
 						</div>
 						{#if reward.stock !== undefined && reward.stock <= 10 && reward.stock > 0}
 							<div class="flex items-center gap-1.5 text-xs text-amber-400 mb-3 bg-amber-500/10 px-3 py-1.5 rounded-lg ring-1 ring-amber-500/20">
-								<AlertTriangle class="w-3.5 h-3.5" /> Only {reward.stock} left
+								<AlertTriangle class="w-3.5 h-3.5" /> {m.rwd_only_left({ count: reward.stock })}
 							</div>
 						{/if}
 						<button
@@ -259,13 +272,13 @@
 							class="w-full {canAfford(reward.pointsCost) && reward.stock !== 0 ? 'btn-primary' : 'btn bg-white/[0.04] text-neutral-600 border-white/[0.04] cursor-not-allowed'}"
 						>
 							{#if redeeming === reward.id}
-								<Loader2 class="w-4 h-4 animate-spin" /> Processing...
+								<Loader2 class="w-4 h-4 animate-spin" /> {m.rwd_processing_btn()}
 							{:else if reward.stock !== undefined && reward.stock <= 0}
-								Out of Stock
+								{m.rwd_out_of_stock()}
 							{:else if !canAfford(reward.pointsCost)}
-								Need {(reward.pointsCost - userPoints).toLocaleString()} more
+								{m.rwd_need_more({ count: (reward.pointsCost - userPoints).toLocaleString() })}
 							{:else}
-								<Gift class="w-4 h-4" /> Redeem
+								<Gift class="w-4 h-4" /> {m.rwd_redeem()}
 							{/if}
 						</button>
 					</div>
@@ -276,15 +289,15 @@
 
 	<!-- Tips -->
 	<div class="relative overflow-hidden bg-surface-100 border border-primary-500/10 rounded-2xl p-5 md:p-6">
-		<div class="absolute -top-16 -right-16 w-40 h-40 bg-primary-500/5 rounded-full blur-3xl"></div>
+		<div class="absolute -top-16 -end-16 w-40 h-40 bg-primary-500/5 rounded-full blur-3xl"></div>
 		<div class="relative flex items-start gap-4">
 			<div class="p-2.5 bg-primary-500/10 rounded-xl flex-shrink-0"><Lightbulb class="w-5 h-5 text-primary-400" /></div>
 			<div>
-				<h2 class="text-sm font-bold text-white mb-3">Tips to Earn More</h2>
+				<h2 class="text-sm font-bold text-white mb-3">{m.rwd_tips_title()}</h2>
 				<ul class="text-sm text-neutral-500 space-y-2">
-					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> Complete surveys regularly to maximize earnings</li>
-					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> Look for high-value surveys with bonus points</li>
-					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> Provide quality responses to unlock more opportunities</li>
+					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> {m.rwd_tip_1()}</li>
+					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> {m.rwd_tip_2()}</li>
+					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> {m.rwd_tip_3()}</li>
 				</ul>
 			</div>
 		</div>
@@ -302,23 +315,23 @@
 				<div class="w-14 h-14 bg-primary-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
 					<Gift class="w-7 h-7 text-primary-400" />
 				</div>
-				<h3 class="text-lg font-bold text-white">Confirm Redemption</h3>
+				<h3 class="text-lg font-bold text-white">{m.rwd_confirm_title()}</h3>
 			</div>
 			<div class="bg-surface-200 rounded-xl p-4 mb-5">
 				<div class="text-sm font-semibold text-white mb-1">{confirmModal.reward.title}</div>
 				<div class="flex items-center justify-between text-xs text-neutral-400 mt-2">
-					<span>Points to spend</span>
+					<span>{m.rwd_confirm_pts_spend()}</span>
 					<span class="font-bold text-white">{confirmModal.reward.pointsCost.toLocaleString()}</span>
 				</div>
 				<div class="flex items-center justify-between text-xs text-neutral-400 mt-1">
-					<span>Balance after</span>
+					<span>{m.rwd_confirm_balance_after()}</span>
 					<span class="font-bold text-emerald-400">{(userPoints - confirmModal.reward.pointsCost).toLocaleString()}</span>
 				</div>
 			</div>
-			<p class="text-xs text-neutral-500 mb-3 text-center">A verification code will be sent to your registered email. Your gift card will also be delivered to the same email.</p>
+			<p class="text-xs text-neutral-500 mb-3 text-center">{m.rwd_confirm_otp_note()}</p>
 			<div class="flex gap-3">
-				<button onclick={() => confirmModal = null} class="btn-secondary flex-1">Cancel</button>
-				<button onclick={confirmRedeem} class="btn-primary flex-1"><Gift class="w-4 h-4" /> Confirm</button>
+				<button onclick={() => confirmModal = null} class="btn-secondary flex-1">{m.common_cancel()}</button>
+				<button onclick={confirmRedeem} class="btn-primary flex-1"><Gift class="w-4 h-4" /> {m.rwd_confirm_btn()}</button>
 			</div>
 		</div>
 	</div>
@@ -334,14 +347,14 @@
 				<div class="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center mx-auto mb-3">
 					<Shield class="w-6 h-6 text-primary-400" />
 				</div>
-				<h3 class="text-lg font-bold text-white">Verify Redemption</h3>
-				<p class="text-sm text-neutral-500 mt-1">Enter the 6-digit code sent to your email</p>
+				<h3 class="text-lg font-bold text-white">{m.rwd_otp_title()}</h3>
+				<p class="text-sm text-neutral-500 mt-1">{m.rwd_otp_subtitle()}</p>
 			</div>
 
 			<div class="space-y-4">
 				<div class="text-center">
-					<p class="text-xs text-neutral-400 mb-2">Redeeming: <strong class="text-white">{otpModal.reward.title}</strong></p>
-					<p class="text-xs text-neutral-500">{otpModal.reward.pointsCost.toLocaleString()} points</p>
+					<p class="text-xs text-neutral-400 mb-2">{m.rwd_otp_redeeming()} <strong class="text-white">{otpModal.reward.title}</strong></p>
+					<p class="text-xs text-neutral-500">{m.rwd_otp_pts({ count: otpModal.reward.pointsCost.toLocaleString() })}</p>
 				</div>
 
 				<input
@@ -360,17 +373,17 @@
 				{/if}
 
 				<div class="flex gap-3">
-					<button onclick={() => otpModal = null} disabled={otpSending} class="btn-secondary flex-1">Cancel</button>
+					<button onclick={() => otpModal = null} disabled={otpSending} class="btn-secondary flex-1">{m.common_cancel()}</button>
 					<button onclick={confirmOtp} disabled={otpSending || otpCode.length !== 6} class="btn-primary flex-1">
 						{#if otpSending}
-							<Loader2 class="w-4 h-4 animate-spin" /> Verifying...
+							<Loader2 class="w-4 h-4 animate-spin" /> {m.rwd_otp_verifying()}
 						{:else}
-							Confirm
+							{m.rwd_confirm_btn()}
 						{/if}
 					</button>
 				</div>
 
-				<p class="text-[10px] text-neutral-600 text-center">Code expires in 5 minutes. Your gift card will be sent to the same email.</p>
+				<p class="text-[10px] text-neutral-600 text-center">{m.rwd_otp_expires()}</p>
 			</div>
 		</div>
 	</div>
@@ -387,21 +400,21 @@
 				<div class="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
 					<CircleCheckBig class="w-7 h-7 text-emerald-400" />
 				</div>
-				<h3 class="text-lg font-bold text-white mb-1">Request Submitted!</h3>
+				<h3 class="text-lg font-bold text-white mb-1">{m.rwd_success_title()}</h3>
 				<p class="text-sm text-neutral-400 mb-4">{successModal.rewardName}</p>
 				<div class="bg-surface-200 rounded-xl p-3 mb-5">
 					<div class="flex items-center justify-between text-xs">
-						<span class="text-neutral-500">Points spent</span>
+						<span class="text-neutral-500">{m.rwd_success_pts_spent()}</span>
 						<span class="font-bold text-white">{successModal.points.toLocaleString()}</span>
 					</div>
 					<div class="flex items-center justify-between text-xs mt-1.5">
-						<span class="text-neutral-500">Status</span>
-						<span class="badge bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20 text-[10px]">Pending Review</span>
+						<span class="text-neutral-500">{m.rwd_success_status()}</span>
+						<span class="badge bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20 text-[10px]">{m.rwd_success_pending_review()}</span>
 					</div>
 				</div>
-				<p class="text-[10px] text-neutral-600 mb-5">You can track your redemption status above. We'll process it shortly.</p>
+				<p class="text-[10px] text-neutral-600 mb-5">{m.rwd_success_track_note()}</p>
 				<button onclick={() => { successModal = null; showRedemptions = true; }} class="btn-primary w-full">
-					<Check class="w-4 h-4" /> Done
+					<Check class="w-4 h-4" /> {m.rwd_success_done()}
 				</button>
 			</div>
 		</div>
@@ -419,9 +432,9 @@
 				<div class="w-14 h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
 					<CircleX class="w-7 h-7 text-rose-400" />
 				</div>
-				<h3 class="text-lg font-bold text-white mb-2">Redemption Failed</h3>
+				<h3 class="text-lg font-bold text-white mb-2">{m.rwd_error_title()}</h3>
 				<p class="text-sm text-neutral-400 mb-5">{errorModal}</p>
-				<button onclick={() => errorModal = null} class="btn-secondary w-full">Close</button>
+				<button onclick={() => errorModal = null} class="btn-secondary w-full">{m.rwd_error_close()}</button>
 			</div>
 		</div>
 	</div>

@@ -116,7 +116,7 @@
 								searchInput = '';
 								handleSearch();
 							}}
-							class="hover:text-primary-300 ml-1"
+							class="hover:text-primary-300 ms-1"
 						>
 							&times;
 						</button>
@@ -130,7 +130,7 @@
 								userTypeFilter = 'all';
 								handleFilterChange();
 							}}
-							class="hover:text-primary-300 ml-1"
+							class="hover:text-primary-300 ms-1"
 						>
 							&times;
 						</button>
@@ -193,7 +193,7 @@
 						<th class="table-th">Points</th>
 						<th class="table-th">Joined</th>
 						<th class="table-th">Last Login</th>
-						<th class="table-th text-right">Actions</th>
+						<th class="table-th text-end">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -217,7 +217,7 @@
 										{user.isActive ? 'Active' : 'Inactive'}
 									</span>
 									{#if user.emailVerified}
-										<span class="ml-1 text-emerald-400" title="Email verified">&#10003;</span>
+										<span class="ms-1 text-emerald-400" title="Email verified">&#10003;</span>
 									{/if}
 								</td>
 								<td class="table-td whitespace-nowrap">
@@ -238,10 +238,10 @@
 								<td class="table-td whitespace-nowrap">
 									{formatDate(user.lastLoginAt)}
 								</td>
-								<td class="table-td whitespace-nowrap text-right text-sm font-medium">
+								<td class="table-td whitespace-nowrap text-end text-sm font-medium">
 									<a
 										href="/admin/users/{user.id}"
-										class="text-primary-400 hover:text-primary-300 mr-3"
+										class="text-primary-400 hover:text-primary-300 me-3"
 										title="View full profile"
 									>
 										View

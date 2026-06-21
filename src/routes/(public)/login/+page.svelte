@@ -6,6 +6,8 @@
 	import { onMount } from 'svelte';
 	import Turnstile from '$lib/components/Turnstile.svelte';
 	import { Loader, CircleX } from '@lucide/svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let email = $state('');
 	let password = $state('');
@@ -63,8 +65,8 @@
 		if (!token) {
 			isLoading = false;
 			authStore.state.error = needsInteraction
-				? 'Please complete the security check below.'
-				: 'Verification timed out. Please refresh and try again.';
+				? m.auth_security_check_msg()
+				: m.auth_verification_timeout();
 			return;
 		}
 
@@ -102,11 +104,8 @@
 </script>
 
 <svelte:head>
-	<title>Sign In - EarnMaze</title>
-	<meta
-		name="description"
-		content="Sign in to your EarnMaze account to access your dashboard and start earning rewards."
-	/>
+	<title>{m.auth_login_meta_title()}</title>
+	<meta name="description" content={m.auth_login_meta_description()} />
 </svelte:head>
 
 {#if isRedirecting}
@@ -121,8 +120,8 @@
 					</svg>
 				</div>
 			</div>
-			<p class="text-base font-semibold text-white mb-1">Welcome back!</p>
-			<p class="text-sm text-neutral-500">Loading your dashboard...</p>
+			<p class="text-base font-semibold text-white mb-1">{m.auth_login_redirect_title()}</p>
+			<p class="text-sm text-neutral-500">{m.auth_login_redirect_subtitle()}</p>
 		</div>
 	</div>
 {/if}
@@ -134,10 +133,10 @@
 			<span class="text-2xl text-white font-bold">EM</span>
 		</div>
 		<h1 class="text-4xl font-bold text-white">
-			Welcome back
+			{m.auth_login_heading()}
 		</h1>
 		<p class="text-lg text-neutral-400">
-			Sign in to your EarnMaze account
+			{m.auth_login_subheading()}
 		</p>
 	</div>
 
@@ -153,27 +152,27 @@
 
 			<!-- Email Field -->
 			<div class="space-y-2">
-				<label for="email" class="label">Email address</label>
+				<label for="email" class="label">{m.common_email()}</label>
 				<input
 					id="email"
 					type="email"
 					bind:value={email}
 					required
 					class="input"
-					placeholder="you@example.com"
+					placeholder={m.auth_email_placeholder()}
 				/>
 			</div>
 
 			<!-- Password Field -->
 			<div class="space-y-2">
-				<label for="password" class="label">Password</label>
+				<label for="password" class="label">{m.common_password()}</label>
 				<input
 					id="password"
 					type="password"
 					bind:value={password}
 					required
 					class="input"
-					placeholder="Enter your password"
+					placeholder={m.auth_password_placeholder_login()}
 				/>
 			</div>
 
@@ -185,17 +184,17 @@
 						type="checkbox"
 						class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50"
 					/>
-					<label for="remember-me" class="ml-2 block text-sm text-neutral-400">
-						Remember me
+					<label for="remember-me" class="ms-2 block text-sm text-neutral-400">
+						{m.auth_remember_me()}
 					</label>
 				</div>
 
 				<div>
 					<a
-						href="/forgot-password"
+						href={localizeHref('/forgot-password')}
 						class="link text-sm"
 					>
-						<span>Forgot password?</span>
+						<span>{m.auth_forgot_link()}</span>
 						</a>
 					</div>
 				</div>
@@ -203,7 +202,7 @@
 				<!-- Cloudflare Turnstile -->
 				<div class="flex flex-col items-center gap-2 py-4">
 					{#if needsInteraction}
-						<p class="text-sm text-amber-400">Please complete the security check below.</p>
+						<p class="text-sm text-amber-400">{m.auth_security_check_msg()}</p>
 					{/if}
 					<Turnstile
 						bind:this={turnstileRef}
@@ -225,10 +224,10 @@
 					>
 						<div class="flex items-center justify-center">
 							{#if isLoading}
-								<Loader class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-								Signing in...
+								<Loader class="animate-spin -ms-1 me-3 h-5 w-5 text-white" />
+								{m.auth_login_button_loading()}
 							{:else}
-								Sign in
+								{m.common_signin()}
 							{/if}
 						</div>
 					</button>
@@ -238,16 +237,16 @@
 		<!-- Register Link -->
 		<div class="relative text-center pt-6">
 			<div class="text-sm text-neutral-500">
-				Don't have an account? <a href="/register" class="link">Sign up for free →</a>
+				{m.auth_no_account()} <a href={localizeHref('/register')} class="link">{m.auth_signup_free_link()}</a>
 			</div>
 		</div>
 
 		<!-- Legal Links Footer -->
 		<div class="relative text-center pt-8 mt-8 border-t border-white/[0.06]">
 			<div class="text-xs text-neutral-600 space-x-4">
-				<a href="/privacy-policy" class="hover:text-primary-400 transition-colors">Privacy Policy</a>
+				<a href={localizeHref('/privacy-policy')} class="hover:text-primary-400 transition-colors">{m.footer_privacy()}</a>
 				<span>•</span>
-				<a href="/terms-of-service" class="hover:text-primary-400 transition-colors">Terms of Service</a>
+				<a href={localizeHref('/terms-of-service')} class="hover:text-primary-400 transition-colors">{m.footer_terms()}</a>
 			</div>
 		</div>
 	</div>

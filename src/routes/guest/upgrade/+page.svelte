@@ -453,19 +453,19 @@
 				<h3 class="font-bold text-lg mb-3">Full Account Benefits:</h3>
 				<ul class="space-y-2 text-sm">
 				<li class="flex items-start">
-					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
+					<Check class="h-5 w-5 me-2 flex-shrink-0" />
 					Save and track all your points permanently
 				</li>
 				<li class="flex items-start">
-					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
+					<Check class="h-5 w-5 me-2 flex-shrink-0" />
 					Redeem rewards and gift cards
 				</li>
 				<li class="flex items-start">
-					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
+					<Check class="h-5 w-5 me-2 flex-shrink-0" />
 					Access complete survey history
 				</li>
 				<li class="flex items-start">
-					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
+					<Check class="h-5 w-5 me-2 flex-shrink-0" />
 					Unlock tier rewards and bonuses
 				</li>
 			</ul>
@@ -480,7 +480,7 @@
 						<div class="flex-shrink-0">
 							<AlertTriangle class="h-5 w-5 text-amber-400" />
 						</div>
-						<div class="ml-3">
+						<div class="ms-3">
 							<h3 class="text-sm font-medium text-amber-300">Account Already Exists</h3>
 							<p class="text-sm text-amber-400/80 mt-1">
 								An account with this email already has a password set. Please <a href="/login" class="underline font-semibold hover:text-amber-200">log in with your password</a> instead.

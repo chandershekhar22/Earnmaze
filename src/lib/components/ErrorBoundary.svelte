@@ -95,7 +95,7 @@
 			</p>
 
 			{#if errorId}
-				<div class="bg-surface-200 rounded-lg p-3 mb-4 text-left">
+				<div class="bg-surface-200 rounded-lg p-3 mb-4 text-start">
 					<div class="text-xs text-neutral-500 mb-1">Error ID</div>
 					<div class="font-mono text-sm text-neutral-300">{errorId}</div>
 				</div>

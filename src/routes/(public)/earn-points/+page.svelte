@@ -11,6 +11,7 @@
 	} from '$lib/analytics';
 	import Turnstile from '$lib/components/Turnstile.svelte';
 	import { Check, ArrowRight, Sparkles, Shield, Zap } from '@lucide/svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let showEmailModal = $state(false);
 	let email = $state('');
@@ -160,9 +161,9 @@
 
 	<!-- Animated blobs -->
 	<div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-		<div class="absolute -top-20 left-[5%] w-[450px] h-[450px] bg-white/10 rounded-full blur-[100px] bl-a"></div>
-		<div class="absolute bottom-[-10%] right-[5%] w-[400px] h-[400px] bg-amber-400/10 rounded-full blur-[90px] bl-b"></div>
-		<div class="absolute top-[40%] left-[50%] w-[300px] h-[300px] bg-cyan-400/8 rounded-full blur-[80px] bl-a" style="animation-delay:3s"></div>
+		<div class="absolute -top-20 start-[5%] w-[450px] h-[450px] bg-white/10 rounded-full blur-[100px] bl-a"></div>
+		<div class="absolute bottom-[-10%] end-[5%] w-[400px] h-[400px] bg-amber-400/10 rounded-full blur-[90px] bl-b"></div>
+		<div class="absolute top-[40%] start-[50%] w-[300px] h-[300px] bg-cyan-400/8 rounded-full blur-[80px] bl-a" style="animation-delay:3s"></div>
 	</div>
 
 	<div class="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
@@ -193,7 +194,7 @@
 				aria-label="Start earning points now for free"
 			>
 				Start Earning Now — It's Free
-				<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+				<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform rtl:-scale-x-100" />
 			</button>
 		</div>
 	</div>
@@ -227,8 +228,8 @@
 <section class="relative py-14 sm:py-20 overflow-hidden" aria-labelledby="cta-heading">
 	<div class="absolute inset-0 bg-gradient-to-br from-indigo-700 via-violet-600 to-fuchsia-600 grad-x"></div>
 	<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-		<div class="absolute top-[10%] left-[10%] w-40 h-40 bg-white/5 rounded-full blur-2xl glow-p"></div>
-		<div class="absolute bottom-[10%] right-[10%] w-32 h-32 bg-white/5 rounded-full blur-2xl glow-p" style="animation-delay:2s"></div>
+		<div class="absolute top-[10%] start-[10%] w-40 h-40 bg-white/5 rounded-full blur-2xl glow-p"></div>
+		<div class="absolute bottom-[10%] end-[10%] w-32 h-32 bg-white/5 rounded-full blur-2xl glow-p" style="animation-delay:2s"></div>
 	</div>
 
 	<div class="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
@@ -247,7 +248,7 @@
 			aria-label="Sign up now to start earning points for free"
 		>
 			Start Earning — It's Free
-			<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+			<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform rtl:-scale-x-100" />
 		</button>
 
 		<div class="mt-8 flex flex-wrap justify-center gap-5 text-xs sm:text-sm text-white/60">
@@ -281,7 +282,7 @@
 		>
 			<button
 				onclick={closeEmailModal}
-				class="absolute top-4 right-4 text-neutral-600 hover:text-white transition-colors"
+				class="absolute top-4 end-4 text-neutral-600 hover:text-white transition-colors"
 				aria-label="Close modal"
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,16 +356,16 @@
 						Processing...
 					{:else}
 						Continue
-						<ArrowRight class="w-4 h-4" />
+						<ArrowRight class="w-4 h-4 rtl:-scale-x-100" />
 					{/if}
 				</button>
 
 				<!-- Implicit consent notice — clicking Continue is the affirmative action. -->
 				<p class="text-xs text-neutral-500 text-center leading-relaxed">
 					By continuing you confirm you are 18+ and agree to our
-					<a href="/terms-of-service" class="link" target="_blank" rel="noopener">Terms</a>
+					<a href={localizeHref('/terms-of-service')} class="link" target="_blank" rel="noopener">Terms</a>
 					and
-					<a href="/privacy-policy" class="link" target="_blank" rel="noopener">Privacy Policy</a>.
+					<a href={localizeHref('/privacy-policy')} class="link" target="_blank" rel="noopener">Privacy Policy</a>.
 				</p>
 			</form>
 

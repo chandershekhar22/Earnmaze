@@ -4,9 +4,22 @@ import { requireAdmin } from '$lib/server/auth';
 import { createFaq, getAllFaqs, updateFaq, deleteFaq } from '$lib/db/repositories';
 import { z } from 'zod';
 
+// Translation overrides keyed by non-base locale code (e.g. "es", "fr").
+// Either field may be omitted to fall back to the base column at read time.
+const translationsSchema = z
+	.record(
+		z.string().min(2).max(10),
+		z.object({
+			question: z.string().min(1).max(500).optional(),
+			answer: z.string().min(1).max(5000).optional(),
+		}),
+	)
+	.optional();
+
 const createSchema = z.object({
 	question: z.string().min(1).max(500),
 	answer: z.string().min(1).max(5000),
+	translations: translationsSchema,
 });
 
 const updateSchema = z.object({
@@ -15,6 +28,7 @@ const updateSchema = z.object({
 	answer: z.string().min(1).max(5000).optional(),
 	sortOrder: z.number().int().min(0).optional(),
 	isActive: z.boolean().optional(),
+	translations: translationsSchema,
 });
 
 export const GET: RequestHandler = async (event) => {
@@ -28,7 +42,7 @@ export const POST: RequestHandler = async (event) => {
 	try {
 		const body = await event.request.json();
 		const data = createSchema.parse(body);
-		const created = await createFaq(data.question, data.answer, admin.id);
+		const created = await createFaq(data.question, data.answer, admin.id, data.translations ?? {});
 		return json({ success: true, faq: created });
 	} catch (err) {
 		if (err instanceof z.ZodError) return json({ error: err.issues[0]?.message || 'Invalid input' }, { status: 400 });

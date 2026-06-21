@@ -118,3 +118,7 @@ gitignore
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Paraglide JS — compiled message accessors. Regenerated on every build by
+# the Vite plugin. Source of truth is messages/{locale}.json.
+src/lib/paraglide/

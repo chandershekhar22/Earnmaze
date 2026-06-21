@@ -4,6 +4,8 @@
 	import type { AvailableSurveyItem, SurveyTransactionsResponse } from '$types/api-responses';
 	import { ClipboardList, Clock, House, FileText, ArrowRight, CircleCheckBig, CircleX, Zap, Rocket, Coins, Sparkles, Search } from '@lucide/svelte';
 	import InfoBanner from '$lib/components/InfoBanner.svelte';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
+	import * as m from '$lib/paraglide/messages';
 	import { page } from '$app/stores';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -50,11 +52,11 @@
 			setTimeout(() => showCelebration = false, 5000);
 			// Show toast
 			if (celebrationPts > 0) {
-				toastStore.success('Points Earned!', `You earned ${celebrationPts} points!`);
+				toastStore.success(m.svy_toast_pts_earned_title(), m.svy_toast_pts_earned_desc({ count: celebrationPts }));
 			} else if (completed === 'disqualified') {
-				toastStore.info('Survey Complete', 'You were screened out of this survey.');
+				toastStore.info(m.svy_toast_complete_title(), m.svy_toast_screened_out());
 			} else {
-				toastStore.info('Survey Complete', 'Survey recorded successfully.');
+				toastStore.info(m.svy_toast_complete_title(), m.svy_toast_recorded());
 			}
 		}
 
@@ -78,11 +80,11 @@
 	async function startSurvey(surveyId: string) {
 		try {
 			const survey = availableSurveyData.find((s) => s.id === surveyId);
-			toastStore.info('Starting Survey', `Loading ${survey?.title || 'survey'}...`);
+			toastStore.info(m.svy_toast_starting_title(), m.svy_toast_starting_desc({ title: survey?.title || m.svy_untitled() }));
 			window.location.href = `/start-survey?surveyId=${surveyId}`;
 		} catch (error) {
 			Logger.root.error({ context: 'errors', error }, 'Failed to start survey');
-			toastStore.error('Connection Error', 'Unable to start survey.');
+			toastStore.error(m.svy_toast_error_title(), m.svy_toast_error_desc());
 		}
 	}
 
@@ -93,7 +95,17 @@
 
 	function formatDate(dateValue?: string | Date | null): string {
 		if (!dateValue) return '--';
-		return new Date(dateValue).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+		return new Date(dateValue).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+	}
+
+	function statusLabel(status: string) {
+		const labels: Record<string, string> = {
+			completed: m.svy_status_completed(),
+			started: m.svy_status_started(),
+			disqualified: m.svy_status_disqualified(),
+			expired: m.svy_status_expired(),
+		};
+		return labels[status] || status;
 	}
 
 	function getStatusStyle(status: string) {
@@ -108,8 +120,8 @@
 </script>
 
 <svelte:head>
-	<title>Surveys - EarnMaze</title>
-	<meta name="description" content="Browse available surveys and view your survey completion history." />
+	<title>{m.svy_meta_title()}</title>
+	<meta name="description" content={m.svy_meta_description()} />
 	<style>
 		@keyframes survey-glow {
 			0%, 100% { box-shadow: 0 0 0 0 rgba(244,63,94,0); border-color: rgba(244,63,94,0.2); }
@@ -125,37 +137,37 @@
 </style>
 
 <div class="space-y-5 animate-fade-in">
-	<InfoBanner id="survey-how" message="Click 'Start' on any survey to begin earning. You'll be redirected to the survey — once done, points are credited automatically. Partial credit may apply for terminated or quota-full surveys." color="primary" />
+	<InfoBanner id="survey-how" message={m.svy_info()} color="primary" />
 
 	<!-- Tabs -->
 	<div class="tab-group max-w-sm">
 		<button onclick={() => activeTab = 'available'} class={activeTab === 'available' ? 'tab-active' : 'tab'}>
-			<ClipboardList class="w-4 h-4 mr-2 inline" />
-			Available ({availableSurveyData.length})
+			<ClipboardList class="w-4 h-4 me-2 inline" />
+			{m.svy_tab_available({ count: availableSurveyData.length })}
 		</button>
 		<button onclick={() => activeTab = 'history'} class={activeTab === 'history' ? 'tab-active' : 'tab'}>
-			<Clock class="w-4 h-4 mr-2 inline" />
-			History ({transactions.length})
+			<Clock class="w-4 h-4 me-2 inline" />
+			{m.svy_tab_history({ count: transactions.length })}
 		</button>
 	</div>
 
 	<!-- Celebration banner -->
 	{#if showCelebration}
 		<div class="relative overflow-hidden bg-gradient-to-r from-emerald-500/15 to-cyan-500/10 border border-emerald-500/20 rounded-2xl p-4 animate-scale-in">
-			<div class="absolute -top-10 -right-10 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl"></div>
+			<div class="absolute -top-10 -end-10 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl"></div>
 			<div class="relative flex items-center gap-4">
 				<div class="p-3 bg-emerald-500/15 rounded-xl flex-shrink-0">
 					<CircleCheckBig class="w-6 h-6 text-emerald-400" />
 				</div>
 				<div class="flex-1">
-					<h3 class="text-sm font-bold text-white">Survey completed!</h3>
+					<h3 class="text-sm font-bold text-white">{m.svy_celebration_title()}</h3>
 					{#if celebrationPts > 0}
-						<p class="text-xs text-emerald-400 font-semibold mt-0.5">+{celebrationPts} points earned</p>
+						<p class="text-xs text-emerald-400 font-semibold mt-0.5">{m.svy_celebration_pts({ count: celebrationPts })}</p>
 					{:else}
-						<p class="text-xs text-neutral-400 mt-0.5">Thanks for participating</p>
+						<p class="text-xs text-neutral-400 mt-0.5">{m.svy_celebration_thanks()}</p>
 					{/if}
 				</div>
-				<button onclick={() => showCelebration = false} class="p-1.5 text-neutral-500 hover:text-white rounded-lg hover:bg-white/5 transition-colors flex-shrink-0" aria-label="Dismiss">
+				<button onclick={() => showCelebration = false} class="p-1.5 text-neutral-500 hover:text-white rounded-lg hover:bg-white/5 transition-colors flex-shrink-0" aria-label={m.svy_dismiss()}>
 					<CircleX class="w-4 h-4" />
 				</button>
 			</div>
@@ -166,15 +178,15 @@
 		<!-- Search bar (shown when 5+ surveys) -->
 		{#if showSearch}
 			<div class="relative">
-				<Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600" />
+				<Search class="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600" />
 				<input
 					type="text"
 					bind:value={searchQuery}
-					placeholder="Search surveys..."
-					class="input !pl-10 !pr-9 !py-2.5 !text-sm"
+					placeholder={m.svy_search_placeholder()}
+					class="input !ps-10 !pe-9 !py-2.5 !text-sm"
 				/>
 				{#if searchQuery}
-					<button onclick={() => searchQuery = ''} class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-neutral-600 hover:text-white transition-colors" aria-label="Clear search">
+					<button onclick={() => searchQuery = ''} class="absolute end-3 top-1/2 -translate-y-1/2 p-0.5 text-neutral-600 hover:text-white transition-colors" aria-label={m.svy_clear_search()}>
 						<CircleX class="w-4 h-4" />
 					</button>
 				{/if}
@@ -186,18 +198,18 @@
 				<div class="w-16 h-16 bg-white/[0.04] rounded-2xl flex items-center justify-center mx-auto mb-4">
 					<ClipboardList class="w-8 h-8 text-neutral-600" />
 				</div>
-				<h3 class="text-lg font-bold text-white mb-2">No surveys right now</h3>
-				<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">Check back later for new earning opportunities.</p>
-				<a href="/dashboard" class="btn-secondary">
+				<h3 class="text-lg font-bold text-white mb-2">{m.svy_empty_title()}</h3>
+				<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">{m.svy_empty_desc()}</p>
+				<a href={localizeHref('/dashboard')} class="btn-secondary">
 					<House class="w-4 h-4" />
-					Back to Dashboard
+					{m.svy_back_to_dashboard()}
 				</a>
 			</div>
 		{:else if filteredSurveys.length === 0}
 			<div class="card text-center py-12">
 				<Search class="w-8 h-8 text-neutral-600 mx-auto mb-3" />
-				<p class="text-sm font-semibold text-white/40">No surveys match "{searchQuery}"</p>
-				<button onclick={() => searchQuery = ''} class="text-xs text-primary-400 hover:text-primary-300 mt-2 transition-colors">Clear search</button>
+				<p class="text-sm font-semibold text-white/40">{m.svy_no_match({ query: searchQuery })}</p>
+				<button onclick={() => searchQuery = ''} class="text-xs text-primary-400 hover:text-primary-300 mt-2 transition-colors">{m.svy_clear_search()}</button>
 			</div>
 		{:else}
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -218,7 +230,7 @@
 										<FileText class="w-5 h-5 {a.text}" />
 									</div>
 									{#if survey.priority === 'high'}
-										<span class="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-rose-500/15 text-rose-400 ring-1 ring-rose-500/25 animate-pulse">Hot</span>
+										<span class="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-rose-500/15 text-rose-400 ring-1 ring-rose-500/25 animate-pulse">{m.svy_priority_hot()}</span>
 									{/if}
 								</div>
 								<div class="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 rounded-full ring-1 ring-emerald-500/20">
@@ -229,14 +241,14 @@
 
 							<!-- Title -->
 							<h3 class="text-sm font-bold text-white mb-1.5 line-clamp-2 leading-snug group-hover:text-white/90 transition-colors">
-								{survey.title || 'Untitled Survey'}
+								{survey.title || m.svy_untitled()}
 							</h3>
 
 							<!-- Description -->
 							{#if survey.description}
 								<p class="text-xs text-neutral-500 line-clamp-2 leading-relaxed mb-4">{survey.description}</p>
 							{:else}
-								<p class="text-xs text-neutral-600 mb-4">Complete this survey to earn points.</p>
+								<p class="text-xs text-neutral-600 mb-4">{m.svy_default_desc()}</p>
 							{/if}
 
 							<!-- CTA Button -->
@@ -244,8 +256,8 @@
 								onclick={() => startSurvey(survey.id)}
 								class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r {a.from} {a.to} text-white text-sm font-bold rounded-xl opacity-90 group-hover:opacity-100 shadow-lg {a.shadow} hover:shadow-xl transition-all duration-200 active:scale-[0.98]"
 							>
-								Start Survey
-								<ArrowRight class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+								{m.svy_start_button()}
+								<ArrowRight class="w-4 h-4 group-hover:translate-x-0.5 transition-transform rtl:-scale-x-100" />
 							</button>
 						</div>
 					</div>
@@ -258,11 +270,11 @@
 				<div class="w-16 h-16 bg-white/[0.04] rounded-2xl flex items-center justify-center mx-auto mb-4">
 					<Clock class="w-8 h-8 text-neutral-600" />
 				</div>
-				<h3 class="text-lg font-bold text-white mb-2">No history yet</h3>
-				<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">Complete your first survey to build your history.</p>
+				<h3 class="text-lg font-bold text-white mb-2">{m.svy_history_empty_title()}</h3>
+				<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">{m.svy_history_empty_desc()}</p>
 				<button onclick={() => activeTab = 'available'} class="btn-primary">
 					<Rocket class="w-4 h-4" />
-					Browse Surveys
+					{m.hist_browse_surveys()}
 				</button>
 			</div>
 		{:else}
@@ -273,14 +285,14 @@
 					<div class="bg-surface-100 border border-white/[0.06] rounded-xl p-4">
 						<div class="flex items-start justify-between mb-2">
 							<div class="text-sm font-semibold text-white flex-1 min-w-0 truncate">{tx.surveyTitle}</div>
-							<span class="badge {ss.class} ml-2 flex-shrink-0">
+							<span class="badge {ss.class} ms-2 flex-shrink-0">
 								<ss.icon class="w-3 h-3" />
-								{tx.status}
+								{statusLabel(tx.status)}
 							</span>
 						</div>
 						<div class="flex items-center justify-between text-xs text-neutral-500">
 							<span>{formatDate(tx.startedAt)}</span>
-							<span class="font-bold text-white">{tx.pointsEarned} pts</span>
+							<span class="font-bold text-white">{tx.pointsEarned} {m.dash_pts_short()}</span>
 						</div>
 					</div>
 				{/each}
@@ -291,12 +303,12 @@
 					<table class="min-w-full">
 						<thead>
 							<tr class="table-header">
-								<th class="table-th">Survey</th>
-								<th class="table-th">Status</th>
-								<th class="table-th">Points</th>
-								<th class="table-th">Time</th>
-								<th class="table-th">Started</th>
-								<th class="table-th">Completed</th>
+								<th class="table-th">{m.svy_table_survey()}</th>
+								<th class="table-th">{m.svy_table_status()}</th>
+								<th class="table-th">{m.svy_table_points()}</th>
+								<th class="table-th">{m.svy_table_time()}</th>
+								<th class="table-th">{m.svy_table_started()}</th>
+								<th class="table-th">{m.svy_table_completed()}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -309,7 +321,7 @@
 									<td class="table-td">
 										<span class="badge {statusStyle.class}">
 											<statusStyle.icon class="w-3 h-3" />
-											{transaction.status}
+											{statusLabel(transaction.status)}
 										</span>
 									</td>
 									<td class="table-td">

@@ -91,10 +91,19 @@ export async function getTotalRejectedPoints(panelistId: string): Promise<number
  * Returns all derived metrics in one query
  */
 export async function getPointsSummary(panelistId: string) {
+    // The `points` column always stores a positive magnitude — the `type`
+    // column encodes direction. So:
+    //  - Lifetime earnings = positive-effect types (completed, terminated,
+    //    quota_full, bonus, adjustment) minus 'rejected' (post-credit
+    //    rejection that claws back already-credited points).
+    //    `refund` is excluded because a refund just restores previously-spent
+    //    points — it is not new income.
+    //  - Net redeemed = `redeemed` minus `refund` so cancelled redemptions
+    //    stop counting as redeemed once refunded.
     const result = await db
         .select({
             lifetimePoints: sql<number>`COALESCE(SUM(CASE
-                WHEN ${pointsTransactions.type} IN ('completed', 'terminated', 'quota_full', 'bonus', 'adjustment', 'refund')
+                WHEN ${pointsTransactions.type} IN ('completed', 'terminated', 'quota_full', 'bonus', 'adjustment')
                 THEN ${pointsTransactions.points}
                 WHEN ${pointsTransactions.type} = 'rejected'
                 THEN -${pointsTransactions.points}
@@ -108,6 +117,8 @@ export async function getPointsSummary(panelistId: string) {
             redeemedPoints: sql<number>`COALESCE(SUM(CASE
                 WHEN ${pointsTransactions.type} = 'redeemed'
                 THEN ${pointsTransactions.points}
+                WHEN ${pointsTransactions.type} = 'refund'
+                THEN -${pointsTransactions.points}
                 ELSE 0
             END), 0)`.as('redeemed_points'),
             rejectedPoints: sql<number>`COALESCE(SUM(CASE

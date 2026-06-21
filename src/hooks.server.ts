@@ -1,5 +1,8 @@
 import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { paraglideMiddleware } from '$lib/paraglide/server';
+import { getDirection } from '$lib/i18n/direction';
 import { validateSession } from '$lib/db';
 import { validateGuestSession } from '$lib/db/repositories/guest-session.repository.server';
 import { getDashboardUrl, canAccessRoute } from '$lib/utils/dashboard-routing';
@@ -41,6 +44,7 @@ const ROUTE_CONFIG = {
     '/login',
     '/register',
     '/about',
+    '/contact',
     '/geo-blocked',
     '/earn-points',
     '/guest/dashboard',
@@ -56,6 +60,7 @@ const ROUTE_CONFIG = {
   loggedInRedirects: [
     '/',
     '/about',
+    '/contact',
     '/earn-points',
     '/forgot-password',
     '/help',
@@ -134,7 +139,82 @@ setInterval(async () => {
   }
 }, 60 * 60 * 1000); // Clean up every hour
 
-export const handle: Handle = async ({ event, resolve }) => {
+// Locales we add a URL prefix for. Base locale `en` is intentionally
+// unprefixed for clean URLs.
+const NON_BASE_LOCALES = new Set(['es', 'fr', 'pt', 'ar']);
+
+/**
+ * Honor the user's locale cookie on unprefixed URLs.
+ *
+ * Paraglide's URL strategy treats unprefixed URLs as the base locale and does
+ * not fall through to the cookie. So a user who switched to Spanish and lands
+ * on `/about` (e.g. via browser Back) would see English. This handler catches
+ * that case and 302s them to `/es/about` so the cookie's preferred language
+ * wins. Crawlers (no cookie) are never redirected.
+ */
+const handleLocaleRedirect: Handle = async ({ event, resolve }) => {
+	const pathname = event.url.pathname;
+
+	// Skip API routes, internal SvelteKit asset paths, and admin/client/
+	// moderator areas (those are English-only — applying a locale prefix
+	// would break their routing).
+	if (
+		pathname.startsWith('/api/') ||
+		pathname.startsWith('/_app/') ||
+		pathname.startsWith('/admin') ||
+		pathname.startsWith('/client') ||
+		pathname.startsWith('/moderator')
+	) {
+		return resolve(event);
+	}
+
+	// SvelteKit's SPA navigation fetches `<route>/__data.json` for client-side
+	// load data. We must redirect those too — otherwise clicking Browser Back
+	// to an unprefixed URL fetches the data via SPA without ever loading our
+	// HTML redirect, and the user sees the page in the wrong locale.
+	const isDataFetch = pathname.endsWith('/__data.json');
+	const logicalPath = isDataFetch
+		? pathname.slice(0, -'/__data.json'.length) || '/'
+		: pathname;
+
+	// Other asset-like paths (extensions: .css, .js, .ico, .svg, etc).
+	if (!isDataFetch && /\.[a-z0-9]+$/i.test(pathname)) {
+		return resolve(event);
+	}
+
+	const cookieLocale = event.cookies.get('em_locale');
+	if (!cookieLocale || !NON_BASE_LOCALES.has(cookieLocale)) {
+		return resolve(event);
+	}
+
+	// Already on a non-base locale prefix — let Paraglide handle it.
+	if (/^\/(es|fr|pt|ar)(\/|$)/.test(logicalPath)) {
+		return resolve(event);
+	}
+
+	const localizedBase = `/${cookieLocale}${logicalPath === '/' ? '' : logicalPath}`;
+	const target = isDataFetch ? `${localizedBase}/__data.json` : localizedBase;
+
+	throw redirect(302, `${target}${event.url.search}`);
+};
+
+/**
+ * Paraglide locale resolution middleware. Determines the active locale from
+ * (in order) URL prefix → cookie → Accept-Language header → baseLocale.
+ * Replaces `%paraglide.lang%` and `%paraglide.dir%` in app.html so the
+ * served HTML has correct `lang` + `dir` attributes for SEO + accessibility.
+ */
+const handleParaglide: Handle = ({ event, resolve }) =>
+	paraglideMiddleware(event.request, ({ request, locale }) => {
+		event.request = request;
+		const dir = getDirection(locale);
+		return resolve(event, {
+			transformPageChunk: ({ html }) =>
+				html.replace('%paraglide.lang%', locale).replace('%paraglide.dir%', dir)
+		});
+	});
+
+const handleApp: Handle = async ({ event, resolve }) => {
   const pathname = event.url.pathname;
   const ipAddress = event.getClientAddress();
   const correlationId = generateRayId();
@@ -389,6 +469,10 @@ export const handle: Handle = async ({ event, resolve }) => {
   withCorrelation(response);
   return response;
 };
+
+// Compose: first apply cookie-based locale redirect for unprefixed URLs,
+// then resolve the locale via Paraglide, then run the app logic.
+export const handle: Handle = sequence(handleLocaleRedirect, handleParaglide, handleApp);
 
 // Unhandled-error hook — logs via Loki AND fires a Telegram alert (best-effort).
 export const handleError: HandleServerError = ({ error, event, status }) => {

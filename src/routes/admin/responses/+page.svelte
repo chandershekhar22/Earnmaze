@@ -103,7 +103,7 @@
 						<th class="table-th">Panelist</th>
 						<th class="table-th">Survey</th>
 						<th class="table-th">Status</th>
-						<th class="table-th text-right">Points</th>
+						<th class="table-th text-end">Points</th>
 						<th class="table-th">Duration</th>
 						<th class="table-th">Started</th>
 						<th class="table-th">Completed</th>
@@ -130,7 +130,7 @@
 									{r.status.replace('_', ' ')}
 								</span>
 							</td>
-							<td class="table-td text-right">
+							<td class="table-td text-end">
 								{#if r.awardedPoints && r.awardedPoints > 0}
 									<span class="font-bold text-emerald-400">+{r.awardedPoints}</span>
 								{:else}
@@ -260,7 +260,7 @@
 							href="/admin/responses?page={data.pagination.page - 1}{data.filters.status !== 'all' ? `&status=${data.filters.status}` : ''}{data.filters.survey !== 'all' ? `&survey=${data.filters.survey}` : ''}"
 							class="btn-secondary !text-xs"
 						>
-							<ArrowLeft class="w-3.5 h-3.5" /> Prev
+							<ArrowLeft class="w-3.5 h-3.5 rtl:-scale-x-100" /> Prev
 						</a>
 					{/if}
 					{#if data.pagination.page < data.pagination.totalPages}
@@ -268,7 +268,7 @@
 							href="/admin/responses?page={data.pagination.page + 1}{data.filters.status !== 'all' ? `&status=${data.filters.status}` : ''}{data.filters.survey !== 'all' ? `&survey=${data.filters.survey}` : ''}"
 							class="btn-secondary !text-xs"
 						>
-							Next <ArrowRight class="w-3.5 h-3.5" />
+							Next <ArrowRight class="w-3.5 h-3.5 rtl:-scale-x-100" />
 						</a>
 					{/if}
 				</div>

@@ -167,11 +167,11 @@
 				<table class="w-full text-sm">
 					<thead>
 						<tr class="text-xs text-neutral-500 border-b border-white/[0.06]">
-							<th class="text-left py-2">Channel</th>
-							<th class="text-left py-2">Source</th>
-							<th class="text-right py-2">Granted</th>
-							<th class="text-right py-2">Revoked</th>
-							<th class="text-right py-2">Net</th>
+							<th class="text-start py-2">Channel</th>
+							<th class="text-start py-2">Source</th>
+							<th class="text-end py-2">Granted</th>
+							<th class="text-end py-2">Revoked</th>
+							<th class="text-end py-2">Net</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -183,13 +183,13 @@
 								<td class="py-2 text-neutral-400">
 									{sourceLabel[row.source] ?? row.source}
 								</td>
-								<td class="py-2 text-right text-emerald-400 tabular-nums">
+								<td class="py-2 text-end text-emerald-400 tabular-nums">
 									+{row.granted}
 								</td>
-								<td class="py-2 text-right text-rose-400 tabular-nums">
+								<td class="py-2 text-end text-rose-400 tabular-nums">
 									−{row.revoked}
 								</td>
-								<td class="py-2 text-right text-white font-semibold tabular-nums">
+								<td class="py-2 text-end text-white font-semibold tabular-nums">
 									{row.granted - row.revoked >= 0 ? '+' : ''}{row.granted - row.revoked}
 								</td>
 							</tr>
@@ -224,10 +224,10 @@
 								></div>
 							{/if}
 						</div>
-						<div class="w-24 text-right tabular-nums flex-shrink-0">
+						<div class="w-24 text-end tabular-nums flex-shrink-0">
 							<span class="text-emerald-400">+{day.granted}</span>
 							{#if day.revoked > 0}
-								<span class="text-rose-400 ml-2">−{day.revoked}</span>
+								<span class="text-rose-400 ms-2">−{day.revoked}</span>
 							{/if}
 						</div>
 					</div>

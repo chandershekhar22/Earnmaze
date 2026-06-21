@@ -3,6 +3,8 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { CircleCheck, KeyRound } from '@lucide/svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let email = $state('');
 	let isLoading = $state(false);
@@ -26,7 +28,7 @@
 		e.preventDefault();
 
 		if (!email) {
-			error = 'Please enter your email address';
+			error = m.auth_forgot_email_required();
 			return;
 		}
 
@@ -50,11 +52,11 @@
 				error = '';
 				email = '';
 			} else {
-				error = result.message || 'Failed to process request';
+				error = result.message || m.auth_forgot_request_failed();
 				Logger.root.warn({ context: 'security', email, error: result.error }, 'Forgot password request failed');
 			}
 		} catch (err) {
-			error = 'An error occurred. Please try again.';
+			error = m.auth_generic_error();
 			Logger.root.error({ context: 'errors', error: err }, 'Forgot password error');
 		} finally {
 			isLoading = false;
@@ -63,8 +65,8 @@
 </script>
 
 <svelte:head>
-	<title>Forgot Password - EarnMaze Panel</title>
-	<meta name="description" content="Reset your EarnMaze password" />
+	<title>{m.auth_forgot_meta_title()}</title>
+	<meta name="description" content={m.auth_forgot_meta_description()} />
 </svelte:head>
 
 <div class="w-full max-w-md space-y-8">
@@ -77,9 +79,9 @@
 
 	<!-- Header -->
 	<div class="text-center">
-		<h1 class="text-4xl font-bold text-white mb-2">Forgot Password?</h1>
+		<h1 class="text-4xl font-bold text-white mb-2">{m.auth_forgot_heading()}</h1>
 		<p class="text-neutral-400">
-			Enter your email address and we'll send you a link to reset your password.
+			{m.auth_forgot_subheading()}
 		</p>
 	</div>
 
@@ -97,10 +99,10 @@
 					<div class="flex-shrink-0">
 						<CircleCheck class="h-5 w-5 text-emerald-400" />
 					</div>
-					<div class="ml-3">
-						<h3 class="text-sm font-medium text-emerald-400">Email Sent Successfully</h3>
+					<div class="ms-3">
+						<h3 class="text-sm font-medium text-emerald-400">{m.auth_forgot_sent_title()}</h3>
 						<p class="text-sm text-emerald-400/80 mt-1">
-							If an account with this email exists, you will receive a password reset link shortly.
+							{m.auth_forgot_sent_body()}
 						</p>
 					</div>
 				</div>
@@ -108,26 +110,26 @@
 
 			<div class="space-y-3">
 				<p class="text-sm text-neutral-500 text-center">
-					Didn't receive the email? Check your spam folder or try again.
+					{m.auth_forgot_didnt_receive()}
 				</p>
 				<a
-					href="/login"
+					href={localizeHref('/login')}
 					class="btn-primary w-full block text-center"
 				>
-					Back to Login
+					{m.auth_back_to_login()}
 				</a>
 			</div>
 		{:else}
 			<form onsubmit={handleSubmit} class="space-y-6">
 				<div>
 					<label for="email" class="label">
-						Email Address
+						{m.auth_email_address_label()}
 					</label>
 					<input
 						id="email"
 						type="email"
 						bind:value={email}
-						placeholder="your@email.com"
+						placeholder={m.auth_forgot_email_placeholder()}
 						required
 						class="input"
 						disabled={isLoading}
@@ -140,14 +142,14 @@
 						onclick={goBack}
 						class="btn-secondary flex-1 text-center"
 					>
-						Back
+						{m.common_back()}
 					</button>
 					<button
 						type="submit"
 						disabled={isLoading || !email}
 						class="btn-primary flex-1"
 					>
-						{isLoading ? 'Sending...' : 'Send Reset Link'}
+						{isLoading ? m.auth_forgot_sending() : m.auth_forgot_send_button()}
 					</button>
 				</div>
 			</form>
@@ -157,7 +159,7 @@
 	<!-- Security Notice -->
 	<div class="text-center text-xs text-neutral-600">
 		<p>
-			For your security, password reset links expire after 1 hour.
+			{m.auth_security_link_expiry_notice()}
 		</p>
 	</div>
 </div>

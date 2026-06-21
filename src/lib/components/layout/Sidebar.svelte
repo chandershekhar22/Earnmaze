@@ -3,8 +3,10 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { pointsStore } from '$lib/stores/points.svelte';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { LayoutDashboard, ClipboardList, Coins, Gift, User, HelpCircle, Users, X, LogOut, Sparkles } from '@lucide/svelte';
+	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let { isOpen = $bindable(false) }: { isOpen?: boolean } = $props();
 
@@ -21,41 +23,40 @@
 		isOpen = false;
 	}
 
-	let isActive = $derived.by(() => (href: string) => $page.url.pathname === href);
-
-	const navItems = [
-		{ name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-		{ name: 'Surveys', href: '/surveys', icon: ClipboardList },
-		{ name: 'Points', href: '/points', icon: Coins },
-		{ name: 'Rewards', href: '/rewards', icon: Gift },
-		{ name: 'Referrals', href: '/referrals', icon: Users },
-		{ name: 'Profile', href: '/profile', icon: User },
-		{ name: 'Support', href: '/support', icon: HelpCircle },
-	];
-
-	let pointsFetched = $state(false);
-
-	// Fetch points on mount
-	onMount(async () => {
-		if (authStore.state.user && !pointsFetched) {
-			pointsFetched = true;
-			await pointsStore.fetchPoints();
-		}
+	// Match active state against the de-localized pathname so /es/surveys
+	// still highlights the "Surveys" entry whose href is the unprefixed form.
+	let basePath = $derived.by(() => {
+		const p = $page.url.pathname;
+		return p.replace(/^\/(es|fr|pt|ar)(?=\/|$)/, '') || '/';
 	});
+	let isActive = $derived.by(() => (href: string) => basePath === href);
 
-	// Re-fetch points on page navigation (throttled to once per 30s)
+	let navItems = $derived([
+		{ name: m.nav_dashboard(), href: '/dashboard', icon: LayoutDashboard },
+		{ name: m.nav_surveys(), href: '/surveys', icon: ClipboardList },
+		{ name: m.nav_points(), href: '/points', icon: Coins },
+		{ name: m.nav_rewards(), href: '/rewards', icon: Gift },
+		{ name: m.nav_referrals(), href: '/referrals', icon: Users },
+		{ name: m.nav_profile(), href: '/profile', icon: User },
+		{ name: m.nav_support(), href: '/support', icon: HelpCircle },
+	]);
+
+	// Re-fetch points whenever the user becomes available or the route
+	// changes. A short throttle prevents spam from rapid client-side nav
+	// while still keeping the balance fresh after surveys/redemptions.
 	let lastFetchTime = 0;
 	$effect(() => {
 		const _path = $page.url.pathname;
+		if (!authStore.state.user) return;
 		const now = Date.now();
-		if (pointsFetched && authStore.state.user && now - lastFetchTime > 30000) {
+		if (now - lastFetchTime > 3000) {
 			lastFetchTime = now;
 			pointsStore.fetchPoints();
 		}
 	});
 
 	let userInitial = $derived(authStore.state.user?.name?.charAt(0)?.toUpperCase() || 'U');
-	let userName = $derived(authStore.state.user?.name || 'User');
+	let userName = $derived(authStore.state.user?.name || m.sb_default_name());
 	let userEmail = $derived(authStore.state.user?.email || '');
 </script>
 
@@ -65,11 +66,11 @@
 		type="button"
 		class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
 		onclick={() => isOpen = false}
-		aria-label="Close navigation overlay"
+		aria-label={m.sb_close_overlay()}
 	></button>
 {/if}
 
-<aside class="fixed lg:static inset-y-0 left-0 z-50 w-[280px] bg-surface-50 border-r border-white/[0.06] flex flex-col transform transition-transform duration-300 ease-in-out {isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}">
+<aside class="fixed lg:static inset-y-0 start-0 z-50 w-[280px] bg-surface-50 border-e border-white/[0.06] flex flex-col transform transition-transform duration-300 ease-in-out {isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}">
 	<!-- Brand -->
 	<div class="px-5 pt-6 pb-5 flex items-center justify-between">
 		<div class="flex items-center gap-3">
@@ -82,7 +83,7 @@
 		</div>
 		<button
 			onclick={() => isOpen = false}
-			aria-label="Close sidebar"
+			aria-label={m.sb_close_sidebar()}
 			class="lg:hidden p-2 text-neutral-500 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
 		>
 			<X class="w-5 h-5" />
@@ -93,7 +94,7 @@
 	<nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
 		{#each navItems as item}
 			<a
-				href={item.href}
+				href={localizeHref(item.href)}
 				data-sveltekit-preload-data="hover"
 				onclick={() => isOpen = false}
 				class="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 {isActive(item.href)
@@ -107,7 +108,7 @@
 				</div>
 				<span>{item.name}</span>
 				{#if isActive(item.href)}
-					<div class="ml-auto w-1.5 h-1.5 bg-primary-400 rounded-full shadow-sm shadow-primary-400/50"></div>
+					<div class="ms-auto w-1.5 h-1.5 bg-primary-400 rounded-full shadow-sm shadow-primary-400/50"></div>
 				{/if}
 			</a>
 		{/each}
@@ -116,23 +117,26 @@
 	<!-- Points Balance -->
 	<div class="mx-3 mb-3">
 		<div class="relative overflow-hidden bg-gradient-to-br from-violet-600/15 via-fuchsia-600/10 to-sky-600/5 border border-violet-500/15 rounded-2xl p-4">
-			<div class="absolute -top-8 -right-8 w-24 h-24 bg-violet-500/15 rounded-full blur-2xl"></div>
-			<div class="absolute bottom-0 left-0 w-16 h-16 bg-fuchsia-500/10 rounded-full blur-xl"></div>
+			<div class="absolute -top-8 -end-8 w-24 h-24 bg-violet-500/15 rounded-full blur-2xl"></div>
+			<div class="absolute bottom-0 start-0 w-16 h-16 bg-fuchsia-500/10 rounded-full blur-xl"></div>
 			<div class="relative">
 				<div class="flex items-center gap-2 mb-2">
 					<Coins class="w-4 h-4 text-amber-400" />
-					<span class="text-[10px] font-bold text-white/30 uppercase tracking-widest">Balance</span>
+					<span class="text-[10px] font-bold text-white/30 uppercase tracking-widest">{m.sb_balance()}</span>
 				</div>
 				<div class="text-2xl font-black text-white tracking-tight">
 					{(pointsStore.data?.currentBalance ?? 0).toLocaleString()}
 				</div>
-				<div class="text-[10px] text-violet-300/40 font-medium mt-0.5">points available</div>
+				<div class="text-[10px] text-violet-300/40 font-medium mt-0.5">{m.sb_points_available()}</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- User + Logout -->
 	<div class="px-3 pb-4 pt-2 border-t border-white/[0.06]">
+		<div class="flex items-center justify-end px-2 pb-1">
+			<LanguageSwitcher variant="panelist" placement="top" />
+		</div>
 		<div class="flex items-center gap-3 px-3 py-3">
 			<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
 				{userInitial}
@@ -144,7 +148,7 @@
 			<button
 				onclick={() => showLogoutConfirm = true}
 				class="p-2 text-neutral-600 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
-				aria-label="Sign out"
+				aria-label={m.sb_logout_aria()}
 			>
 				<LogOut class="w-4 h-4" />
 			</button>
@@ -162,11 +166,11 @@
 					<div class="w-12 h-12 bg-rose-500/10 rounded-xl flex items-center justify-center mx-auto mb-3">
 						<LogOut class="w-6 h-6 text-rose-400" />
 					</div>
-					<h3 class="text-base font-bold text-white mb-1">Sign out?</h3>
-					<p class="text-xs text-neutral-500 mb-5">You'll need to log in again to access your account.</p>
+					<h3 class="text-base font-bold text-white mb-1">{m.sb_logout_title()}</h3>
+					<p class="text-xs text-neutral-500 mb-5">{m.sb_logout_body()}</p>
 					<div class="flex gap-2">
-						<button onclick={() => showLogoutConfirm = false} class="btn-secondary flex-1 !text-xs">Cancel</button>
-						<button onclick={handleLogout} class="btn-danger flex-1 !text-xs">Sign Out</button>
+						<button onclick={() => showLogoutConfirm = false} class="btn-secondary flex-1 !text-xs">{m.common_cancel()}</button>
+						<button onclick={handleLogout} class="btn-danger flex-1 !text-xs">{m.sb_logout_button()}</button>
 					</div>
 				</div>
 			</div>

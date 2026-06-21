@@ -52,7 +52,7 @@
 		<!-- Status Badge -->
 		<div class="inline-block bg-surface-100 border border-white/[0.06] rounded-lg px-4 py-2 mb-6">
 			<p class="text-sm text-neutral-400">
-				<span class="inline-block w-2 h-2 bg-emerald-400 rounded-full mr-2 animate-pulse"></span>
+				<span class="inline-block w-2 h-2 bg-emerald-400 rounded-full me-2 animate-pulse"></span>
 				Updating survey records
 			</p>
 		</div>

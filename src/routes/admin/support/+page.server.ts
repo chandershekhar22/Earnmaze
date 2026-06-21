@@ -31,6 +31,7 @@ export const load: PageServerLoad = async (event) => {
 				id: f.id,
 				question: f.question,
 				answer: f.answer,
+				translations: f.translations ?? {},
 				sortOrder: f.sortOrder,
 				isActive: f.isActive,
 			})),

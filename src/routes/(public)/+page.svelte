@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { Check, CircleDollarSign, ShieldCheck, Sparkles, Zap, ArrowRight, Users, Gift, Clock } from '@lucide/svelte';
 	import { onMount } from 'svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	// Intersection Observer for scroll-triggered animations
 	let sections: Record<string, boolean> = $state({ steps: false, features: false, cta: false });
@@ -21,8 +23,8 @@
 </script>
 
 <svelte:head>
-	<title>EarnMaze - Earn Rewards for Your Opinions</title>
-	<meta name="description" content="Join EarnMaze to earn rewards by participating in surveys. Complete surveys, earn points, and redeem exciting rewards." />
+	<title>{m.home_meta_title()}</title>
+	<meta name="description" content={m.home_meta_description()} />
 </svelte:head>
 
 <style>
@@ -107,10 +109,10 @@
 <section class="relative overflow-hidden bg-surface pt-8 pb-16 md:pt-16 md:pb-28">
 	<!-- Animated gradient blobs -->
 	<div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-		<div class="absolute -top-20 left-[8%] w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] bl-1"></div>
-		<div class="absolute bottom-[-5%] right-[3%] w-[420px] h-[420px] bg-fuchsia-500/15 rounded-full blur-[100px] bl-2"></div>
-		<div class="absolute top-[40%] left-[45%] w-[500px] h-[250px] bg-cyan-500/8 rounded-full blur-[100px] bl-3"></div>
-		<div class="absolute top-[20%] right-[20%] w-[220px] h-[220px] bg-orange-500/10 rounded-full blur-[80px] bl-4"></div>
+		<div class="absolute -top-20 start-[8%] w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] bl-1"></div>
+		<div class="absolute bottom-[-5%] end-[3%] w-[420px] h-[420px] bg-fuchsia-500/15 rounded-full blur-[100px] bl-2"></div>
+		<div class="absolute top-[40%] start-[45%] w-[500px] h-[250px] bg-cyan-500/8 rounded-full blur-[100px] bl-3"></div>
+		<div class="absolute top-[20%] end-[20%] w-[220px] h-[220px] bg-orange-500/10 rounded-full blur-[80px] bl-4"></div>
 	</div>
 
 	<div class="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
@@ -118,38 +120,38 @@
 		<div class="hi-badge">
 			<span class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/[0.06] backdrop-blur-sm border border-white/[0.08] rounded-full text-xs font-semibold text-neutral-300">
 				<Sparkles class="w-3.5 h-3.5 text-amber-400 icon-bob" />
-				Earn rewards in your spare time
+				{m.home_hero_badge()}
 			</span>
 		</div>
 
 		<!-- Headline -->
 		<h1 class="hi-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mt-6 mb-5 leading-[1.08] tracking-tight">
-			Share your voice.<br />
-			<span class="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent grad-x">Get rewarded.</span>
+			{m.home_hero_title_line1()}<br />
+			<span class="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent grad-x">{m.home_hero_title_line2()}</span>
 		</h1>
 
 		<!-- Subtitle -->
 		<p class="hi-sub text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-			Complete quick surveys, earn points instantly, and redeem them for gift cards from top brands. It takes just minutes to start.
+			{m.home_hero_subtitle()}
 		</p>
 
 		<!-- CTA -->
 		<div class="hi-cta flex flex-col sm:flex-row gap-3 justify-center mb-10">
-			<a href="/register" class="group relative inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-base rounded-xl shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 overflow-hidden">
+			<a href={localizeHref('/register')} class="group relative inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-base rounded-xl shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 overflow-hidden">
 				<span class="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
 				<span class="relative flex items-center gap-2">
-					Start Earning Free
-					<ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+					{m.home_hero_cta_signup()}
+					<ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200 rtl:-scale-x-100" />
 				</span>
 			</a>
 			<a href="#steps" class="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white/[0.06] border border-white/[0.08] text-neutral-300 font-semibold text-base rounded-xl hover:bg-white/[0.1] hover:text-white hover:border-white/[0.15] transition-all duration-200">
-				How it works
+				{m.home_hero_cta_how_it_works()}
 			</a>
 		</div>
 
 		<!-- Trust badges -->
 		<div class="hi-trust flex flex-wrap justify-center gap-6 text-sm text-neutral-500">
-			{#each [{ t: 'Free to join' }, { t: 'Fast payouts' }, { t: '100% secure' }] as item}
+			{#each [{ t: m.home_trust_free_to_join() }, { t: m.home_trust_fast_payouts() }, { t: m.home_trust_secure() }] as item}
 				<span class="flex items-center gap-1.5 hover:text-neutral-300 transition-colors">
 					<Check class="w-4 h-4 text-emerald-400" /> {item.t}
 				</span>
@@ -162,22 +164,22 @@
 <section id="steps" class="py-16 md:py-24 bg-surface scroll-mt-20" data-section="steps">
 	<div class="max-w-5xl mx-auto px-4 sm:px-6">
 		<div class="text-center mb-12 reveal {sections.steps ? 'vis' : ''}">
-			<span class="text-[10px] font-bold text-primary-400 uppercase tracking-[0.2em]">Simple process</span>
+			<span class="text-[10px] font-bold text-primary-400 uppercase tracking-[0.2em]">{m.home_steps_label()}</span>
 			<h2 class="text-3xl md:text-4xl font-black text-white mt-2 tracking-tight">
-				Three steps to start earning
+				{m.home_steps_title()}
 			</h2>
 		</div>
 
 		<!-- Connecting line (desktop) -->
 		<div class="hidden md:block relative mb-8">
-			<div class="absolute top-1/2 left-[16%] right-[16%] h-px bg-gradient-to-r from-violet-500/20 via-emerald-500/20 to-amber-500/20 {sections.steps ? 'line-grow' : 'opacity-0'}" style="transition-delay:.4s"></div>
+			<div class="absolute top-1/2 start-[16%] end-[16%] h-px bg-gradient-to-r from-violet-500/20 via-emerald-500/20 to-amber-500/20 {sections.steps ? 'line-grow' : 'opacity-0'}" style="transition-delay:.4s"></div>
 		</div>
 
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 			{#each [
-				{ num: '1', color: 'violet', icon: Users, title: 'Create account', desc: 'Sign up in 30 seconds. No credit card needed, ever.' },
-				{ num: '2', color: 'emerald', icon: CircleDollarSign, title: 'Complete surveys', desc: 'Answer questions matched to your profile. Each takes 5-15 min.' },
-				{ num: '3', color: 'amber', icon: Gift, title: 'Get rewarded', desc: 'Redeem points for gift cards from top brands. Fast and easy.' },
+				{ num: '1', color: 'violet', icon: Users, title: m.home_step_1_title(), desc: m.home_step_1_desc() },
+				{ num: '2', color: 'emerald', icon: CircleDollarSign, title: m.home_step_2_title(), desc: m.home_step_2_desc() },
+				{ num: '3', color: 'amber', icon: Gift, title: m.home_step_3_title(), desc: m.home_step_3_desc() },
 			] as step, i}
 				<div class="relative group reveal reveal-d{i+1} {sections.steps ? 'vis' : ''} card-lift">
 					<!-- Hover glow -->
@@ -205,18 +207,18 @@
 <section class="py-16 md:py-24 bg-surface-50" data-section="features">
 	<div class="max-w-5xl mx-auto px-4 sm:px-6">
 		<div class="text-center mb-12 reveal {sections.features ? 'vis' : ''}">
-			<span class="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">Why EarnMaze</span>
+			<span class="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">{m.home_features_label()}</span>
 			<h2 class="text-3xl md:text-4xl font-black text-white mt-2 tracking-tight">
-				Built for serious earners
+				{m.home_features_title()}
 			</h2>
 		</div>
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 			{#each [
-				{ icon: CircleDollarSign, color: 'violet', title: 'Competitive payouts', desc: 'Earn points for every completed survey, with rates that reflect your time.' },
-				{ icon: Zap, color: 'emerald', title: 'Fast payouts', desc: 'Redeem points for gift cards as soon as you hit the threshold. Most are processed within a few business days.' },
-				{ icon: ShieldCheck, color: 'cyan', title: 'Smart matching', desc: "Our algorithm finds surveys you'll actually qualify for." },
-				{ icon: Clock, color: 'amber', title: 'Quick surveys', desc: 'Most surveys take 5-10 minutes. Earn during your lunch break.' },
+				{ icon: CircleDollarSign, color: 'violet', title: m.home_feature_payouts_title(), desc: m.home_feature_payouts_desc() },
+				{ icon: Zap, color: 'emerald', title: m.home_feature_fast_title(), desc: m.home_feature_fast_desc() },
+				{ icon: ShieldCheck, color: 'cyan', title: m.home_feature_smart_title(), desc: m.home_feature_smart_desc() },
+				{ icon: Clock, color: 'amber', title: m.home_feature_quick_title(), desc: m.home_feature_quick_desc() },
 			] as feat, i}
 				<div class="group reveal reveal-d{i+1} {sections.features ? 'vis' : ''} card-lift bg-surface-100 border border-white/[0.06] rounded-2xl p-5 hover:border-{feat.color}-500/15">
 					<div class="flex items-start gap-4">
@@ -240,38 +242,38 @@
 	<div class="absolute inset-0 bg-gradient-to-br from-violet-600 via-fuchsia-600 to-indigo-700 grad-x"></div>
 	<!-- Floating glow orbs -->
 	<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-		<div class="absolute top-[10%] left-[12%] w-44 h-44 bg-white/5 rounded-full blur-2xl glow"></div>
-		<div class="absolute bottom-[10%] right-[8%] w-36 h-36 bg-white/5 rounded-full blur-2xl glow" style="animation-delay:2s"></div>
-		<div class="absolute top-[50%] left-[60%] w-24 h-24 bg-cyan-400/5 rounded-full blur-xl glow" style="animation-delay:1s"></div>
+		<div class="absolute top-[10%] start-[12%] w-44 h-44 bg-white/5 rounded-full blur-2xl glow"></div>
+		<div class="absolute bottom-[10%] end-[8%] w-36 h-36 bg-white/5 rounded-full blur-2xl glow" style="animation-delay:2s"></div>
+		<div class="absolute top-[50%] start-[60%] w-24 h-24 bg-cyan-400/5 rounded-full blur-xl glow" style="animation-delay:1s"></div>
 	</div>
 
 	<div class="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
 		<div class="reveal {sections.cta ? 'vis' : ''}">
 			<span class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full text-xs font-semibold text-white mb-6">
 				<Zap class="w-3.5 h-3.5" />
-				Takes less than 30 seconds
+				{m.home_cta_badge()}
 			</span>
 		</div>
 
 		<h2 class="reveal reveal-d1 {sections.cta ? 'vis' : ''} text-3xl md:text-4xl lg:text-5xl font-black text-white mb-4 leading-tight tracking-tight">
-			Ready to start<br />
-			<span class="text-transparent bg-gradient-to-r from-amber-300 to-orange-300 bg-clip-text">earning?</span>
+			{m.home_cta_title_prefix()}<br />
+			<span class="text-transparent bg-gradient-to-r from-amber-300 to-orange-300 bg-clip-text">{m.home_cta_title_emphasis()}</span>
 		</h2>
 
 		<p class="reveal reveal-d2 {sections.cta ? 'vis' : ''} text-base text-white/70 mb-8 max-w-lg mx-auto leading-relaxed">
-			Turn spare minutes into real rewards. Free to join, no subscription.
+			{m.home_cta_subtitle()}
 		</p>
 
 		<div class="reveal reveal-d3 {sections.cta ? 'vis' : ''} flex flex-col sm:flex-row gap-3 justify-center">
-			<a href="/register" class="group relative inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-violet-700 font-bold text-base rounded-xl shadow-2xl shadow-black/20 hover:shadow-3xl hover:-translate-y-1 active:translate-y-0 transition-all duration-200 overflow-hidden">
+			<a href={localizeHref('/register')} class="group relative inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-violet-700 font-bold text-base rounded-xl shadow-2xl shadow-black/20 hover:shadow-3xl hover:-translate-y-1 active:translate-y-0 transition-all duration-200 overflow-hidden">
 				<span class="absolute inset-0 bg-neutral-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
 				<span class="relative flex items-center gap-2">
-					Start Earning Free
-					<ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+					{m.home_cta_signup()}
+					<ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200 rtl:-scale-x-100" />
 				</span>
 			</a>
-			<a href="/login" class="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/30 text-white font-semibold text-base rounded-xl hover:bg-white/10 hover:border-white/50 transition-all duration-200">
-				Sign In
+			<a href={localizeHref('/login')} class="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/30 text-white font-semibold text-base rounded-xl hover:bg-white/10 hover:border-white/50 transition-all duration-200">
+				{m.common_signin()}
 			</a>
 		</div>
 	</div>

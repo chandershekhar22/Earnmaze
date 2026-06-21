@@ -332,7 +332,7 @@
 								searchInput = '';
 								handleSearch();
 							}}
-							class="hover:text-primary-300 ml-1"
+							class="hover:text-primary-300 ms-1"
 						>
 							&times;
 						</button>
@@ -346,7 +346,7 @@
 								statusFilter = 'all';
 								handleFilterChange();
 							}}
-							class="hover:text-primary-300 ml-1"
+							class="hover:text-primary-300 ms-1"
 						>
 							&times;
 						</button>
@@ -368,7 +368,7 @@
 						<th class="table-th">Status</th>
 						<th class="table-th">Completions</th>
 						<th class="table-th">Created</th>
-						<th class="table-th text-right">Actions</th>
+						<th class="table-th text-end">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -403,7 +403,7 @@
 									<span class="text-neutral-600">/ {survey.totalStarted}</span>
 								</td>
 								<td class="table-td whitespace-nowrap text-neutral-500">{formatDate(survey.createdAt)}</td>
-								<td class="table-td whitespace-nowrap text-right text-sm font-medium">
+								<td class="table-td whitespace-nowrap text-end text-sm font-medium">
 									<div class="flex items-center justify-end gap-1.5">
 										<button onclick={(e) => { e.stopPropagation(); toggleSurveyDetail(survey.id); }} class="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/5 transition-colors" title="View details">
 											{#if expandedSurvey === survey.id}<ChevronUp class="w-4 h-4" />{:else}<Eye class="w-4 h-4" />{/if}

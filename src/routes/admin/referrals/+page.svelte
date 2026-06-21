@@ -52,28 +52,28 @@
 	<!-- Summary cards -->
 	<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
 		<div class="relative overflow-hidden bg-gradient-to-br from-sky-500/[0.08] to-surface-100 rounded-xl p-4 border border-sky-500/10">
-			<div class="absolute -top-6 -right-6 w-16 h-16 bg-sky-500/10 rounded-full blur-xl"></div>
+			<div class="absolute -top-6 -end-6 w-16 h-16 bg-sky-500/10 rounded-full blur-xl"></div>
 			<div class="relative">
 				<div class="text-[10px] font-bold text-sky-300/40 uppercase tracking-widest">Total</div>
 				<div class="text-xl font-black text-white mt-1">{data.statusCounts.all ?? 0}</div>
 			</div>
 		</div>
 		<div class="relative overflow-hidden bg-gradient-to-br from-amber-500/[0.08] to-surface-100 rounded-xl p-4 border border-amber-500/10">
-			<div class="absolute -top-6 -right-6 w-16 h-16 bg-amber-500/10 rounded-full blur-xl"></div>
+			<div class="absolute -top-6 -end-6 w-16 h-16 bg-amber-500/10 rounded-full blur-xl"></div>
 			<div class="relative">
 				<div class="text-[10px] font-bold text-amber-300/40 uppercase tracking-widest">Pending</div>
 				<div class="text-xl font-black text-amber-400 mt-1">{data.statusCounts.pending ?? 0}</div>
 			</div>
 		</div>
 		<div class="relative overflow-hidden bg-gradient-to-br from-emerald-500/[0.08] to-surface-100 rounded-xl p-4 border border-emerald-500/10">
-			<div class="absolute -top-6 -right-6 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl"></div>
+			<div class="absolute -top-6 -end-6 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl"></div>
 			<div class="relative">
 				<div class="text-[10px] font-bold text-emerald-300/40 uppercase tracking-widest">Paid</div>
 				<div class="text-xl font-black text-emerald-400 mt-1">{(data.statusCounts.completed ?? 0) + (data.statusCounts.paid ?? 0)}</div>
 			</div>
 		</div>
 		<div class="relative overflow-hidden bg-gradient-to-br from-violet-500/[0.08] to-surface-100 rounded-xl p-4 border border-violet-500/10">
-			<div class="absolute -top-6 -right-6 w-16 h-16 bg-violet-500/10 rounded-full blur-xl"></div>
+			<div class="absolute -top-6 -end-6 w-16 h-16 bg-violet-500/10 rounded-full blur-xl"></div>
 			<div class="relative">
 				<div class="text-[10px] font-bold text-violet-300/40 uppercase tracking-widest">Bonus Paid</div>
 				<div class="text-xl font-black text-violet-400 mt-1">{data.totalBonusPaid.toLocaleString()}</div>
@@ -98,7 +98,7 @@
 							<th class="table-th">Referred</th>
 							<th class="table-th">Code</th>
 							<th class="table-th">Status</th>
-							<th class="table-th text-right">Bonus</th>
+							<th class="table-th text-end">Bonus</th>
 							<th class="table-th">Joined</th>
 							<th class="table-th">Qualified</th>
 							<th class="table-th"></th>
@@ -125,7 +125,7 @@
 								<td class="table-td">
 									<span class="badge {getStatusStyle(ref.status)} text-[10px]">{ref.status}</span>
 								</td>
-								<td class="table-td text-right">
+								<td class="table-td text-end">
 									{#if ref.referrerBonus > 0}
 										<span class="font-bold {ref.status === 'paid' || ref.status === 'completed' ? 'text-emerald-400' : 'text-neutral-500'}">+{ref.referrerBonus}</span>
 									{:else}
@@ -151,12 +151,12 @@
 					<div class="flex gap-2">
 						{#if data.pagination.page > 1}
 							<a href="/admin/referrals?page={data.pagination.page - 1}{data.filters.status !== 'all' ? `&status=${data.filters.status}` : ''}" class="btn-secondary !text-xs">
-								<ArrowLeft class="w-3.5 h-3.5" /> Prev
+								<ArrowLeft class="w-3.5 h-3.5 rtl:-scale-x-100" /> Prev
 							</a>
 						{/if}
 						{#if data.pagination.page < data.pagination.totalPages}
 							<a href="/admin/referrals?page={data.pagination.page + 1}{data.filters.status !== 'all' ? `&status=${data.filters.status}` : ''}" class="btn-secondary !text-xs">
-								Next <ArrowRight class="w-3.5 h-3.5" />
+								Next <ArrowRight class="w-3.5 h-3.5 rtl:-scale-x-100" />
 							</a>
 						{/if}
 					</div>
