@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="sq-bg" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="#1a3050"/><stop offset="100%" stop-color="#050810"/></radialGradient>
+    <radialGradient id="sq-c1" cx="35%" cy="35%"><stop offset="0%" stop-color="#ff8fa8"/><stop offset="100%" stop-color="#a02040"/></radialGradient>
+    <radialGradient id="sq-c2" cx="35%" cy="35%"><stop offset="0%" stop-color="#4ff0dc"/><stop offset="100%" stop-color="#1a8a80"/></radialGradient>
+    <radialGradient id="sq-c3" cx="35%" cy="35%"><stop offset="0%" stop-color="#ffe066"/><stop offset="100%" stop-color="#a07010"/></radialGradient>
+    <radialGradient id="sq-c4" cx="35%" cy="35%"><stop offset="0%" stop-color="#a77bff"/><stop offset="100%" stop-color="#4a2a9e"/></radialGradient>
+    <filter id="sq-glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#sq-bg)"/>
+  <!-- Player big bubble -->
+  <g filter="url(#sq-glow)"><circle cx="200" cy="150" r="60" fill="url(#sq-c1)" opacity="0.9"/><circle cx="180" cy="130" r="14" fill="#fff" opacity="0.35"/></g>
+  <!-- Other bubbles with vectors -->
+  <g filter="url(#sq-glow)">
+    <circle cx="80" cy="80" r="26" fill="url(#sq-c2)" opacity="0.85"/><line x1="80" y1="80" x2="120" y2="100" stroke="#4ff0dc" stroke-width="2" opacity="0.6"/>
+    <circle cx="310" cy="70" r="20" fill="url(#sq-c3)" opacity="0.85"/><line x1="310" y1="70" x2="280" y2="90" stroke="#ffe066" stroke-width="2" opacity="0.6"/>
+    <circle cx="340" cy="220" r="30" fill="url(#sq-c4)" opacity="0.85"/><line x1="340" y1="220" x2="300" y2="200" stroke="#a77bff" stroke-width="2" opacity="0.6"/>
+    <circle cx="60" cy="240" r="18" fill="url(#sq-c2)" opacity="0.85"/><line x1="60" y1="240" x2="95" y2="220" stroke="#4ff0dc" stroke-width="2" opacity="0.6"/>
+    <circle cx="260" cy="260" r="12" fill="url(#sq-c3)" opacity="0.8"/>
+    <circle cx="130" cy="40" r="10" fill="url(#sq-c4)" opacity="0.8"/>
+  </g>
+  <g font-family="monospace" fill="#ff8fa8" font-weight="bold"><text x="20" y="28" font-size="11">MASS</text><text x="20" y="50" font-size="22">86%</text></g>
+  <g font-family="monospace" fill="#4ff0dc" text-anchor="end" font-weight="bold"><text x="380" y="28" font-size="11">LEVEL</text><text x="380" y="50" font-size="22">09</text></g>
+</svg>

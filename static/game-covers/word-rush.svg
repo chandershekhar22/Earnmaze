@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="wr-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c1040"/>
+      <stop offset="100%" stop-color="#0a061a"/>
+    </linearGradient>
+    <linearGradient id="wr-rush" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff5f8f"/>
+      <stop offset="50%" stop-color="#ffd166"/>
+      <stop offset="100%" stop-color="#35d39a"/>
+    </linearGradient>
+    <filter id="wr-glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="wr-sh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.5"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#wr-bg)"/>
+  <!-- Speed lines -->
+  <g stroke="#fff" stroke-width="1.5" opacity="0.08">
+    <line x1="0" y1="40" x2="400" y2="40"/><line x1="0" y1="80" x2="400" y2="80"/>
+    <line x1="0" y1="120" x2="400" y2="120"/><line x1="0" y1="220" x2="400" y2="220"/>
+    <line x1="0" y1="260" x2="400" y2="260"/>
+  </g>
+  <g stroke="url(#wr-rush)" stroke-width="2" opacity="0.4">
+    <line x1="0" y1="60" x2="80" y2="60"/><line x1="320" y1="100" x2="400" y2="100"/>
+    <line x1="0" y1="240" x2="70" y2="240"/><line x1="340" y1="200" x2="400" y2="200"/>
+  </g>
+  <g filter="url(#wr-glow)" transform="translate(200,165)" text-anchor="middle">
+    <text font-family="'Arial Black',sans-serif" font-size="64" font-weight="900" fill="url(#wr-rush)" letter-spacing="3">LIGHTNING</text>
+  </g>
+  <g font-family="monospace" fill="#fff" opacity="0.65" text-anchor="middle">
+    <text x="200" y="195" font-size="12">TYPE BEFORE TIME RUNS OUT</text>
+  </g>
+  <!-- Timer bar -->
+  <g transform="translate(60,220)">
+    <rect width="280" height="8" rx="4" fill="#2a2048"/>
+    <rect width="180" height="8" rx="4" fill="url(#wr-rush)" filter="url(#wr-glow)"/>
+  </g>
+  <!-- Score bubbles -->
+  <g filter="url(#wr-sh)">
+    <g transform="translate(40,60)">
+      <rect x="0" y="0" width="90" height="36" rx="18" fill="#1f2540" stroke="#35d39a" stroke-width="1.5"/>
+      <text x="45" y="22" text-anchor="middle" font-family="monospace" font-size="12" fill="#35d39a" font-weight="bold">SCORE 24</text>
+    </g>
+    <g transform="translate(270,60)">
+      <rect x="0" y="0" width="90" height="36" rx="18" fill="#1f2540" stroke="#ff5f8f" stroke-width="1.5"/>
+      <text x="45" y="22" text-anchor="middle" font-family="monospace" font-size="12" fill="#ff5f8f" font-weight="bold">4.2s</text>
+    </g>
+  </g>
+  <!-- Difficulty stars -->
+  <g transform="translate(200,55)" text-anchor="middle" fill="#ffd166" font-size="18">
+    <text>★ ★ ★</text>
+  </g>
+  <!-- Typed text preview -->
+  <g transform="translate(200,250)" text-anchor="middle">
+    <rect x="-120" y="-8" width="240" height="28" rx="6" fill="#0a061a" stroke="#3a2c70" stroke-width="1"/>
+    <text y="12" font-family="monospace" font-size="14" fill="#fff">lightn<tspan fill="#35d39a">|</tspan></text>
+  </g>
+</svg>

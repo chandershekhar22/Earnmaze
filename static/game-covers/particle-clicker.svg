@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="pc-bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1a2a4a"/>
+      <stop offset="100%" stop-color="#050814"/>
+    </radialGradient>
+    <radialGradient id="pc-core" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#4ff0ff"/>
+      <stop offset="70%" stop-color="#0a5aff"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <filter id="pc-glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="pc-sh"><feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.4"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#pc-bg)"/>
+  <!-- Accelerator ring -->
+  <g transform="translate(200,150)">
+    <circle r="115" fill="none" stroke="#2a3a6a" stroke-width="2" opacity="0.5"/>
+    <circle r="115" fill="none" stroke="#4ff0ff" stroke-width="3" stroke-dasharray="180 540" stroke-linecap="round" opacity="0.7" filter="url(#pc-glow)"/>
+    <circle r="100" fill="none" stroke="#2a3a6a" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>
+    <circle r="85" fill="none" stroke="#3a4a7a" stroke-width="1" opacity="0.4"/>
+  </g>
+  <!-- Collision core -->
+  <g transform="translate(200,150)" filter="url(#pc-glow)">
+    <circle r="60" fill="url(#pc-core)" opacity="0.9"/>
+    <circle r="12" fill="#fff"/>
+  </g>
+  <!-- Particles spraying out -->
+  <g filter="url(#pc-glow)">
+    <circle cx="260" cy="120" r="3" fill="#4ff0ff"/>
+    <circle cx="140" cy="120" r="2.5" fill="#ff6b9a"/>
+    <circle cx="280" cy="170" r="3" fill="#ffe066"/>
+    <circle cx="120" cy="180" r="2" fill="#a77bff"/>
+    <circle cx="220" cy="90" r="2.5" fill="#4ff0b5"/>
+    <circle cx="180" cy="210" r="3" fill="#ff8a3d"/>
+    <circle cx="250" cy="95" r="1.5" fill="#fff"/>
+    <circle cx="150" cy="90" r="1.8" fill="#fff"/>
+  </g>
+  <!-- Particle trails (curved) -->
+  <g stroke-width="1.2" fill="none" opacity="0.6">
+    <path d="M210,155 Q240,130 265,120" stroke="#4ff0ff"/>
+    <path d="M190,155 Q160,130 135,120" stroke="#ff6b9a"/>
+    <path d="M210,145 Q240,155 280,170" stroke="#ffe066"/>
+    <path d="M190,145 Q160,175 120,180" stroke="#a77bff"/>
+    <path d="M203,140 Q218,115 222,90" stroke="#4ff0b5"/>
+    <path d="M197,160 Q188,185 180,210" stroke="#ff8a3d"/>
+  </g>
+  <!-- HUD: click counter -->
+  <g filter="url(#pc-sh)" transform="translate(200,275)" text-anchor="middle">
+    <rect x="-80" y="-20" width="160" height="36" rx="18" fill="#0a1228" stroke="#4ff0ff" stroke-width="1.5"/>
+    <text y="4" font-family="monospace" font-size="14" font-weight="bold" fill="#4ff0ff">⚛ 1,248,390 eV</text>
+  </g>
+  <g font-family="monospace">
+    <text x="20" y="30" font-size="10" fill="#6a7aa8">REPUTATION</text>
+    <text x="20" y="54" font-size="22" fill="#4ff0b5" font-weight="bold">NOBEL</text>
+    <text x="380" y="30" font-size="10" fill="#6a7aa8" text-anchor="end">RATE / SEC</text>
+    <text x="380" y="54" font-size="22" fill="#ffe066" font-weight="bold" text-anchor="end">+840</text>
+  </g>
+</svg>

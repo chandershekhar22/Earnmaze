@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="tm-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1d40"/>
+      <stop offset="100%" stop-color="#0a0c20"/>
+    </linearGradient>
+    <linearGradient id="tm-wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8f7cff"/>
+      <stop offset="100%" stop-color="#4b3eb0"/>
+    </linearGradient>
+    <radialGradient id="tm-ball" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#ffd166"/>
+      <stop offset="100%" stop-color="#d17a1e"/>
+    </radialGradient>
+    <filter id="tm-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="tm-sh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.45"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#tm-bg)"/>
+  <g transform="translate(200 150) rotate(-8) translate(-150 -120)">
+    <!-- Maze board bg -->
+    <rect x="0" y="0" width="300" height="240" rx="8" fill="#171a36" stroke="#2a2f5c" stroke-width="2"/>
+    <!-- Walls -->
+    <g fill="url(#tm-wall)" filter="url(#tm-sh)">
+      <rect x="30" y="30" width="180" height="10" rx="2"/>
+      <rect x="200" y="30" width="10" height="80" rx="2"/>
+      <rect x="80" y="60" width="10" height="60" rx="2"/>
+      <rect x="30" y="100" width="120" height="10" rx="2"/>
+      <rect x="140" y="60" width="10" height="40" rx="2"/>
+      <rect x="140" y="130" width="100" height="10" rx="2"/>
+      <rect x="30" y="130" width="80" height="10" rx="2"/>
+      <rect x="100" y="140" width="10" height="60" rx="2"/>
+      <rect x="170" y="140" width="10" height="70" rx="2"/>
+      <rect x="220" y="110" width="10" height="80" rx="2"/>
+      <rect x="220" y="180" width="50" height="10" rx="2"/>
+      <rect x="40" y="180" width="50" height="10" rx="2"/>
+    </g>
+    <!-- Goal -->
+    <g transform="translate(250,210)">
+      <circle r="12" fill="none" stroke="#35d39a" stroke-width="2" opacity="0.5"/>
+      <circle r="8" fill="#35d39a" opacity="0.35"/>
+      <circle r="4" fill="#35d39a"/>
+    </g>
+    <!-- Ball with trail -->
+    <g opacity="0.4">
+      <circle cx="52" cy="52" r="6" fill="#ffd166" opacity="0.2"/>
+      <circle cx="60" cy="65" r="7" fill="#ffd166" opacity="0.35"/>
+      <circle cx="65" cy="78" r="8" fill="#ffd166" opacity="0.55"/>
+    </g>
+    <g filter="url(#tm-glow)"><circle cx="68" cy="90" r="9" fill="url(#tm-ball)"/></g>
+  </g>
+  <g font-family="monospace" fill="#fff" opacity="0.75">
+    <text x="20" y="28" font-size="11">LEVEL</text>
+    <text x="20" y="50" font-size="22" font-weight="bold">04</text>
+    <text x="380" y="28" font-size="11" text-anchor="end" fill="#ffd166">BEST</text>
+    <text x="380" y="50" font-size="22" font-weight="bold" fill="#ffd166" text-anchor="end">0:24</text>
+  </g>
+</svg>

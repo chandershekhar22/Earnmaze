@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="ot-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a4020"/><stop offset="100%" stop-color="#031808"/></linearGradient>
+    <radialGradient id="ot-b" cx="0.35" cy="0.3"><stop offset="0%" stop-color="#666"/><stop offset="100%" stop-color="#000"/></radialGradient>
+    <radialGradient id="ot-w" cx="0.35" cy="0.3"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#aaa"/></radialGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#ot-bg)"/>
+  <g transform="translate(100,30)">
+    <rect x="-4" y="-4" width="208" height="208" fill="#1a8540" rx="4"/>
+    <g stroke="#0a4020" stroke-width="1.5">
+      <line x1="0" y1="25" x2="200" y2="25"/><line x1="0" y1="50" x2="200" y2="50"/><line x1="0" y1="75" x2="200" y2="75"/>
+      <line x1="0" y1="100" x2="200" y2="100"/><line x1="0" y1="125" x2="200" y2="125"/><line x1="0" y1="150" x2="200" y2="150"/><line x1="0" y1="175" x2="200" y2="175"/>
+      <line x1="25" y1="0" x2="25" y2="200"/><line x1="50" y1="0" x2="50" y2="200"/><line x1="75" y1="0" x2="75" y2="200"/>
+      <line x1="100" y1="0" x2="100" y2="200"/><line x1="125" y1="0" x2="125" y2="200"/><line x1="150" y1="0" x2="150" y2="200"/><line x1="175" y1="0" x2="175" y2="200"/>
+    </g>
+    <circle cx="62" cy="62" r="10" fill="url(#ot-w)"/>
+    <circle cx="87" cy="62" r="10" fill="url(#ot-b)"/>
+    <circle cx="112" cy="62" r="10" fill="url(#ot-b)"/>
+    <circle cx="62" cy="87" r="10" fill="url(#ot-b)"/>
+    <circle cx="87" cy="87" r="10" fill="url(#ot-b)"/>
+    <circle cx="112" cy="87" r="10" fill="url(#ot-w)"/>
+    <circle cx="62" cy="112" r="10" fill="url(#ot-w)"/>
+    <circle cx="87" cy="112" r="10" fill="url(#ot-w)"/>
+    <circle cx="112" cy="112" r="10" fill="url(#ot-b)"/>
+    <circle cx="137" cy="112" r="10" fill="url(#ot-b)"/>
+    <circle cx="137" cy="137" r="10" fill="url(#ot-w)"/>
+    <circle cx="62" cy="137" r="10" fill="url(#ot-b)"/>
+  </g>
+  <g font-family="monospace" font-weight="bold">
+    <circle cx="340" cy="80" r="14" fill="url(#ot-b)"/><text x="340" y="85" text-anchor="middle" fill="#fff" font-size="12">12</text>
+    <circle cx="340" cy="220" r="14" fill="url(#ot-w)"/><text x="340" y="225" text-anchor="middle" fill="#000" font-size="12">8</text>
+  </g>
+</svg>

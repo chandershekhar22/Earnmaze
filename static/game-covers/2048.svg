@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="t-2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eee4da"/>
+      <stop offset="100%" stop-color="#e0d5c5"/>
+    </linearGradient>
+    <linearGradient id="t-4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ede0c8"/>
+      <stop offset="100%" stop-color="#ddd1b5"/>
+    </linearGradient>
+    <linearGradient id="t-8" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2b179"/>
+      <stop offset="100%" stop-color="#e5a065"/>
+    </linearGradient>
+    <linearGradient id="t-16" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f59563"/>
+      <stop offset="100%" stop-color="#e58550"/>
+    </linearGradient>
+    <linearGradient id="t-32" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f67c5f"/>
+      <stop offset="100%" stop-color="#e56c4f"/>
+    </linearGradient>
+    <linearGradient id="t-64" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f65e3b"/>
+      <stop offset="100%" stop-color="#e54e2b"/>
+    </linearGradient>
+    <linearGradient id="t-128" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#edcf72"/>
+      <stop offset="100%" stop-color="#ddc060"/>
+    </linearGradient>
+    <linearGradient id="t-256" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#edcc61"/>
+      <stop offset="100%" stop-color="#ddbc51"/>
+    </linearGradient>
+    <linearGradient id="t-512" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#edc850"/>
+      <stop offset="100%" stop-color="#ddb840"/>
+    </linearGradient>
+    <linearGradient id="t-1024" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#edc53f"/>
+      <stop offset="100%" stop-color="#ddb52f"/>
+    </linearGradient>
+    <linearGradient id="t-2048" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#edc22e"/>
+      <stop offset="100%" stop-color="#ddb21e"/>
+    </linearGradient>
+    <filter id="t-shadow">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.2"/>
+    </filter>
+    <filter id="t-glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="#bbada0" fill-opacity="0.15" rx="10"/>
+  <!-- Board background -->
+  <rect x="50" y="10" width="300" height="280" rx="8" fill="#bbada0" opacity="0.3"/>
+  <!-- 4x4 grid of tiles -->
+  <!-- Row 1 -->
+  <g filter="url(#t-shadow)">
+    <rect x="60" y="18" width="65" height="60" rx="5" fill="url(#t-2)"/>
+    <text x="92" y="55" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="bold" fill="#776e65">2</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="132" y="18" width="65" height="60" rx="5" fill="url(#t-8)"/>
+    <text x="164" y="55" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="bold" fill="#f9f6f2">8</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="204" y="18" width="65" height="60" rx="5" fill="url(#t-64)"/>
+    <text x="236" y="55" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="24" font-weight="bold" fill="#f9f6f2">64</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="276" y="18" width="65" height="60" rx="5" fill="url(#t-4)"/>
+    <text x="308" y="55" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="bold" fill="#776e65">4</text>
+  </g>
+  <!-- Row 2 -->
+  <g filter="url(#t-shadow)">
+    <rect x="60" y="85" width="65" height="60" rx="5" fill="url(#t-16)"/>
+    <text x="92" y="122" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="24" font-weight="bold" fill="#f9f6f2">16</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="132" y="85" width="65" height="60" rx="5" fill="url(#t-128)"/>
+    <text x="164" y="122" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#f9f6f2">128</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="204" y="85" width="65" height="60" rx="5" fill="url(#t-32)"/>
+    <text x="236" y="122" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="24" font-weight="bold" fill="#f9f6f2">32</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="276" y="85" width="65" height="60" rx="5" fill="url(#t-256)"/>
+    <text x="308" y="122" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#f9f6f2">256</text>
+  </g>
+  <!-- Row 3 -->
+  <g filter="url(#t-shadow)">
+    <rect x="60" y="152" width="65" height="60" rx="5" fill="url(#t-2)"/>
+    <text x="92" y="189" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="bold" fill="#776e65">2</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="132" y="152" width="65" height="60" rx="5" fill="url(#t-512)"/>
+    <text x="164" y="189" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="bold" fill="#f9f6f2">512</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="204" y="152" width="65" height="60" rx="5" fill="url(#t-4)"/>
+    <text x="236" y="189" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="bold" fill="#776e65">4</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="276" y="152" width="65" height="60" rx="5" fill="url(#t-1024)"/>
+    <text x="308" y="189" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="bold" fill="#f9f6f2">1024</text>
+  </g>
+  <!-- Row 4 -->
+  <g filter="url(#t-shadow)">
+    <rect x="60" y="219" width="65" height="60" rx="5" fill="url(#t-8)"/>
+    <text x="92" y="256" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="bold" fill="#f9f6f2">8</text>
+  </g>
+  <g filter="url(#t-shadow)">
+    <rect x="132" y="219" width="65" height="60" rx="5" fill="url(#t-16)"/>
+    <text x="164" y="256" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="24" font-weight="bold" fill="#f9f6f2">16</text>
+  </g>
+  <g filter="url(#t-glow)">
+    <rect x="204" y="219" width="137" height="60" rx="5" fill="url(#t-2048)"/>
+    <text x="273" y="258" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="30" font-weight="bold" fill="#f9f6f2">2048</text>
+  </g>
+</svg>

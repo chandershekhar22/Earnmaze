@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect x="0" y="0" width="400" height="40" fill="#1a4020"/>
+  <rect x="0" y="40" width="400" height="100" fill="#0a3a6a"/>
+  <rect x="0" y="140" width="400" height="30" fill="#1a8540"/>
+  <rect x="0" y="170" width="400" height="100" fill="#1a1a1a"/>
+  <rect x="0" y="270" width="400" height="30" fill="#1a8540"/>
+  <!-- home slots -->
+  <g><rect x="20" y="0" width="60" height="40" fill="#0a2010"/><rect x="100" y="0" width="60" height="40" fill="#0a2010"/><rect x="180" y="0" width="60" height="40" fill="#ff8a3d"/><rect x="260" y="0" width="60" height="40" fill="#0a2010"/><rect x="340" y="0" width="40" height="40" fill="#0a2010"/></g>
+  <!-- logs -->
+  <g><rect x="40" y="60" width="100" height="20" fill="#8b5a30" rx="4"/><rect x="48" y="68" width="84" height="4" fill="#5a3a1a"/></g>
+  <g><rect x="200" y="100" width="80" height="20" fill="#8b5a30" rx="4"/><rect x="208" y="108" width="64" height="4" fill="#5a3a1a"/></g>
+  <g><rect x="320" y="80" width="60" height="20" fill="#8b5a30" rx="4"/><rect x="328" y="88" width="44" height="4" fill="#5a3a1a"/></g>
+  <!-- road dashes -->
+  <g fill="#fff"><rect x="10" y="200" width="20" height="3"/><rect x="60" y="200" width="20" height="3"/><rect x="110" y="200" width="20" height="3"/><rect x="160" y="200" width="20" height="3"/><rect x="210" y="200" width="20" height="3"/><rect x="260" y="200" width="20" height="3"/><rect x="310" y="200" width="20" height="3"/><rect x="360" y="200" width="20" height="3"/></g>
+  <g fill="#fff"><rect x="30" y="240" width="20" height="3"/><rect x="80" y="240" width="20" height="3"/><rect x="130" y="240" width="20" height="3"/><rect x="180" y="240" width="20" height="3"/><rect x="230" y="240" width="20" height="3"/><rect x="280" y="240" width="20" height="3"/><rect x="330" y="240" width="20" height="3"/></g>
+  <!-- cars -->
+  <rect x="50" y="183" width="36" height="14" fill="#ff3050" rx="3"/>
+  <rect x="55" y="186" width="26" height="4" fill="rgba(255,255,255,0.4)"/>
+  <rect x="200" y="220" width="36" height="14" fill="#ffd166" rx="3"/>
+  <rect x="205" y="223" width="26" height="4" fill="rgba(255,255,255,0.4)"/>
+  <rect x="320" y="183" width="50" height="14" fill="#56a8ff" rx="3"/>
+  <rect x="325" y="186" width="40" height="4" fill="rgba(255,255,255,0.4)"/>
+  <!-- frog -->
+  <g transform="translate(200,285)">
+    <circle r="14" fill="#35d39a"/>
+    <circle cx="-5" cy="-3" r="3" fill="#fff"/><circle cx="5" cy="-3" r="3" fill="#fff"/>
+    <circle cx="-5" cy="-3" r="1.5" fill="#000"/><circle cx="5" cy="-3" r="1.5" fill="#000"/>
+  </g>
+</svg>

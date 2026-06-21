@@ -19,6 +19,19 @@ app.config.timestamp_*.js
 /package
 **/.svelte-kit/**
 
+# Local Claude Code settings
+.claude/
+
+# Games repo (cloned separately)
+static/games-repo/
+
+# User-uploaded content (admin upload sections)
+static/artifacts-uploaded/
+static/streaks-uploaded/
+static/quizzes-uploaded/
+static/weekly-challenges-uploaded/
+static/exclusive-deals-uploaded/
+
 # Environment variables
 .env
 .env.*

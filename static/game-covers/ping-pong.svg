@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="pp-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0c1226"/>
+      <stop offset="100%" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="pp-pad-l" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4ff0b5"/>
+      <stop offset="100%" stop-color="#12875d"/>
+    </linearGradient>
+    <linearGradient id="pp-pad-r" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff8fa8"/>
+      <stop offset="100%" stop-color="#c02f52"/>
+    </linearGradient>
+    <radialGradient id="pp-ball" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#b8b8b8"/>
+    </radialGradient>
+    <filter id="pp-glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#pp-bg)"/>
+  <!-- Court border -->
+  <rect x="14" y="14" width="372" height="272" fill="none" stroke="#2a3352" stroke-width="2" rx="4"/>
+  <!-- Center dashed -->
+  <g stroke="#3a4680" stroke-width="3" stroke-dasharray="10 10" opacity="0.7">
+    <line x1="200" y1="20" x2="200" y2="280"/>
+  </g>
+  <!-- Left paddle -->
+  <g filter="url(#pp-glow)">
+    <rect x="28" y="90" width="14" height="80" rx="3" fill="url(#pp-pad-l)"/>
+  </g>
+  <!-- Right paddle -->
+  <g filter="url(#pp-glow)">
+    <rect x="358" y="130" width="14" height="80" rx="3" fill="url(#pp-pad-r)"/>
+  </g>
+  <!-- Trail -->
+  <g opacity="0.5">
+    <circle cx="160" cy="120" r="6" fill="#fff" opacity="0.15"/>
+    <circle cx="180" cy="135" r="7" fill="#fff" opacity="0.25"/>
+    <circle cx="200" cy="148" r="8" fill="#fff" opacity="0.4"/>
+    <circle cx="220" cy="163" r="9" fill="#fff" opacity="0.6"/>
+  </g>
+  <!-- Ball -->
+  <g filter="url(#pp-glow)"><circle cx="240" cy="178" r="11" fill="url(#pp-ball)"/></g>
+  <!-- Scores -->
+  <g font-family="monospace" font-weight="bold" font-size="72">
+    <text x="130" y="100" fill="#4ff0b5" text-anchor="middle" opacity="0.75">7</text>
+    <text x="270" y="100" fill="#ff8fa8" text-anchor="middle" opacity="0.75">5</text>
+  </g>
+  <g font-family="monospace" fill="#6c7aa8" font-size="10" opacity="0.7">
+    <text x="130" y="275" text-anchor="middle">PLAYER 1</text>
+    <text x="270" y="275" text-anchor="middle">CPU</text>
+  </g>
+</svg>

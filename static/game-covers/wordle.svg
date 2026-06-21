@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="w-green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6aaa64"/>
+      <stop offset="100%" stop-color="#538d4e"/>
+    </linearGradient>
+    <linearGradient id="w-yellow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c9b458"/>
+      <stop offset="100%" stop-color="#b59f3b"/>
+    </linearGradient>
+    <linearGradient id="w-gray" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#787c7e"/>
+      <stop offset="100%" stop-color="#5a5d5f"/>
+    </linearGradient>
+    <linearGradient id="w-empty" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3a3c"/>
+      <stop offset="100%" stop-color="#2a2a2c"/>
+    </linearGradient>
+    <filter id="w-shadow">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="#121213" fill-opacity="0.2"/>
+  <!-- Row 1: CRANE - C(gray) R(gray) A(yellow) N(gray) E(green) -->
+  <g transform="translate(75, 20)" filter="url(#w-shadow)">
+    <rect x="0" y="0" width="48" height="48" rx="3" fill="url(#w-gray)"/>
+    <text x="24" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">C</text>
+    <rect x="54" y="0" width="48" height="48" rx="3" fill="url(#w-gray)"/>
+    <text x="78" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">R</text>
+    <rect x="108" y="0" width="48" height="48" rx="3" fill="url(#w-yellow)"/>
+    <text x="132" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">A</text>
+    <rect x="162" y="0" width="48" height="48" rx="3" fill="url(#w-gray)"/>
+    <text x="186" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">N</text>
+    <rect x="216" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="240" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">E</text>
+  </g>
+  <!-- Row 2: MAPLE - M(gray) A(green) P(gray) L(yellow) E(green) -->
+  <g transform="translate(75, 74)" filter="url(#w-shadow)">
+    <rect x="0" y="0" width="48" height="48" rx="3" fill="url(#w-gray)"/>
+    <text x="24" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">M</text>
+    <rect x="54" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="78" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">A</text>
+    <rect x="108" y="0" width="48" height="48" rx="3" fill="url(#w-gray)"/>
+    <text x="132" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">P</text>
+    <rect x="162" y="0" width="48" height="48" rx="3" fill="url(#w-yellow)"/>
+    <text x="186" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">L</text>
+    <rect x="216" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="240" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">E</text>
+  </g>
+  <!-- Row 3: HASTE - H(gray) A(green) S(gray) T(gray) E(green) -->
+  <g transform="translate(75, 128)" filter="url(#w-shadow)">
+    <rect x="0" y="0" width="48" height="48" rx="3" fill="url(#w-gray)"/>
+    <text x="24" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">H</text>
+    <rect x="54" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="78" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">A</text>
+    <rect x="108" y="0" width="48" height="48" rx="3" fill="url(#w-gray)"/>
+    <text x="132" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">S</text>
+    <rect x="162" y="0" width="48" height="48" rx="3" fill="url(#w-gray)"/>
+    <text x="186" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">T</text>
+    <rect x="216" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="240" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">E</text>
+  </g>
+  <!-- Row 4: VALVE - all green (solved!) -->
+  <g transform="translate(75, 182)" filter="url(#w-shadow)">
+    <rect x="0" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="24" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">V</text>
+    <rect x="54" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="78" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">A</text>
+    <rect x="108" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="132" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">L</text>
+    <rect x="162" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="186" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">V</text>
+    <rect x="216" y="0" width="48" height="48" rx="3" fill="url(#w-green)"/>
+    <text x="240" y="33" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="26" font-weight="bold" fill="#fff">E</text>
+  </g>
+  <!-- Row 5: empty -->
+  <g transform="translate(75, 236)">
+    <rect x="0" y="0" width="48" height="48" rx="3" fill="url(#w-empty)" stroke="#3a3a3c" stroke-width="1.5"/>
+    <rect x="54" y="0" width="48" height="48" rx="3" fill="url(#w-empty)" stroke="#3a3a3c" stroke-width="1.5"/>
+    <rect x="108" y="0" width="48" height="48" rx="3" fill="url(#w-empty)" stroke="#3a3a3c" stroke-width="1.5"/>
+    <rect x="162" y="0" width="48" height="48" rx="3" fill="url(#w-empty)" stroke="#3a3a3c" stroke-width="1.5"/>
+    <rect x="216" y="0" width="48" height="48" rx="3" fill="url(#w-empty)" stroke="#3a3a3c" stroke-width="1.5"/>
+  </g>
+</svg>

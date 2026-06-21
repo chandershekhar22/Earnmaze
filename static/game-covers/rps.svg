@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="rps-bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#7c4dff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#311b92" stop-opacity="0.05"/>
+    </radialGradient>
+    <linearGradient id="rps-rock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#78909c"/>
+      <stop offset="100%" stop-color="#455a64"/>
+    </linearGradient>
+    <linearGradient id="rps-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e0e0e0"/>
+    </linearGradient>
+    <linearGradient id="rps-scissor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd54f"/>
+      <stop offset="100%" stop-color="#f9a825"/>
+    </linearGradient>
+    <filter id="rps-shadow">
+      <feDropShadow dx="2" dy="3" stdDeviation="4" flood-opacity="0.3"/>
+    </filter>
+    <filter id="rps-glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#rps-bg)"/>
+  <!-- Triangle connecting lines -->
+  <g stroke="#7c4dff" stroke-width="2" opacity="0.3" stroke-dasharray="6,4">
+    <line x1="200" y1="55" x2="80" y2="230"/>
+    <line x1="200" y1="55" x2="320" y2="230"/>
+    <line x1="80" y1="230" x2="320" y2="230"/>
+  </g>
+  <!-- VS circles -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#7c4dff" text-anchor="middle" font-weight="bold" opacity="0.5">
+    <text x="135" y="145">VS</text>
+    <text x="265" y="145">VS</text>
+    <text x="200" y="245">VS</text>
+  </g>
+  <!-- Scissors (top) -->
+  <g transform="translate(200, 65)" filter="url(#rps-shadow)">
+    <circle cx="0" cy="0" r="45" fill="#1a1a2e" opacity="0.6"/>
+    <circle cx="0" cy="0" r="42" fill="none" stroke="url(#rps-scissor)" stroke-width="2"/>
+    <!-- Scissor blades -->
+    <path d="M-5,8 L-18,-22 Q-20,-28 -14,-26 L-2,0Z" fill="url(#rps-scissor)" stroke="#f57f17" stroke-width="0.5"/>
+    <path d="M5,8 L18,-22 Q20,-28 14,-26 L2,0Z" fill="url(#rps-scissor)" stroke="#f57f17" stroke-width="0.5"/>
+    <!-- Handles -->
+    <ellipse cx="-8" cy="18" rx="10" ry="8" fill="none" stroke="url(#rps-scissor)" stroke-width="3"/>
+    <ellipse cx="8" cy="18" rx="10" ry="8" fill="none" stroke="url(#rps-scissor)" stroke-width="3"/>
+    <!-- Pivot -->
+    <circle cx="0" cy="5" r="3" fill="#f57f17"/>
+  </g>
+  <!-- Rock (bottom-left) -->
+  <g transform="translate(80, 215)" filter="url(#rps-shadow)">
+    <circle cx="0" cy="0" r="45" fill="#1a1a2e" opacity="0.6"/>
+    <circle cx="0" cy="0" r="42" fill="none" stroke="url(#rps-rock)" stroke-width="2"/>
+    <!-- Fist shape -->
+    <path d="M-15,10 Q-20,0 -18,-8 Q-16,-16 -8,-18 Q0,-20 8,-18 Q16,-16 18,-8 Q20,0 18,8 Q16,14 10,16 Q4,18 -4,18 Q-12,16 -15,10Z" fill="url(#rps-rock)" stroke="#37474f" stroke-width="1"/>
+    <!-- Finger bumps -->
+    <ellipse cx="-10" cy="-14" rx="6" ry="5" fill="#90a4ae" opacity="0.5"/>
+    <ellipse cx="0" cy="-16" rx="6" ry="5" fill="#90a4ae" opacity="0.5"/>
+    <ellipse cx="10" cy="-14" rx="6" ry="5" fill="#90a4ae" opacity="0.5"/>
+    <!-- Thumb -->
+    <ellipse cx="-16" cy="0" rx="5" ry="7" fill="#78909c" stroke="#546e7a" stroke-width="0.5"/>
+    <!-- Knuckle lines -->
+    <path d="M-8,-8 Q-4,-6 0,-8" fill="none" stroke="#546e7a" stroke-width="0.8"/>
+    <path d="M2,-8 Q6,-6 10,-8" fill="none" stroke="#546e7a" stroke-width="0.8"/>
+  </g>
+  <!-- Paper (bottom-right) -->
+  <g transform="translate(320, 215)" filter="url(#rps-shadow)">
+    <circle cx="0" cy="0" r="45" fill="#1a1a2e" opacity="0.6"/>
+    <circle cx="0" cy="0" r="42" fill="none" stroke="url(#rps-paper)" stroke-width="2"/>
+    <!-- Flat hand -->
+    <rect x="-14" y="-5" width="28" height="24" rx="4" fill="url(#rps-paper)" stroke="#bdbdbd" stroke-width="0.5"/>
+    <!-- Fingers -->
+    <rect x="-13" y="-22" width="7" height="20" rx="3.5" fill="url(#rps-paper)" stroke="#bdbdbd" stroke-width="0.5"/>
+    <rect x="-4" y="-25" width="7" height="23" rx="3.5" fill="url(#rps-paper)" stroke="#bdbdbd" stroke-width="0.5"/>
+    <rect x="5" y="-23" width="7" height="21" rx="3.5" fill="url(#rps-paper)" stroke="#bdbdbd" stroke-width="0.5"/>
+    <rect x="13" y="-18" width="6" height="16" rx="3" fill="url(#rps-paper)" stroke="#bdbdbd" stroke-width="0.5"/>
+    <!-- Thumb -->
+    <rect x="-20" y="-8" width="10" height="7" rx="3.5" fill="#e0e0e0" stroke="#bdbdbd" stroke-width="0.5" transform="rotate(-30 -15 -5)"/>
+  </g>
+  <!-- Labels -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#b39ddb" text-anchor="middle" font-weight="bold" opacity="0.7">
+    <text x="80" y="275">ROCK</text>
+    <text x="200" y="25">SCISSORS</text>
+    <text x="320" y="275">PAPER</text>
+  </g>
+</svg>

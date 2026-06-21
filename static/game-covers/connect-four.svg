@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="cf-board" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1565c0"/>
+      <stop offset="100%" stop-color="#0d47a1"/>
+    </linearGradient>
+    <radialGradient id="cf-red" cx="40%" cy="35%">
+      <stop offset="0%" stop-color="#ef5350"/>
+      <stop offset="100%" stop-color="#c62828"/>
+    </radialGradient>
+    <radialGradient id="cf-yellow" cx="40%" cy="35%">
+      <stop offset="0%" stop-color="#ffee58"/>
+      <stop offset="100%" stop-color="#f9a825"/>
+    </radialGradient>
+    <radialGradient id="cf-empty" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#0a2e5c"/>
+      <stop offset="100%" stop-color="#061a38"/>
+    </radialGradient>
+    <filter id="cf-shadow">
+      <feDropShadow dx="2" dy="3" stdDeviation="4" flood-opacity="0.4"/>
+    </filter>
+    <filter id="cf-inner">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+      <feOffset dx="1" dy="1" result="offset"/>
+      <feComposite in="offset" in2="SourceAlpha" operator="in" result="shadow"/>
+      <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="transparent"/>
+  <!-- Board -->
+  <g filter="url(#cf-shadow)">
+    <rect x="25" y="25" width="350" height="255" rx="10" fill="url(#cf-board)"/>
+    <!-- Board rim/edge highlight -->
+    <rect x="25" y="25" width="350" height="255" rx="10" fill="none" stroke="#1976d2" stroke-width="2"/>
+    <!-- Holes - 7 columns x 6 rows -->
+    <!-- Using circles as holes. Empty = dark, filled = red/yellow -->
+    <!-- Row 1 (top) - mostly empty -->
+    <circle cx="75" cy="55" r="18" fill="url(#cf-empty)"/>
+    <circle cx="125" cy="55" r="18" fill="url(#cf-empty)"/>
+    <circle cx="175" cy="55" r="18" fill="url(#cf-empty)"/>
+    <circle cx="225" cy="55" r="18" fill="url(#cf-empty)"/>
+    <circle cx="275" cy="55" r="18" fill="url(#cf-empty)"/>
+    <circle cx="325" cy="55" r="18" fill="url(#cf-empty)"/>
+    <!-- Row 2 -->
+    <circle cx="75" cy="95" r="18" fill="url(#cf-empty)"/>
+    <circle cx="125" cy="95" r="18" fill="url(#cf-empty)"/>
+    <circle cx="175" cy="95" r="18" fill="url(#cf-empty)"/>
+    <circle cx="225" cy="95" r="18" fill="url(#cf-empty)"/>
+    <circle cx="275" cy="95" r="18" fill="url(#cf-empty)"/>
+    <circle cx="325" cy="95" r="18" fill="url(#cf-empty)"/>
+    <!-- Row 3 -->
+    <circle cx="75" cy="135" r="18" fill="url(#cf-empty)"/>
+    <circle cx="125" cy="135" r="18" fill="url(#cf-empty)"/>
+    <circle cx="175" cy="135" r="18" fill="url(#cf-yellow)" filter="url(#cf-inner)"/>
+    <circle cx="225" cy="135" r="18" fill="url(#cf-empty)"/>
+    <circle cx="275" cy="135" r="18" fill="url(#cf-empty)"/>
+    <circle cx="325" cy="135" r="18" fill="url(#cf-empty)"/>
+    <!-- Row 4 -->
+    <circle cx="75" cy="175" r="18" fill="url(#cf-empty)"/>
+    <circle cx="125" cy="175" r="18" fill="url(#cf-red)" filter="url(#cf-inner)"/>
+    <circle cx="175" cy="175" r="18" fill="url(#cf-red)" filter="url(#cf-inner)"/>
+    <circle cx="225" cy="175" r="18" fill="url(#cf-yellow)" filter="url(#cf-inner)"/>
+    <circle cx="275" cy="175" r="18" fill="url(#cf-empty)"/>
+    <circle cx="325" cy="175" r="18" fill="url(#cf-empty)"/>
+    <!-- Row 5 -->
+    <circle cx="75" cy="215" r="18" fill="url(#cf-yellow)" filter="url(#cf-inner)"/>
+    <circle cx="125" cy="215" r="18" fill="url(#cf-yellow)" filter="url(#cf-inner)"/>
+    <circle cx="175" cy="215" r="18" fill="url(#cf-red)" filter="url(#cf-inner)"/>
+    <circle cx="225" cy="215" r="18" fill="url(#cf-red)" filter="url(#cf-inner)"/>
+    <circle cx="275" cy="215" r="18" fill="url(#cf-yellow)" filter="url(#cf-inner)"/>
+    <circle cx="325" cy="215" r="18" fill="url(#cf-red)" filter="url(#cf-inner)"/>
+    <!-- Row 6 (bottom) -->
+    <circle cx="75" cy="255" r="18" fill="url(#cf-red)" filter="url(#cf-inner)"/>
+    <circle cx="125" cy="255" r="18" fill="url(#cf-yellow)" filter="url(#cf-inner)"/>
+    <circle cx="175" cy="255" r="18" fill="url(#cf-yellow)" filter="url(#cf-inner)"/>
+    <circle cx="225" cy="255" r="18" fill="url(#cf-red)" filter="url(#cf-inner)"/>
+    <circle cx="275" cy="255" r="18" fill="url(#cf-red)" filter="url(#cf-inner)"/>
+    <circle cx="325" cy="255" r="18" fill="url(#cf-yellow)" filter="url(#cf-inner)"/>
+    <!-- Shine on filled discs -->
+    <g opacity="0.25" fill="#fff">
+      <ellipse cx="170" cy="130" rx="6" ry="4"/>
+      <ellipse cx="120" cy="170" rx="6" ry="4"/>
+      <ellipse cx="170" cy="170" rx="6" ry="4"/>
+      <ellipse cx="220" cy="170" rx="6" ry="4"/>
+      <ellipse cx="70" cy="210" rx="6" ry="4"/>
+      <ellipse cx="120" cy="210" rx="6" ry="4"/>
+      <ellipse cx="170" cy="210" rx="6" ry="4"/>
+      <ellipse cx="220" cy="210" rx="6" ry="4"/>
+      <ellipse cx="270" cy="210" rx="6" ry="4"/>
+      <ellipse cx="320" cy="210" rx="6" ry="4"/>
+      <ellipse cx="70" cy="250" rx="6" ry="4"/>
+      <ellipse cx="120" cy="250" rx="6" ry="4"/>
+      <ellipse cx="170" cy="250" rx="6" ry="4"/>
+      <ellipse cx="220" cy="250" rx="6" ry="4"/>
+      <ellipse cx="270" cy="250" rx="6" ry="4"/>
+      <ellipse cx="320" cy="250" rx="6" ry="4"/>
+    </g>
+  </g>
+  <!-- Dropping disc animation hint -->
+  <circle cx="275" cy="12" r="16" fill="url(#cf-yellow)" opacity="0.7"/>
+  <ellipse cx="271" cy="8" rx="5" ry="3" fill="#fff" opacity="0.3"/>
+</svg>

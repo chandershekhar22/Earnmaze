@@ -37,7 +37,8 @@ const ROUTE_CONFIG = {
     '/moderator',
     '/points',
     '/history',
-    '/rewards'
+    '/rewards',
+    '/games'
   ],
   publicPaths: [
     '/',
@@ -216,7 +217,12 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 
 const handleApp: Handle = async ({ event, resolve }) => {
   const pathname = event.url.pathname;
-  const ipAddress = event.getClientAddress();
+  let ipAddress: string;
+  try {
+    ipAddress = event.getClientAddress();
+  } catch {
+    ipAddress = '0.0.0.0';
+  }
   const correlationId = generateRayId();
   event.locals.correlationId = correlationId;
 

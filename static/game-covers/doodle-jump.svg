@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="dj-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#87ceeb" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#e0f7fa" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="dj-plat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4caf50"/>
+      <stop offset="100%" stop-color="#2e7d32"/>
+    </linearGradient>
+    <linearGradient id="dj-plat2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8bc34a"/>
+      <stop offset="100%" stop-color="#558b2f"/>
+    </linearGradient>
+    <radialGradient id="dj-body" cx="50%" cy="40%">
+      <stop offset="0%" stop-color="#81c784"/>
+      <stop offset="100%" stop-color="#388e3c"/>
+    </radialGradient>
+    <linearGradient id="dj-spring" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff9800"/>
+      <stop offset="100%" stop-color="#e65100"/>
+    </linearGradient>
+    <filter id="dj-shadow">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#dj-bg)"/>
+  <!-- Grid lines (notebook paper) -->
+  <g stroke="#90caf9" stroke-width="0.5" opacity="0.3">
+    <line x1="0" y1="30" x2="400" y2="30"/><line x1="0" y1="60" x2="400" y2="60"/>
+    <line x1="0" y1="90" x2="400" y2="90"/><line x1="0" y1="120" x2="400" y2="120"/>
+    <line x1="0" y1="150" x2="400" y2="150"/><line x1="0" y1="180" x2="400" y2="180"/>
+    <line x1="0" y1="210" x2="400" y2="210"/><line x1="0" y1="240" x2="400" y2="240"/>
+    <line x1="0" y1="270" x2="400" y2="270"/>
+    <line x1="50" y1="0" x2="50" y2="300" stroke="#ef9a9a"/>
+  </g>
+  <!-- Platforms -->
+  <rect x="60" y="260" width="80" height="12" rx="6" fill="url(#dj-plat)" filter="url(#dj-shadow)"/>
+  <rect x="200" y="230" width="80" height="12" rx="6" fill="url(#dj-plat2)" filter="url(#dj-shadow)"/>
+  <rect x="100" y="195" width="80" height="12" rx="6" fill="url(#dj-plat)" filter="url(#dj-shadow)"/>
+  <!-- Brown breakable platform -->
+  <rect x="280" y="175" width="70" height="12" rx="6" fill="#8d6e63" filter="url(#dj-shadow)"/>
+  <line x1="290" y1="178" x2="290" y2="184" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="310" y1="178" x2="310" y2="184" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="330" y1="178" x2="330" y2="184" stroke="#6d4c41" stroke-width="1"/>
+  <rect x="50" y="145" width="80" height="12" rx="6" fill="url(#dj-plat2)" filter="url(#dj-shadow)"/>
+  <!-- Spring on platform -->
+  <g transform="translate(85, 145)">
+    <path d="M-5,0 L5,0 L4,-4 L-4,-4 L5,-8 L-5,-8 L4,-12 L-4,-12 L0,-16" fill="none" stroke="url(#dj-spring)" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <rect x="220" y="105" width="80" height="12" rx="6" fill="url(#dj-plat)" filter="url(#dj-shadow)"/>
+  <rect x="310" y="70" width="70" height="12" rx="6" fill="url(#dj-plat2)" filter="url(#dj-shadow)"/>
+  <rect x="130" y="55" width="80" height="12" rx="6" fill="url(#dj-plat)" filter="url(#dj-shadow)"/>
+  <!-- Doodler character -->
+  <g transform="translate(140, 85)" filter="url(#dj-shadow)">
+    <!-- Body -->
+    <ellipse cx="0" cy="0" rx="18" ry="22" fill="url(#dj-body)"/>
+    <!-- Nose/snout -->
+    <ellipse cx="14" cy="-4" rx="10" ry="7" fill="#a5d6a7"/>
+    <!-- Eye -->
+    <circle cx="8" cy="-8" r="6" fill="#fff"/>
+    <circle cx="10" cy="-8" r="3" fill="#111"/>
+    <circle cx="11" cy="-9" r="1" fill="#fff"/>
+    <!-- Mouth -->
+    <path d="M14,2 Q20,2 22,0" fill="none" stroke="#2e7d32" stroke-width="1.5"/>
+    <!-- Legs -->
+    <rect x="-12" y="18" width="8" height="14" rx="4" fill="#66bb6a"/>
+    <rect x="4" y="18" width="8" height="14" rx="4" fill="#66bb6a"/>
+    <!-- Feet -->
+    <ellipse cx="-8" cy="33" rx="7" ry="4" fill="#4caf50"/>
+    <ellipse cx="8" cy="33" rx="7" ry="4" fill="#4caf50"/>
+  </g>
+  <!-- Jump trail -->
+  <g opacity="0.4">
+    <path d="M140,120 Q130,140 140,160 Q150,180 140,195" fill="none" stroke="#81c784" stroke-width="2" stroke-dasharray="4,4"/>
+  </g>
+  <!-- Stars/score items -->
+  <g fill="#ffd54f" opacity="0.7">
+    <polygon points="350,30 353,39 362,39 355,44 357,53 350,48 343,53 345,44 338,39 347,39"/>
+    <polygon points="30,80 32,86 38,86 33,90 35,96 30,92 25,96 27,90 22,86 28,86"/>
+  </g>
+  <!-- Clouds -->
+  <g fill="#fff" opacity="0.3">
+    <ellipse cx="320" cy="40" rx="30" ry="12"/>
+    <ellipse cx="340" cy="38" rx="20" ry="10"/>
+    <ellipse cx="80" cy="25" rx="25" ry="10"/>
+    <ellipse cx="100" cy="22" rx="18" ry="8"/>
+  </g>
+</svg>

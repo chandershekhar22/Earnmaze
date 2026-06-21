@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="hx-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1020"/>
+      <stop offset="100%" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="hx-cy" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4ff0dc"/><stop offset="100%" stop-color="#1b9a88"/></linearGradient>
+    <linearGradient id="hx-pk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff6b9a"/><stop offset="100%" stop-color="#a82556"/></linearGradient>
+    <linearGradient id="hx-yl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffe066"/><stop offset="100%" stop-color="#c99010"/></linearGradient>
+    <linearGradient id="hx-pr" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a77bff"/><stop offset="100%" stop-color="#4a2a9e"/></linearGradient>
+    <linearGradient id="hx-gn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#66e38a"/><stop offset="100%" stop-color="#1a8a40"/></linearGradient>
+    <linearGradient id="hx-or" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffa24a"/><stop offset="100%" stop-color="#c25a10"/></linearGradient>
+    <filter id="hx-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="hx-sh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.4"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#hx-bg)"/>
+  <!-- Central hex core -->
+  <g transform="translate(200,150)">
+    <polygon points="0,-60 52,-30 52,30 0,60 -52,30 -52,-30" fill="#1a1f2e" stroke="#3a4662" stroke-width="2"/>
+    <polygon points="0,-44 38,-22 38,22 0,44 -38,22 -38,-22" fill="#0a0e1a" stroke="#2a3048" stroke-width="1"/>
+    <text y="6" text-anchor="middle" font-family="'Segoe UI',Arial" font-size="20" font-weight="bold" fill="#4ff0dc" filter="url(#hx-glow)">hex</text>
+  </g>
+  <!-- Stacked hexes around -->
+  <g filter="url(#hx-sh)">
+    <!-- Top edge -->
+    <polygon points="200,66 226,81 226,111 200,126 174,111 174,81" fill="url(#hx-cy)"/>
+    <polygon points="226,81 252,66 278,81 278,111 252,126 226,111" fill="url(#hx-pk)"/>
+    <polygon points="174,81 148,66 122,81 122,111 148,126 174,111" fill="url(#hx-yl)"/>
+    <!-- Right edge -->
+    <polygon points="252,126 278,111 304,126 304,156 278,171 252,156" fill="url(#hx-pr)"/>
+    <polygon points="278,171 304,156 330,171 330,201 304,216 278,201" fill="url(#hx-gn)"/>
+    <!-- Bottom edge -->
+    <polygon points="226,219 252,204 278,219 278,249 252,264 226,249" fill="url(#hx-or)"/>
+    <polygon points="174,219 200,204 226,219 226,249 200,264 174,249" fill="url(#hx-cy)"/>
+    <polygon points="122,219 148,204 174,219 174,249 148,264 122,249" fill="url(#hx-pk)"/>
+    <!-- Left edge -->
+    <polygon points="122,171 148,156 174,171 174,201 148,216 122,201" fill="url(#hx-yl)"/>
+    <polygon points="70,171 96,156 122,171 122,201 96,216 70,201" fill="url(#hx-gn)"/>
+    <polygon points="70,111 96,96 122,111 122,141 96,156 70,141" fill="url(#hx-pr)"/>
+  </g>
+  <!-- Incoming hex with glow -->
+  <g filter="url(#hx-glow)">
+    <polygon points="200,20 226,35 226,65 200,80 174,65 174,35" fill="url(#hx-cy)" opacity="0.9"/>
+  </g>
+  <!-- Trail arrow -->
+  <g opacity="0.4" stroke="#4ff0dc" stroke-width="2" fill="none">
+    <line x1="200" y1="5" x2="200" y2="18" stroke-linecap="round"/>
+  </g>
+  <g font-family="monospace" fill="#fff">
+    <text x="20" y="30" font-size="11" opacity="0.7">SCORE</text>
+    <text x="20" y="54" font-size="24" font-weight="bold" fill="#4ff0dc">1,240</text>
+    <text x="380" y="30" font-size="11" opacity="0.7" text-anchor="end">LEVEL</text>
+    <text x="380" y="54" font-size="24" font-weight="bold" fill="#ffe066" text-anchor="end">07</text>
+  </g>
+</svg>

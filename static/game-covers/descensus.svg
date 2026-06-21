@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="ds-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a2a3a"/><stop offset="100%" stop-color="#050810"/></linearGradient>
+    <linearGradient id="ds-ball" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff8fa8"/><stop offset="100%" stop-color="#a02040"/></linearGradient>
+    <filter id="ds-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="ds-sh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.45"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#ds-bg)"/>
+  <!-- Bars / platforms -->
+  <g filter="url(#ds-sh)">
+    <rect x="80" y="80" width="120" height="8" rx="2" fill="#4a6a8a" transform="rotate(15 140 84)"/>
+    <rect x="200" y="140" width="100" height="8" rx="2" fill="#4a6a8a" transform="rotate(-20 250 144)"/>
+    <rect x="60" y="190" width="110" height="8" rx="2" fill="#4a6a8a" transform="rotate(10 115 194)"/>
+    <rect x="230" y="220" width="120" height="8" rx="2" fill="#4a6a8a" transform="rotate(-8 290 224)"/>
+  </g>
+  <!-- Saw -->
+  <g filter="url(#ds-glow)" transform="translate(300,90)">
+    <g><polygon points="0,-20 5,-15 12,-18 10,-10 18,-7 12,-3 18,4 10,5 12,14 5,10 0,18 -5,10 -12,14 -10,5 -18,4 -12,-3 -18,-7 -10,-10 -12,-18 -5,-15" fill="#c2c7d1"/></g>
+    <circle r="5" fill="#2a2a2a"/>
+  </g>
+  <g filter="url(#ds-glow)" transform="translate(100,140)">
+    <polygon points="0,-14 4,-10 9,-13 8,-7 13,-5 9,-2 13,3 8,4 9,10 4,7 0,13 -4,7 -9,10 -8,4 -13,3 -9,-2 -13,-5 -8,-7 -9,-13 -4,-10" fill="#c2c7d1"/>
+    <circle r="4" fill="#2a2a2a"/>
+  </g>
+  <!-- Ball with trail -->
+  <g opacity="0.4"><circle cx="160" cy="40" r="6" fill="#ff8fa8" opacity="0.3"/><circle cx="170" cy="60" r="7" fill="#ff8fa8" opacity="0.5"/></g>
+  <g filter="url(#ds-glow)"><circle cx="180" cy="80" r="10" fill="url(#ds-ball)"/></g>
+  <!-- Finish line -->
+  <g transform="translate(200,280)"><rect x="-80" y="-6" width="160" height="12" fill="#35d39a" opacity="0.8"/></g>
+  <g font-family="monospace" fill="#ff8fa8" font-weight="bold"><text x="20" y="28" font-size="11">DESCEND</text><text x="20" y="50" font-size="22">72%</text></g>
+  <g font-family="monospace" fill="#35d39a" text-anchor="end" font-weight="bold"><text x="380" y="28" font-size="11">⏱ 0:24</text></g>
+</svg>

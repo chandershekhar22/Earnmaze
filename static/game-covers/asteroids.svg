@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="as-bg" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#141a3a"/>
+      <stop offset="100%" stop-color="#000"/>
+    </radialGradient>
+    <linearGradient id="as-rock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8a8078"/>
+      <stop offset="100%" stop-color="#3a3530"/>
+    </linearGradient>
+    <linearGradient id="as-rock2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a605a"/>
+      <stop offset="100%" stop-color="#2a2420"/>
+    </linearGradient>
+    <filter id="as-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#as-bg)"/>
+  <!-- Stars -->
+  <g fill="#fff">
+    <circle cx="40" cy="40" r="1"/><circle cx="100" cy="70" r="0.8"/><circle cx="180" cy="30" r="1.2"/>
+    <circle cx="260" cy="60" r="0.9"/><circle cx="340" cy="40" r="1.1"/><circle cx="60" cy="200" r="1"/>
+    <circle cx="120" cy="250" r="0.8"/><circle cx="300" cy="230" r="1"/><circle cx="370" cy="200" r="0.9"/>
+    <circle cx="220" cy="280" r="0.8"/><circle cx="30" cy="140" r="0.7"/><circle cx="80" cy="110" r="0.6"/>
+    <circle cx="160" cy="170" r="0.6"/><circle cx="340" cy="140" r="0.7"/><circle cx="370" cy="100" r="0.8"/>
+  </g>
+  <!-- Asteroid (large) -->
+  <g transform="translate(90,90) rotate(15)" filter="url(#as-glow)">
+    <polygon points="-30,-5 -20,-28 5,-32 28,-20 32,5 22,25 0,30 -25,22 -32,8" fill="url(#as-rock)" stroke="#1a1612" stroke-width="1.5"/>
+    <polygon points="-12,-8 -4,-16 4,-12 6,-2 0,4 -10,0" fill="#1a1612" opacity="0.5"/>
+    <circle cx="10" cy="10" r="3" fill="#1a1612" opacity="0.4"/>
+  </g>
+  <!-- Asteroid (medium) -->
+  <g transform="translate(310,80) rotate(-20)" filter="url(#as-glow)">
+    <polygon points="-20,-3 -12,-18 5,-22 20,-12 22,5 12,18 -5,20 -18,12" fill="url(#as-rock2)" stroke="#1a1612" stroke-width="1.5"/>
+    <circle cx="-4" cy="-2" r="2" fill="#1a1612" opacity="0.4"/>
+  </g>
+  <!-- Asteroid (small) -->
+  <g transform="translate(340,220) rotate(30)">
+    <polygon points="-12,-2 -8,-10 3,-12 10,-8 12,2 8,10 -3,10 -10,6" fill="url(#as-rock)" stroke="#1a1612" stroke-width="1"/>
+  </g>
+  <g transform="translate(50,220) rotate(-10)">
+    <polygon points="-10,-2 -6,-8 2,-10 9,-6 10,2 6,8 -2,8 -8,4" fill="url(#as-rock2)" stroke="#1a1612" stroke-width="1"/>
+  </g>
+  <!-- Ship (vector-battle style outline) -->
+  <g transform="translate(200,160) rotate(-20)" filter="url(#as-glow)">
+    <polygon points="0,-22 14,18 0,10 -14,18" fill="none" stroke="#4ff0b5" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- Thrust flame -->
+    <polygon points="-6,14 0,24 6,14 0,18" fill="#ff8a3d" opacity="0.9"/>
+    <polygon points="-3,14 0,20 3,14" fill="#ffe066"/>
+  </g>
+  <!-- Bullets with trail -->
+  <g filter="url(#as-glow)" stroke="#fff" stroke-width="2" stroke-linecap="round">
+    <line x1="200" y1="120" x2="200" y2="128"/>
+    <line x1="170" y1="90" x2="175" y2="100"/>
+    <line x1="260" y1="130" x2="255" y2="138"/>
+  </g>
+  <g font-family="monospace" fill="#4ff0b5">
+    <text x="20" y="30" font-size="11">SCORE</text>
+    <text x="20" y="54" font-size="22" font-weight="bold">08240</text>
+    <text x="380" y="30" font-size="11" text-anchor="end">SHIPS</text>
+    <text x="380" y="54" font-size="22" font-weight="bold" text-anchor="end">▲▲▲</text>
+  </g>
+</svg>

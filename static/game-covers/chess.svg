@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="ch-light" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0d9b5"/>
+      <stop offset="100%" stop-color="#e8c99b"/>
+    </linearGradient>
+    <linearGradient id="ch-dark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b58863"/>
+      <stop offset="100%" stop-color="#8c6242"/>
+    </linearGradient>
+    <linearGradient id="ch-white-p" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d9d9d9"/>
+    </linearGradient>
+    <linearGradient id="ch-black-p" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3a3a"/>
+      <stop offset="100%" stop-color="#111"/>
+    </linearGradient>
+    <filter id="ch-shadow"><feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.35"/></filter>
+    <filter id="ch-glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="#1a1a2e" fill-opacity="0.25"/>
+  <g transform="translate(80,20) rotate(-4 120 130)">
+    <rect x="0" y="0" width="240" height="240" fill="#8c6242" rx="4"/>
+    <g>
+      <rect x="0" y="0" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="60" y="0" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="120" y="0" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="180" y="0" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="30" y="0" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="90" y="0" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="150" y="0" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="210" y="0" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="30" y="30" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="90" y="30" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="150" y="30" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="210" y="30" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="0" y="30" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="60" y="30" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="120" y="30" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="180" y="30" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="0" y="60" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="60" y="60" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="120" y="60" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="180" y="60" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="30" y="60" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="90" y="60" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="150" y="60" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="210" y="60" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="30" y="90" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="90" y="90" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="150" y="90" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="210" y="90" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="0" y="90" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="60" y="90" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="120" y="90" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="180" y="90" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="0" y="120" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="60" y="120" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="120" y="120" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="180" y="120" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="30" y="120" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="90" y="120" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="150" y="120" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="210" y="120" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="30" y="150" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="90" y="150" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="150" y="150" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="210" y="150" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="0" y="150" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="60" y="150" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="120" y="150" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="180" y="150" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="0" y="180" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="60" y="180" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="120" y="180" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="180" y="180" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="30" y="180" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="90" y="180" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="150" y="180" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="210" y="180" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="30" y="210" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="90" y="210" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="150" y="210" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="210" y="210" width="30" height="30" fill="url(#ch-light)"/>
+      <rect x="0" y="210" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="60" y="210" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="120" y="210" width="30" height="30" fill="url(#ch-dark)"/>
+      <rect x="180" y="210" width="30" height="30" fill="url(#ch-dark)"/>
+    </g>
+  </g>
+  <g filter="url(#ch-shadow)" transform="translate(170,50)">
+    <text x="0" y="48" font-family="'Segoe UI Symbol',Arial" font-size="72" fill="url(#ch-black-p)">♛</text>
+  </g>
+  <g filter="url(#ch-glow)" transform="translate(210,160)">
+    <text x="0" y="48" font-family="'Segoe UI Symbol',Arial" font-size="72" fill="url(#ch-white-p)">♞</text>
+  </g>
+  <g transform="translate(120,190)" opacity="0.9" filter="url(#ch-shadow)">
+    <text x="0" y="36" font-family="'Segoe UI Symbol',Arial" font-size="56" fill="url(#ch-black-p)">♟</text>
+  </g>
+  <g transform="translate(260,100)" opacity="0.9" filter="url(#ch-shadow)">
+    <text x="0" y="36" font-family="'Segoe UI Symbol',Arial" font-size="56" fill="url(#ch-white-p)">♙</text>
+  </g>
+</svg>

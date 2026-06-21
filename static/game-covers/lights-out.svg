@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="lo-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#06080f"/><stop offset="100%" stop-color="#000"/></linearGradient>
+    <radialGradient id="lo-on" cx="0.5" cy="0.5"><stop offset="0%" stop-color="#9fd0ff"/><stop offset="50%" stop-color="#56a8ff"/><stop offset="100%" stop-color="#1a4080"/></radialGradient>
+    <filter id="lo-glow"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#lo-bg)"/>
+  <g transform="translate(95,30)">
+    <g filter="url(#lo-glow)" opacity="0.6">
+      <rect x="0" y="0" width="44" height="44" rx="8" fill="#56a8ff"/>
+      <rect x="100" y="0" width="44" height="44" rx="8" fill="#56a8ff"/>
+      <rect x="50" y="50" width="44" height="44" rx="8" fill="#56a8ff"/>
+      <rect x="150" y="50" width="44" height="44" rx="8" fill="#56a8ff"/>
+      <rect x="0" y="100" width="44" height="44" rx="8" fill="#56a8ff"/>
+      <rect x="100" y="100" width="44" height="44" rx="8" fill="#56a8ff"/>
+      <rect x="50" y="150" width="44" height="44" rx="8" fill="#56a8ff"/>
+      <rect x="150" y="150" width="44" height="44" rx="8" fill="#56a8ff"/>
+    </g>
+    <rect x="0" y="0" width="44" height="44" rx="8" fill="url(#lo-on)"/>
+    <rect x="50" y="0" width="44" height="44" rx="8" fill="#0e1a30" stroke="#1a2845"/>
+    <rect x="100" y="0" width="44" height="44" rx="8" fill="url(#lo-on)"/>
+    <rect x="150" y="0" width="44" height="44" rx="8" fill="#0e1a30" stroke="#1a2845"/>
+    <rect x="0" y="50" width="44" height="44" rx="8" fill="#0e1a30" stroke="#1a2845"/>
+    <rect x="50" y="50" width="44" height="44" rx="8" fill="url(#lo-on)"/>
+    <rect x="100" y="50" width="44" height="44" rx="8" fill="#0e1a30" stroke="#1a2845"/>
+    <rect x="150" y="50" width="44" height="44" rx="8" fill="url(#lo-on)"/>
+    <rect x="0" y="100" width="44" height="44" rx="8" fill="url(#lo-on)"/>
+    <rect x="50" y="100" width="44" height="44" rx="8" fill="#0e1a30" stroke="#1a2845"/>
+    <rect x="100" y="100" width="44" height="44" rx="8" fill="url(#lo-on)"/>
+    <rect x="150" y="100" width="44" height="44" rx="8" fill="#0e1a30" stroke="#1a2845"/>
+    <rect x="0" y="150" width="44" height="44" rx="8" fill="#0e1a30" stroke="#1a2845"/>
+    <rect x="50" y="150" width="44" height="44" rx="8" fill="url(#lo-on)"/>
+    <rect x="100" y="150" width="44" height="44" rx="8" fill="#0e1a30" stroke="#1a2845"/>
+    <rect x="150" y="150" width="44" height="44" rx="8" fill="url(#lo-on)"/>
+  </g>
+  <text x="200" y="285" font-family="monospace" font-weight="bold" font-size="14" fill="#56a8ff" text-anchor="middle" letter-spacing="3">LIGHTS OUT</text>
+</svg>

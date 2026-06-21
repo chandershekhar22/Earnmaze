@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="mj-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a3a2a"/><stop offset="100%" stop-color="#031a10"/></linearGradient>
+    <linearGradient id="mj-tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fffcf2"/><stop offset="100%" stop-color="#dec99b"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#mj-bg)"/>
+  <g font-family="serif" font-size="32" text-anchor="middle">
+    <g transform="translate(80,80)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="url(#mj-tile)" stroke="#5a4520" stroke-width="2"/><rect x="-22" y="-28" width="44" height="56" rx="4" fill="none" stroke="#8c6e3c" stroke-width="1"/><text y="6" fill="#1f6dff">🀙</text></g>
+    <g transform="translate(140,80)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="url(#mj-tile)" stroke="#5a4520" stroke-width="2"/><text y="6" fill="#1e8540">🀐</text></g>
+    <g transform="translate(200,80)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="url(#mj-tile)" stroke="#5a4520" stroke-width="2"/><text y="6" fill="#a02030">🀇</text></g>
+    <g transform="translate(260,80)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="url(#mj-tile)" stroke="#5a4520" stroke-width="2"/><text y="6" fill="#1e6d8c">🀀</text></g>
+    <g transform="translate(320,80)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="url(#mj-tile)" stroke="#5a4520" stroke-width="2"/><text y="6" fill="#a04020">🀄</text></g>
+    <g transform="translate(110,170)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="url(#mj-tile)" stroke="#5a4520" stroke-width="2"/><text y="6" fill="#1f6dff">🀙</text></g>
+    <g transform="translate(170,170)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="url(#mj-tile)" stroke="#5a4520" stroke-width="2"/><text y="6" fill="#1e8540">🀐</text></g>
+    <g transform="translate(230,170)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="url(#mj-tile)" stroke="#5a4520" stroke-width="2"/><text y="6" fill="#a02030">🀇</text></g>
+    <g transform="translate(290,170)"><rect x="-22" y="-28" width="44" height="56" rx="4" fill="#ffe066" stroke="#8c6e3c" stroke-width="2"/><text y="6" fill="#5a4520">🌸</text></g>
+  </g>
+  <g font-family="monospace" fill="#ffd166" font-weight="bold"><text x="20" y="265" font-size="14">PAIRS 12/36</text></g>
+</svg>

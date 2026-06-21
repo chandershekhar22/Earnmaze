@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bk-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e27"/>
+      <stop offset="100%" stop-color="#1a2040"/>
+    </linearGradient>
+    <linearGradient id="bk-r" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#c92a2a"/></linearGradient>
+    <linearGradient id="bk-o" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffa940"/><stop offset="100%" stop-color="#d9480f"/></linearGradient>
+    <linearGradient id="bk-y" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd43b"/><stop offset="100%" stop-color="#e67700"/></linearGradient>
+    <linearGradient id="bk-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#51cf66"/><stop offset="100%" stop-color="#2b8a3e"/></linearGradient>
+    <linearGradient id="bk-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#339af0"/><stop offset="100%" stop-color="#1864ab"/></linearGradient>
+    <linearGradient id="bk-p" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#cc5de8"/><stop offset="100%" stop-color="#862e9c"/></linearGradient>
+    <radialGradient id="bk-ball" cx="35%" cy="35%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#c9c9c9"/></radialGradient>
+    <filter id="bk-sh"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.5"/></filter>
+    <filter id="bk-glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#bk-bg)"/>
+  <g filter="url(#bk-sh)">
+    <!-- Row 1 red -->
+    <rect x="40" y="30" width="44" height="16" rx="2" fill="url(#bk-r)"/>
+    <rect x="86" y="30" width="44" height="16" rx="2" fill="url(#bk-r)"/>
+    <rect x="132" y="30" width="44" height="16" rx="2" fill="url(#bk-r)"/>
+    <rect x="224" y="30" width="44" height="16" rx="2" fill="url(#bk-r)"/>
+    <rect x="270" y="30" width="44" height="16" rx="2" fill="url(#bk-r)"/>
+    <rect x="316" y="30" width="44" height="16" rx="2" fill="url(#bk-r)"/>
+    <!-- Row 2 orange -->
+    <rect x="40" y="48" width="44" height="16" rx="2" fill="url(#bk-o)"/>
+    <rect x="86" y="48" width="44" height="16" rx="2" fill="url(#bk-o)"/>
+    <rect x="132" y="48" width="44" height="16" rx="2" fill="url(#bk-o)"/>
+    <rect x="178" y="48" width="44" height="16" rx="2" fill="url(#bk-o)"/>
+    <rect x="270" y="48" width="44" height="16" rx="2" fill="url(#bk-o)"/>
+    <rect x="316" y="48" width="44" height="16" rx="2" fill="url(#bk-o)"/>
+    <!-- Row 3 yellow -->
+    <rect x="40" y="66" width="44" height="16" rx="2" fill="url(#bk-y)"/>
+    <rect x="132" y="66" width="44" height="16" rx="2" fill="url(#bk-y)"/>
+    <rect x="178" y="66" width="44" height="16" rx="2" fill="url(#bk-y)"/>
+    <rect x="224" y="66" width="44" height="16" rx="2" fill="url(#bk-y)"/>
+    <rect x="270" y="66" width="44" height="16" rx="2" fill="url(#bk-y)"/>
+    <!-- Row 4 green -->
+    <rect x="40" y="84" width="44" height="16" rx="2" fill="url(#bk-g)"/>
+    <rect x="86" y="84" width="44" height="16" rx="2" fill="url(#bk-g)"/>
+    <rect x="178" y="84" width="44" height="16" rx="2" fill="url(#bk-g)"/>
+    <rect x="270" y="84" width="44" height="16" rx="2" fill="url(#bk-g)"/>
+    <rect x="316" y="84" width="44" height="16" rx="2" fill="url(#bk-g)"/>
+    <!-- Row 5 blue -->
+    <rect x="40" y="102" width="44" height="16" rx="2" fill="url(#bk-b)"/>
+    <rect x="86" y="102" width="44" height="16" rx="2" fill="url(#bk-b)"/>
+    <rect x="132" y="102" width="44" height="16" rx="2" fill="url(#bk-b)"/>
+    <rect x="316" y="102" width="44" height="16" rx="2" fill="url(#bk-b)"/>
+    <!-- Row 6 purple -->
+    <rect x="86" y="120" width="44" height="16" rx="2" fill="url(#bk-p)"/>
+    <rect x="132" y="120" width="44" height="16" rx="2" fill="url(#bk-p)"/>
+    <rect x="270" y="120" width="44" height="16" rx="2" fill="url(#bk-p)"/>
+  </g>
+  <!-- Trail -->
+  <g opacity="0.35">
+    <circle cx="220" cy="180" r="3" fill="#fff"/>
+    <circle cx="212" cy="172" r="2.5" fill="#fff" opacity="0.6"/>
+    <circle cx="206" cy="166" r="2" fill="#fff" opacity="0.4"/>
+  </g>
+  <!-- Ball -->
+  <g filter="url(#bk-glow)"><circle cx="230" cy="190" r="7" fill="url(#bk-ball)"/></g>
+  <!-- Paddle -->
+  <g filter="url(#bk-glow)">
+    <rect x="150" y="250" width="100" height="12" rx="6" fill="#4ff0b5"/>
+    <rect x="154" y="252" width="92" height="3" rx="2" fill="#fff" opacity="0.4"/>
+  </g>
+  <g font-family="monospace" fill="#fff" opacity="0.8">
+    <text x="20" y="286" font-size="11">LIVES ♥♥♥</text>
+    <text x="380" y="286" font-size="13" font-weight="bold" fill="#ffd43b" text-anchor="end">SCORE 4,240</text>
+  </g>
+</svg>

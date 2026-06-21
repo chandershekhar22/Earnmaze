@@ -3,7 +3,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { pointsStore } from '$lib/stores/points.svelte';
 	import { goto } from '$app/navigation';
-	import { LayoutDashboard, ClipboardList, Coins, Gift, User, HelpCircle, Users, X, LogOut, Sparkles } from '@lucide/svelte';
+	import { LayoutDashboard, ClipboardList, Coins, Gift, User, HelpCircle, Users, X, LogOut, Sparkles, Gamepad2 } from '@lucide/svelte';
 	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
@@ -34,6 +34,7 @@
 	let navItems = $derived([
 		{ name: m.nav_dashboard(), href: '/dashboard', icon: LayoutDashboard },
 		{ name: m.nav_surveys(), href: '/surveys', icon: ClipboardList },
+		{ name: m.nav_games(), href: '/games', icon: Gamepad2 },
 		{ name: m.nav_points(), href: '/points', icon: Coins },
 		{ name: m.nav_rewards(), href: '/rewards', icon: Gift },
 		{ name: m.nav_referrals(), href: '/referrals', icon: Users },

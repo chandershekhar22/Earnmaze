@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bs-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#172447"/><stop offset="100%" stop-color="#070b1c"/></linearGradient>
+    <radialGradient id="bs-p" cx="0.3" cy="0.3"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#ff5f8f"/><stop offset="100%" stop-color="#3a0a18"/></radialGradient>
+    <radialGradient id="bs-y" cx="0.3" cy="0.3"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#ffd166"/><stop offset="100%" stop-color="#5a3a0a"/></radialGradient>
+    <radialGradient id="bs-b" cx="0.3" cy="0.3"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#56a8ff"/><stop offset="100%" stop-color="#0a2050"/></radialGradient>
+    <radialGradient id="bs-g" cx="0.3" cy="0.3"><stop offset="0%" stop-color="#fff"/><stop offset="40%" stop-color="#35d39a"/><stop offset="100%" stop-color="#0a3020"/></radialGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bs-bg)"/>
+  <g>
+    <circle cx="80" cy="60" r="22" fill="url(#bs-p)"/>
+    <circle cx="125" cy="60" r="22" fill="url(#bs-y)"/>
+    <circle cx="170" cy="60" r="22" fill="url(#bs-b)"/>
+    <circle cx="215" cy="60" r="22" fill="url(#bs-p)"/>
+    <circle cx="260" cy="60" r="22" fill="url(#bs-g)"/>
+    <circle cx="305" cy="60" r="22" fill="url(#bs-y)"/>
+    <circle cx="100" cy="100" r="22" fill="url(#bs-g)"/>
+    <circle cx="145" cy="100" r="22" fill="url(#bs-p)"/>
+    <circle cx="190" cy="100" r="22" fill="url(#bs-y)"/>
+    <circle cx="235" cy="100" r="22" fill="url(#bs-b)"/>
+    <circle cx="280" cy="100" r="22" fill="url(#bs-p)"/>
+  </g>
+  <circle cx="200" cy="240" r="18" fill="url(#bs-y)"/>
+  <rect x="190" y="240" width="20" height="40" fill="#1a2548" rx="4"/>
+  <line x1="200" y1="220" x2="170" y2="120" stroke="#56a8ff" stroke-width="2" stroke-dasharray="4 4" opacity="0.8"/>
+  <text x="200" y="180" font-family="monospace" font-size="14" font-weight="bold" fill="#56a8ff" text-anchor="middle">SHOOT</text>
+</svg>

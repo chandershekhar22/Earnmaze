@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="mem-back" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5c6bc0"/>
+      <stop offset="100%" stop-color="#3949ab"/>
+    </linearGradient>
+    <linearGradient id="mem-front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f5f5f5"/>
+    </linearGradient>
+    <pattern id="mem-pattern" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#3949ab"/>
+      <circle cx="4" cy="4" r="1.5" fill="#5c6bc0" opacity="0.5"/>
+    </pattern>
+    <filter id="mem-shadow">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.25"/>
+    </filter>
+    <filter id="mem-glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="transparent"/>
+  <!-- 4x4 grid of cards -->
+  <!-- Row 1 -->
+  <!-- Card face-down -->
+  <g transform="translate(30, 15)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <g transform="translate(115, 15)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <!-- Flipped card: Star -->
+  <g transform="translate(200, 15)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-front)" stroke="#e0e0e0" stroke-width="1"/>
+    <polygon points="36,12 40,24 52,24 42,32 46,44 36,36 26,44 30,32 20,24 32,24" fill="#ffd54f" stroke="#f9a825" stroke-width="0.5" filter="url(#mem-glow)"/>
+  </g>
+  <g transform="translate(285, 15)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <!-- Row 2 -->
+  <g transform="translate(30, 85)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <!-- Flipped card: Heart -->
+  <g transform="translate(115, 85)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-front)" stroke="#e0e0e0" stroke-width="1"/>
+    <path d="M36,44 C36,44 20,32 20,22 C20,16 25,12 30,12 C34,12 36,15 36,15 C36,15 38,12 42,12 C47,12 52,16 52,22 C52,32 36,44 36,44Z" fill="#ef5350" filter="url(#mem-glow)"/>
+  </g>
+  <g transform="translate(200, 85)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <g transform="translate(285, 85)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <!-- Row 3 -->
+  <g transform="translate(30, 155)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <g transform="translate(115, 155)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <!-- Flipped card: Heart (match!) -->
+  <g transform="translate(200, 155)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-front)" stroke="#4caf50" stroke-width="2"/>
+    <path d="M36,44 C36,44 20,32 20,22 C20,16 25,12 30,12 C34,12 36,15 36,15 C36,15 38,12 42,12 C47,12 52,16 52,22 C52,32 36,44 36,44Z" fill="#ef5350" filter="url(#mem-glow)"/>
+    <!-- Match indicator -->
+    <circle cx="62" cy="10" r="7" fill="#4caf50"/>
+    <path d="M58,10 L61,13 L66,7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(285, 155)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <!-- Row 4 -->
+  <!-- Matched pair (already found - faded) -->
+  <g transform="translate(30, 225)" opacity="0.4" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-front)" stroke="#4caf50" stroke-width="1"/>
+    <polygon points="36,14 40,26 52,26 42,33 46,44 36,37 26,44 30,33 20,26 32,26" fill="#ffd54f" stroke="#f9a825" stroke-width="0.5"/>
+  </g>
+  <g transform="translate(115, 225)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <g transform="translate(200, 225)" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-back)" stroke="#3f51b5" stroke-width="1"/>
+    <rect x="6" y="5" width="60" height="50" rx="4" fill="url(#mem-pattern)"/>
+    <text x="36" y="38" text-anchor="middle" font-family="serif" font-size="20" fill="#7986cb" font-weight="bold" opacity="0.6">?</text>
+  </g>
+  <!-- Matched pair (already found - faded) -->
+  <g transform="translate(285, 225)" opacity="0.4" filter="url(#mem-shadow)">
+    <rect width="72" height="60" rx="6" fill="url(#mem-front)" stroke="#4caf50" stroke-width="1"/>
+    <circle cx="36" cy="30" r="14" fill="none" stroke="#42a5f5" stroke-width="3"/>
+    <circle cx="36" cy="30" r="6" fill="#42a5f5"/>
+  </g>
+</svg>

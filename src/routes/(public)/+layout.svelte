@@ -59,6 +59,12 @@
 		basePath === '/reset-password'
 	);
 
+	let isStandalonePage = $derived(
+		$page.url.pathname === '/' ||
+		$page.url.pathname === '/login' ||
+		$page.url.pathname === '/register'
+	);
+
 	let isEarnMoneyPage = $derived(basePath === '/earn-points');
 </script>
 
@@ -90,6 +96,9 @@
 				{@render children()}
 			</div>
 		</main>
+	{:else if isStandalonePage}
+		<!-- Home and auth pages render their own shell -->
+		{@render children()}
 	{:else}
 		<!-- Public pages layout -->
 		<div class="min-h-screen bg-surface">

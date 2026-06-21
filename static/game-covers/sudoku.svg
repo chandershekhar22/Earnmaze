@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="su-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e3f2fd" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#bbdefb" stop-opacity="0.1"/>
+    </linearGradient>
+    <filter id="su-shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="4" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#su-bg)"/>
+  <!-- Grid background -->
+  <g transform="translate(65, 15)" filter="url(#su-shadow)">
+    <rect x="0" y="0" width="270" height="270" rx="4" fill="#fff" fill-opacity="0.95" stroke="#1a237e" stroke-width="3"/>
+    <!-- Thin grid lines -->
+    <g stroke="#90a4ae" stroke-width="0.8">
+      <line x1="30" y1="0" x2="30" y2="270"/>
+      <line x1="60" y1="0" x2="60" y2="270"/>
+      <line x1="120" y1="0" x2="120" y2="270"/>
+      <line x1="150" y1="0" x2="150" y2="270"/>
+      <line x1="210" y1="0" x2="210" y2="270"/>
+      <line x1="240" y1="0" x2="240" y2="270"/>
+      <line x1="0" y1="30" x2="270" y2="30"/>
+      <line x1="0" y1="60" x2="270" y2="60"/>
+      <line x1="0" y1="120" x2="270" y2="120"/>
+      <line x1="0" y1="150" x2="270" y2="150"/>
+      <line x1="0" y1="210" x2="270" y2="210"/>
+      <line x1="0" y1="240" x2="270" y2="240"/>
+    </g>
+    <!-- Thick 3x3 box lines -->
+    <g stroke="#1a237e" stroke-width="2.5">
+      <line x1="90" y1="0" x2="90" y2="270"/>
+      <line x1="180" y1="0" x2="180" y2="270"/>
+      <line x1="0" y1="90" x2="270" y2="90"/>
+      <line x1="0" y1="180" x2="270" y2="180"/>
+    </g>
+    <!-- Highlighted cell -->
+    <rect x="120" y="120" width="30" height="30" fill="#bbdefb" opacity="0.5"/>
+    <rect x="90" y="90" width="90" height="90" fill="#e3f2fd" opacity="0.2"/>
+    <!-- Pre-filled numbers (dark, bold) -->
+    <g font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="bold" fill="#1a237e" text-anchor="middle" dominant-baseline="central">
+      <text x="15" y="15">5</text>
+      <text x="75" y="15">6</text>
+      <text x="195" y="15">9</text>
+      <text x="255" y="15">1</text>
+      <text x="45" y="45">8</text>
+      <text x="135" y="45">3</text>
+      <text x="225" y="45">6</text>
+      <text x="15" y="75">4</text>
+      <text x="105" y="75">7</text>
+      <text x="165" y="75">2</text>
+      <text x="45" y="105">6</text>
+      <text x="135" y="105">8</text>
+      <text x="195" y="105">4</text>
+      <text x="255" y="105">9</text>
+      <text x="15" y="135">8</text>
+      <text x="105" y="135">1</text>
+      <text x="255" y="135">5</text>
+      <text x="45" y="165">3</text>
+      <text x="105" y="165">9</text>
+      <text x="165" y="165">7</text>
+      <text x="225" y="165">6</text>
+      <text x="75" y="195">2</text>
+      <text x="135" y="195">4</text>
+      <text x="195" y="195">5</text>
+      <text x="15" y="225">1</text>
+      <text x="105" y="225">3</text>
+      <text x="195" y="225">6</text>
+      <text x="255" y="225">4</text>
+      <text x="45" y="255">7</text>
+      <text x="165" y="255">1</text>
+      <text x="225" y="255">9</text>
+    </g>
+    <!-- User-entered numbers (blue, lighter) -->
+    <g font-family="'Segoe UI', Arial, sans-serif" font-size="18" fill="#1976d2" text-anchor="middle" dominant-baseline="central">
+      <text x="135" y="135">7</text>
+      <text x="165" y="135">3</text>
+      <text x="75" y="165">5</text>
+    </g>
+    <!-- Pencil marks (tiny candidates) -->
+    <g font-family="'Segoe UI', Arial, sans-serif" font-size="7" fill="#78909c" text-anchor="middle" dominant-baseline="central">
+      <text x="37" y="128">1</text>
+      <text x="52" y="128">2</text>
+      <text x="37" y="142">7</text>
+    </g>
+  </g>
+</svg>

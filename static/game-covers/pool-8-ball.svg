@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="po-w"><stop offset="0%" stop-color="#fff"/><stop offset="60%" stop-color="#ddd"/><stop offset="100%" stop-color="#444"/></radialGradient>
+    <radialGradient id="po-y"><stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#ffd166"/><stop offset="100%" stop-color="#5a3a0a"/></radialGradient>
+    <radialGradient id="po-b"><stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#1f6dff"/><stop offset="100%" stop-color="#000820"/></radialGradient>
+    <radialGradient id="po-r"><stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#ff3050"/><stop offset="100%" stop-color="#3a000a"/></radialGradient>
+    <radialGradient id="po-p"><stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#7a3ad6"/><stop offset="100%" stop-color="#1a0540"/></radialGradient>
+    <radialGradient id="po-or"><stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#ff8a3d"/><stop offset="100%" stop-color="#3a1a0a"/></radialGradient>
+    <radialGradient id="po-g"><stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#1e8540"/><stop offset="100%" stop-color="#031808"/></radialGradient>
+    <radialGradient id="po-8"><stop offset="0%" stop-color="#444"/><stop offset="50%" stop-color="#000"/><stop offset="100%" stop-color="#000"/></radialGradient>
+  </defs>
+  <!-- table -->
+  <rect width="400" height="300" fill="#5a3a18"/>
+  <rect x="14" y="14" width="372" height="272" fill="#1e8540" rx="8"/>
+  <!-- pockets -->
+  <circle cx="20" cy="20" r="14" fill="#000"/>
+  <circle cx="200" cy="14" r="14" fill="#000"/>
+  <circle cx="380" cy="20" r="14" fill="#000"/>
+  <circle cx="20" cy="280" r="14" fill="#000"/>
+  <circle cx="200" cy="286" r="14" fill="#000"/>
+  <circle cx="380" cy="280" r="14" fill="#000"/>
+  <!-- balls in rack triangle -->
+  <g>
+    <circle cx="240" cy="150" r="11" fill="url(#po-y)"/><circle cx="240" cy="150" r="4" fill="#fff"/><text x="240" y="153" font-family="monospace" font-size="7" font-weight="bold" text-anchor="middle">1</text>
+    <circle cx="260" cy="139" r="11" fill="url(#po-b)"/><circle cx="260" cy="139" r="4" fill="#fff"/><text x="260" y="142" font-family="monospace" font-size="7" font-weight="bold" text-anchor="middle">2</text>
+    <circle cx="260" cy="161" r="11" fill="url(#po-r)"/><circle cx="260" cy="161" r="4" fill="#fff"/><text x="260" y="164" font-family="monospace" font-size="7" font-weight="bold" text-anchor="middle">3</text>
+    <circle cx="280" cy="128" r="11" fill="url(#po-p)"/>
+    <circle cx="280" cy="150" r="11" fill="url(#po-8)"/><circle cx="280" cy="150" r="4" fill="#fff"/><text x="280" y="153" font-family="monospace" font-size="7" font-weight="bold" text-anchor="middle">8</text>
+    <circle cx="280" cy="172" r="11" fill="url(#po-or)"/>
+    <circle cx="300" cy="117" r="11" fill="url(#po-g)"/>
+    <circle cx="300" cy="139" r="11" fill="url(#po-y)"/>
+    <circle cx="300" cy="161" r="11" fill="url(#po-b)"/>
+    <circle cx="300" cy="183" r="11" fill="url(#po-r)"/>
+  </g>
+  <!-- cue ball -->
+  <circle cx="100" cy="150" r="11" fill="url(#po-w)"/>
+  <!-- aim line -->
+  <line x1="111" y1="150" x2="220" y2="150" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="200" y="40" font-family="monospace" font-size="10" fill="#fff" font-weight="bold" text-anchor="middle" opacity="0.7">8-BALL POOL</text>
+</svg>

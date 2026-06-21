@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="sn-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b2631" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#0d1117" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="sn-body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4caf50"/>
+      <stop offset="100%" stop-color="#2e7d32"/>
+    </linearGradient>
+    <radialGradient id="sn-apple" cx="35%" cy="35%">
+      <stop offset="0%" stop-color="#ff5252"/>
+      <stop offset="100%" stop-color="#b71c1c"/>
+    </radialGradient>
+    <filter id="sn-glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="sn-shadow">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#sn-bg)"/>
+  <!-- Grid -->
+  <g stroke="#1a3a1a" stroke-width="0.5" opacity="0.4">
+    <line x1="0" y1="0" x2="0" y2="300"/><line x1="20" y1="0" x2="20" y2="300"/>
+    <line x1="40" y1="0" x2="40" y2="300"/><line x1="60" y1="0" x2="60" y2="300"/>
+    <line x1="80" y1="0" x2="80" y2="300"/><line x1="100" y1="0" x2="100" y2="300"/>
+    <line x1="120" y1="0" x2="120" y2="300"/><line x1="140" y1="0" x2="140" y2="300"/>
+    <line x1="160" y1="0" x2="160" y2="300"/><line x1="180" y1="0" x2="180" y2="300"/>
+    <line x1="200" y1="0" x2="200" y2="300"/><line x1="220" y1="0" x2="220" y2="300"/>
+    <line x1="240" y1="0" x2="240" y2="300"/><line x1="260" y1="0" x2="260" y2="300"/>
+    <line x1="280" y1="0" x2="280" y2="300"/><line x1="300" y1="0" x2="300" y2="300"/>
+    <line x1="320" y1="0" x2="320" y2="300"/><line x1="340" y1="0" x2="340" y2="300"/>
+    <line x1="360" y1="0" x2="360" y2="300"/><line x1="380" y1="0" x2="380" y2="300"/>
+    <line x1="0" y1="20" x2="400" y2="20"/><line x1="0" y1="40" x2="400" y2="40"/>
+    <line x1="0" y1="60" x2="400" y2="60"/><line x1="0" y1="80" x2="400" y2="80"/>
+    <line x1="0" y1="100" x2="400" y2="100"/><line x1="0" y1="120" x2="400" y2="120"/>
+    <line x1="0" y1="140" x2="400" y2="140"/><line x1="0" y1="160" x2="400" y2="160"/>
+    <line x1="0" y1="180" x2="400" y2="180"/><line x1="0" y1="200" x2="400" y2="200"/>
+    <line x1="0" y1="220" x2="400" y2="220"/><line x1="0" y1="240" x2="400" y2="240"/>
+    <line x1="0" y1="260" x2="400" y2="260"/><line x1="0" y1="280" x2="400" y2="280"/>
+  </g>
+  <!-- Snake body segments -->
+  <g filter="url(#sn-glow)">
+    <!-- Head (facing right) -->
+    <rect x="260" y="100" width="18" height="18" rx="4" fill="#66bb6a" stroke="#2e7d32" stroke-width="1"/>
+    <!-- Eyes -->
+    <circle cx="272" cy="106" r="2.5" fill="#fff"/>
+    <circle cx="273" cy="106" r="1.2" fill="#111"/>
+    <circle cx="272" cy="113" r="2.5" fill="#fff"/>
+    <circle cx="273" cy="113" r="1.2" fill="#111"/>
+    <!-- Tongue -->
+    <line x1="278" y1="109" x2="285" y2="107" stroke="#e53935" stroke-width="1.5"/>
+    <line x1="285" y1="107" x2="288" y2="104" stroke="#e53935" stroke-width="1"/>
+    <line x1="285" y1="107" x2="288" y2="110" stroke="#e53935" stroke-width="1"/>
+    <!-- Body segments with alternating shading -->
+    <rect x="240" y="100" width="18" height="18" rx="3" fill="#4caf50" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="220" y="100" width="18" height="18" rx="3" fill="#43a047" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="200" y="100" width="18" height="18" rx="3" fill="#4caf50" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="180" y="100" width="18" height="18" rx="3" fill="#43a047" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="180" y="120" width="18" height="18" rx="3" fill="#4caf50" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="180" y="140" width="18" height="18" rx="3" fill="#43a047" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="180" y="160" width="18" height="18" rx="3" fill="#4caf50" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="160" y="160" width="18" height="18" rx="3" fill="#43a047" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="140" y="160" width="18" height="18" rx="3" fill="#4caf50" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="120" y="160" width="18" height="18" rx="3" fill="#43a047" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="120" y="180" width="18" height="18" rx="3" fill="#4caf50" stroke="#2e7d32" stroke-width="0.8"/>
+    <rect x="120" y="200" width="18" height="18" rx="3" fill="#43a047" stroke="#2e7d32" stroke-width="0.8"/>
+    <!-- Tail (tapered) -->
+    <rect x="122" y="222" width="14" height="14" rx="4" fill="#388e3c" stroke="#2e7d32" stroke-width="0.8"/>
+    <!-- Belly pattern -->
+    <g fill="#66bb6a" opacity="0.3">
+      <rect x="244" y="106" width="10" height="6" rx="2"/>
+      <rect x="204" y="106" width="10" height="6" rx="2"/>
+      <rect x="184" y="126" width="10" height="6" rx="2"/>
+      <rect x="184" y="166" width="10" height="6" rx="2"/>
+      <rect x="144" y="166" width="10" height="6" rx="2"/>
+      <rect x="124" y="186" width="10" height="6" rx="2"/>
+    </g>
+  </g>
+  <!-- Apple -->
+  <g transform="translate(320, 180)" filter="url(#sn-glow)">
+    <circle cx="0" cy="0" r="9" fill="url(#sn-apple)"/>
+    <ellipse cx="-3" cy="-3" rx="3" ry="2" fill="#fff" opacity="0.3"/>
+    <!-- Stem -->
+    <path d="M0,-9 Q2,-14 4,-12" fill="none" stroke="#5d4037" stroke-width="1.5"/>
+    <!-- Leaf -->
+    <path d="M2,-12 Q6,-16 8,-12 Q6,-10 2,-12Z" fill="#4caf50"/>
+  </g>
+  <!-- Score -->
+  <text x="200" y="25" text-anchor="middle" font-family="monospace" font-size="16" fill="#4caf50" font-weight="bold" opacity="0.5">SCORE: 130</text>
+  <!-- Border -->
+  <rect x="1" y="1" width="398" height="298" fill="none" stroke="#2e7d32" stroke-width="2" opacity="0.3" rx="2"/>
+</svg>

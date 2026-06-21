@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <radialGradient id="dr-bg" cx="50%" cy="55%" r="55%">
+      <stop offset="0%" stop-color="#3a2a14"/>
+      <stop offset="45%" stop-color="#1a0f05"/>
+      <stop offset="100%" stop-color="#000"/>
+    </radialGradient>
+    <radialGradient id="dr-fire" cx="50%" cy="60%" r="55%">
+      <stop offset="0%" stop-color="#fff2b3"/>
+      <stop offset="40%" stop-color="#ff9633"/>
+      <stop offset="85%" stop-color="#a01e08"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <filter id="dr-glow"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="dr-sh"><feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.6"/></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#dr-bg)"/>
+  <!-- Fire glow -->
+  <g filter="url(#dr-glow)">
+    <ellipse cx="200" cy="195" rx="90" ry="50" fill="url(#dr-fire)" opacity="0.9"/>
+  </g>
+  <!-- Firepit stones -->
+  <g filter="url(#dr-sh)">
+    <ellipse cx="168" cy="212" rx="14" ry="7" fill="#2a2016"/>
+    <ellipse cx="188" cy="218" rx="14" ry="7" fill="#3a2a1c"/>
+    <ellipse cx="210" cy="218" rx="14" ry="7" fill="#2a2016"/>
+    <ellipse cx="230" cy="212" rx="14" ry="7" fill="#3a2a1c"/>
+    <ellipse cx="150" cy="210" rx="12" ry="6" fill="#1a130c"/>
+    <ellipse cx="250" cy="210" rx="12" ry="6" fill="#1a130c"/>
+  </g>
+  <!-- Flames -->
+  <g filter="url(#dr-glow)">
+    <path d="M184,205 Q180,175 195,155 Q200,175 205,155 Q215,175 212,205 Z" fill="#ffb84a"/>
+    <path d="M192,200 Q190,180 200,165 Q208,180 208,200 Z" fill="#ffe066" opacity="0.9"/>
+    <circle cx="200" cy="175" r="4" fill="#fff6d8"/>
+  </g>
+  <!-- Sparks -->
+  <g fill="#ffd166" opacity="0.8">
+    <circle cx="210" cy="150" r="1.5"/>
+    <circle cx="185" cy="140" r="1"/>
+    <circle cx="225" cy="130" r="1.2"/>
+    <circle cx="170" cy="120" r="1"/>
+    <circle cx="195" cy="110" r="1"/>
+  </g>
+  <!-- Text terminal -->
+  <g filter="url(#dr-sh)">
+    <rect x="40" y="30" width="320" height="70" rx="4" fill="#0a0604" stroke="#3a2a14" stroke-width="1"/>
+    <g font-family="monospace" fill="#ffb366">
+      <text x="54" y="54" font-size="12">&gt; the fire is dead.</text>
+      <text x="54" y="72" font-size="12">&gt; the room is cold.</text>
+      <text x="54" y="90" font-size="12">&gt; <tspan fill="#ffe066">light fire</tspan> <tspan fill="#ffb366" opacity="0.7">▋</tspan></text>
+    </g>
+  </g>
+  <!-- Wood pile -->
+  <g transform="translate(320,240)" filter="url(#dr-sh)">
+    <rect x="-20" y="-4" width="36" height="6" rx="2" fill="#6b4a28"/>
+    <rect x="-16" y="-10" width="30" height="6" rx="2" fill="#8a5e30"/>
+    <rect x="-12" y="-16" width="24" height="6" rx="2" fill="#6b4a28"/>
+  </g>
+  <!-- Small ember indicators -->
+  <g font-family="monospace" fill="#ff9633" opacity="0.85">
+    <text x="20" y="286" font-size="11">🔥 wood: 34</text>
+  </g>
+  <g font-family="monospace" fill="#ffe066" opacity="0.85" text-anchor="end">
+    <text x="380" y="286" font-size="11">a stranger stirs...</text>
+  </g>
+</svg>

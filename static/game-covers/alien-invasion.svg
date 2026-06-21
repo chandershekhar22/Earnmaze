@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="ai-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a0520"/><stop offset="100%" stop-color="#000"/></linearGradient>
+    <filter id="ai-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#ai-bg)"/>
+  <g fill="#fff"><circle cx="40" cy="30" r="1"/><circle cx="120" cy="20" r="0.8"/><circle cx="220" cy="40" r="1"/><circle cx="320" cy="30" r="1.2"/><circle cx="380" cy="60" r="0.9"/><circle cx="60" cy="100" r="0.7"/><circle cx="340" cy="120" r="0.8"/></g>
+  <!-- Alien rows -->
+  <g filter="url(#ai-glow)">
+    <g transform="translate(80,70)" fill="#6eff6e"><rect x="-10" y="-8" width="20" height="14"/><rect x="-14" y="-2" width="28" height="8"/><rect x="-12" y="6" width="6" height="4"/><rect x="6" y="6" width="6" height="4"/><rect x="-6" y="-12" width="4" height="4"/><rect x="2" y="-12" width="4" height="4"/></g>
+    <g transform="translate(160,70)" fill="#6eff6e"><rect x="-10" y="-8" width="20" height="14"/><rect x="-14" y="-2" width="28" height="8"/><rect x="-12" y="6" width="6" height="4"/><rect x="6" y="6" width="6" height="4"/><rect x="-6" y="-12" width="4" height="4"/><rect x="2" y="-12" width="4" height="4"/></g>
+    <g transform="translate(240,70)" fill="#6eff6e"><rect x="-10" y="-8" width="20" height="14"/><rect x="-14" y="-2" width="28" height="8"/><rect x="-12" y="6" width="6" height="4"/><rect x="6" y="6" width="6" height="4"/><rect x="-6" y="-12" width="4" height="4"/><rect x="2" y="-12" width="4" height="4"/></g>
+    <g transform="translate(320,70)" fill="#6eff6e"><rect x="-10" y="-8" width="20" height="14"/><rect x="-14" y="-2" width="28" height="8"/><rect x="-12" y="6" width="6" height="4"/><rect x="6" y="6" width="6" height="4"/><rect x="-6" y="-12" width="4" height="4"/><rect x="2" y="-12" width="4" height="4"/></g>
+  </g>
+  <g fill="#ff5f8f" filter="url(#ai-glow)">
+    <g transform="translate(120,120)"><rect x="-10" y="-6" width="20" height="10"/><rect x="-14" y="-2" width="28" height="6"/><rect x="-8" y="4" width="4" height="4"/><rect x="4" y="4" width="4" height="4"/></g>
+    <g transform="translate(200,120)"><rect x="-10" y="-6" width="20" height="10"/><rect x="-14" y="-2" width="28" height="6"/><rect x="-8" y="4" width="4" height="4"/><rect x="4" y="4" width="4" height="4"/></g>
+    <g transform="translate(280,120)"><rect x="-10" y="-6" width="20" height="10"/><rect x="-14" y="-2" width="28" height="6"/><rect x="-8" y="4" width="4" height="4"/><rect x="4" y="4" width="4" height="4"/></g>
+  </g>
+  <!-- Bullets -->
+  <g stroke="#ffe066" stroke-width="3" stroke-linecap="round" filter="url(#ai-glow)">
+    <line x1="200" y1="180" x2="200" y2="200"/><line x1="260" y1="160" x2="260" y2="180"/><line x1="140" y1="180" x2="140" y2="200"/>
+  </g>
+  <!-- Cannon -->
+  <g filter="url(#ai-glow)" transform="translate(200,250)"><rect x="-20" y="-10" width="40" height="10" fill="#4ff0b5"/><rect x="-6" y="-18" width="12" height="8" fill="#4ff0b5"/></g>
+  <g font-family="monospace" fill="#4ff0b5" font-weight="bold"><text x="20" y="28" font-size="11">SCORE</text><text x="20" y="50" font-size="22">01240</text></g>
+  <g font-family="monospace" fill="#ff5f8f" text-anchor="end" font-weight="bold"><text x="380" y="28" font-size="11">WAVE</text><text x="380" y="50" font-size="22">03</text></g>
+</svg>

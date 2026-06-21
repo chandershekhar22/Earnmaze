@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#0a1228"/>
+  <text x="200" y="36" font-family="system-ui" font-weight="800" font-size="22" fill="#56a8ff" text-anchor="middle" letter-spacing="6">0h h1</text>
+  <g transform="translate(85,55)">
+    <!-- 6x6 grid of circles -->
+    <g>
+      <circle cx="20" cy="20" r="16" fill="#ff3050"/>
+      <circle cx="60" cy="20" r="16" fill="#56a8ff"/>
+      <circle cx="100" cy="20" r="16" fill="#56a8ff"/>
+      <circle cx="140" cy="20" r="16" fill="#ff3050"/>
+      <circle cx="180" cy="20" r="16" fill="#1a2440"/>
+      <circle cx="220" cy="20" r="16" fill="#ff3050"/>
+
+      <circle cx="20" cy="60" r="16" fill="#56a8ff"/>
+      <circle cx="60" cy="60" r="16" fill="#ff3050"/>
+      <circle cx="100" cy="60" r="16" fill="#1a2440"/>
+      <circle cx="140" cy="60" r="16" fill="#56a8ff"/>
+      <circle cx="180" cy="60" r="16" fill="#ff3050"/>
+      <circle cx="220" cy="60" r="16" fill="#56a8ff"/>
+
+      <circle cx="20" cy="100" r="16" fill="#1a2440"/>
+      <circle cx="60" cy="100" r="16" fill="#56a8ff"/>
+      <circle cx="100" cy="100" r="16" fill="#ff3050"/>
+      <circle cx="140" cy="100" r="16" fill="#56a8ff"/>
+      <circle cx="180" cy="100" r="16" fill="#56a8ff"/>
+      <circle cx="220" cy="100" r="16" fill="#ff3050"/>
+
+      <circle cx="20" cy="140" r="16" fill="#ff3050"/>
+      <circle cx="60" cy="140" r="16" fill="#1a2440"/>
+      <circle cx="100" cy="140" r="16" fill="#56a8ff"/>
+      <circle cx="140" cy="140" r="16" fill="#ff3050"/>
+      <circle cx="180" cy="140" r="16" fill="#56a8ff"/>
+      <circle cx="220" cy="140" r="16" fill="#56a8ff"/>
+
+      <circle cx="20" cy="180" r="16" fill="#56a8ff"/>
+      <circle cx="60" cy="180" r="16" fill="#ff3050"/>
+      <circle cx="100" cy="180" r="16" fill="#56a8ff"/>
+      <circle cx="140" cy="180" r="16" fill="#1a2440"/>
+      <circle cx="180" cy="180" r="16" fill="#ff3050"/>
+      <circle cx="220" cy="180" r="16" fill="#1a2440"/>
+
+      <circle cx="20" cy="220" r="16" fill="#56a8ff"/>
+      <circle cx="60" cy="220" r="16" fill="#ff3050"/>
+      <circle cx="100" cy="220" r="16" fill="#56a8ff"/>
+      <circle cx="140" cy="220" r="16" fill="#ff3050"/>
+      <circle cx="180" cy="220" r="16" fill="#1a2440"/>
+      <circle cx="220" cy="220" r="16" fill="#ff3050"/>
+    </g>
+    <!-- locked hint markers (yellow ring) -->
+    <g fill="none" stroke="#ffd166" stroke-width="2">
+      <circle cx="60" cy="20" r="17"/>
+      <circle cx="100" cy="60" r="17"/>
+      <circle cx="220" cy="100" r="17"/>
+      <circle cx="20" cy="140" r="17"/>
+    </g>
+    <!-- empty cell hint -->
+    <text x="180" y="25" font-family="monospace" font-size="14" fill="#3a4870" text-anchor="middle">?</text>
+    <text x="100" y="145" font-family="monospace" font-size="14" fill="#3a4870" text-anchor="middle">?</text>
+  </g>
+</svg>
