@@ -12,8 +12,14 @@ import { csrfMiddleware, generateCsrfToken, setSecurityHeaders } from '$lib/serv
 import { verifyToken } from '$lib/server/jwt';
 import { notifyError } from '$lib/utils/telegram';
 import { db } from '$lib/db';
+import { initializeDatabase } from '$lib/db/init.server';
 import { session as sessionTable, passwordReset } from '$lib/db/schema/auth';
 import { lt } from 'drizzle-orm';
+
+// Initialize database on startup (creates admin user if needed)
+initializeDatabase().catch((error) => {
+	console.error('Failed to initialize database on startup:', error);
+});
 
 // Simple rate limiting store (in-memory)
 // For production, use Redis or a proper rate limiting service
