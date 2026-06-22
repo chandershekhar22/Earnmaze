@@ -1,5 +1,8 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { paraglideMiddleware } from '$lib/paraglide/server';
+import { getDirection } from '$lib/i18n/direction';
 import { validateSession } from '$lib/db';
 import { validateGuestSession } from '$lib/db/repositories/guest-session.repository.server';
 import { getDashboardUrl, canAccessRoute } from '$lib/utils/dashboard-routing';
@@ -13,9 +16,16 @@ import {
   setEmbeddedContentHeaders,
 } from '$lib/server/security';
 import { verifyToken } from '$lib/server/jwt';
+import { notifyError } from '$lib/utils/telegram';
 import { db } from '$lib/db';
+import { initializeDatabase } from '$lib/db/init.server';
 import { session as sessionTable, passwordReset } from '$lib/db/schema/auth';
 import { lt } from 'drizzle-orm';
+
+// Initialize database on startup (creates admin user if needed)
+initializeDatabase().catch((error) => {
+	console.error('Failed to initialize database on startup:', error);
+});
 
 // Simple rate limiting store (in-memory)
 // For production, use Redis or a proper rate limiting service
@@ -48,6 +58,7 @@ const ROUTE_CONFIG = {
     '/login',
     '/register',
     '/about',
+    '/contact',
     '/geo-blocked',
     '/earn-points',
     '/games',
@@ -64,6 +75,7 @@ const ROUTE_CONFIG = {
   loggedInRedirects: [
     '/',
     '/about',
+    '/contact',
     '/earn-points',
     '/forgot-password',
     '/help',
@@ -142,7 +154,82 @@ setInterval(async () => {
   }
 }, 60 * 60 * 1000); // Clean up every hour
 
-export const handle: Handle = async ({ event, resolve }) => {
+// Locales we add a URL prefix for. Base locale `en` is intentionally
+// unprefixed for clean URLs.
+const NON_BASE_LOCALES = new Set(['es', 'fr', 'pt', 'ar']);
+
+/**
+ * Honor the user's locale cookie on unprefixed URLs.
+ *
+ * Paraglide's URL strategy treats unprefixed URLs as the base locale and does
+ * not fall through to the cookie. So a user who switched to Spanish and lands
+ * on `/about` (e.g. via browser Back) would see English. This handler catches
+ * that case and 302s them to `/es/about` so the cookie's preferred language
+ * wins. Crawlers (no cookie) are never redirected.
+ */
+const handleLocaleRedirect: Handle = async ({ event, resolve }) => {
+	const pathname = event.url.pathname;
+
+	// Skip API routes, internal SvelteKit asset paths, and admin/client/
+	// moderator areas (those are English-only — applying a locale prefix
+	// would break their routing).
+	if (
+		pathname.startsWith('/api/') ||
+		pathname.startsWith('/_app/') ||
+		pathname.startsWith('/admin') ||
+		pathname.startsWith('/client') ||
+		pathname.startsWith('/moderator')
+	) {
+		return resolve(event);
+	}
+
+	// SvelteKit's SPA navigation fetches `<route>/__data.json` for client-side
+	// load data. We must redirect those too — otherwise clicking Browser Back
+	// to an unprefixed URL fetches the data via SPA without ever loading our
+	// HTML redirect, and the user sees the page in the wrong locale.
+	const isDataFetch = pathname.endsWith('/__data.json');
+	const logicalPath = isDataFetch
+		? pathname.slice(0, -'/__data.json'.length) || '/'
+		: pathname;
+
+	// Other asset-like paths (extensions: .css, .js, .ico, .svg, etc).
+	if (!isDataFetch && /\.[a-z0-9]+$/i.test(pathname)) {
+		return resolve(event);
+	}
+
+	const cookieLocale = event.cookies.get('em_locale');
+	if (!cookieLocale || !NON_BASE_LOCALES.has(cookieLocale)) {
+		return resolve(event);
+	}
+
+	// Already on a non-base locale prefix — let Paraglide handle it.
+	if (/^\/(es|fr|pt|ar)(\/|$)/.test(logicalPath)) {
+		return resolve(event);
+	}
+
+	const localizedBase = `/${cookieLocale}${logicalPath === '/' ? '' : logicalPath}`;
+	const target = isDataFetch ? `${localizedBase}/__data.json` : localizedBase;
+
+	throw redirect(302, `${target}${event.url.search}`);
+};
+
+/**
+ * Paraglide locale resolution middleware. Determines the active locale from
+ * (in order) URL prefix → cookie → Accept-Language header → baseLocale.
+ * Replaces `%paraglide.lang%` and `%paraglide.dir%` in app.html so the
+ * served HTML has correct `lang` + `dir` attributes for SEO + accessibility.
+ */
+const handleParaglide: Handle = ({ event, resolve }) =>
+	paraglideMiddleware(event.request, ({ request, locale }) => {
+		event.request = request;
+		const dir = getDirection(locale);
+		return resolve(event, {
+			transformPageChunk: ({ html }) =>
+				html.replace('%paraglide.lang%', locale).replace('%paraglide.dir%', dir)
+		});
+	});
+
+const handleApp: Handle = async ({ event, resolve }) => {
   const pathname = event.url.pathname;
   let ipAddress: string;
   try {
@@ -252,15 +339,30 @@ export const handle: Handle = async ({ event, resolve }) => {
       try {
         const payload = await verifyToken(authHeader.slice(7));
         if (payload && payload.type === 'access') {
-          // Set locals.user with JWT payload so existing guards work
-          event.locals.user = {
-            id: payload.sub,
-            email: '',
-            userType: payload.userType as any,
-            name: null,
-            isActive: true,
-            emailVerified: true,
-          } as any;
+          // Validate userType against the enum — never trust the JWT payload
+          // unconditionally. A signature flaw upstream or a forged token must
+          // not be able to claim 'admin' or any privileged role.
+          const ALLOWED_USER_TYPES = ['admin', 'client', 'moderator', 'panelist'] as const;
+          type AllowedUserType = (typeof ALLOWED_USER_TYPES)[number];
+          const claimedType = payload.userType;
+          if (
+            typeof claimedType === 'string' &&
+            (ALLOWED_USER_TYPES as readonly string[]).includes(claimedType)
+          ) {
+            event.locals.user = {
+              id: payload.sub,
+              email: '',
+              userType: claimedType as AllowedUserType,
+              name: null,
+              isActive: true,
+              emailVerified: true,
+            } as any;
+          } else {
+            Logger.root.warn(
+              { context: 'auth', claimedType, sub: payload.sub },
+              'JWT had invalid or missing userType — rejecting'
+            );
+          }
         }
       } catch {
         // Invalid JWT — ignore, fall through to guest/no-auth
@@ -407,4 +509,42 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
   withCorrelation(response);
   return response;
+};
+
+// Compose: first apply cookie-based locale redirect for unprefixed URLs,
+// then resolve the locale via Paraglide, then run the app logic.
+export const handle: Handle = sequence(handleLocaleRedirect, handleParaglide, handleApp);
+
+// Unhandled-error hook — logs via Loki AND fires a Telegram alert (best-effort).
+export const handleError: HandleServerError = ({ error, event, status }) => {
+  const correlationId = (event.locals as { correlationId?: string })?.correlationId;
+  Logger.root.error(
+    {
+      context: 'errors',
+      pathname: event.url.pathname,
+      status,
+      correlationId,
+      error,
+    },
+    'Unhandled server error'
+  );
+
+  // Skip alerts for 4xx (user errors). Only fire for genuine server failures.
+  if (status === undefined || status >= 500) {
+    try {
+      notifyError(`${event.request.method} ${event.url.pathname}`, error, {
+        status: String(status ?? 500),
+        correlationId: correlationId ?? 'n/a',
+      }).catch(() => {
+        // Alert dispatch is best-effort; swallow any failure
+      });
+    } catch {
+      // Sync throw from sendTask (e.g., null celery client) — swallow
+    }
+  }
+
+  return {
+    message: 'Internal server error',
+    correlationId,
+  };
 };

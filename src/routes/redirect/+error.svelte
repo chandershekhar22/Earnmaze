@@ -76,7 +76,7 @@
 
 			<!-- Error Details -->
 			{#if error?.message}
-				<div class="bg-surface-200 border border-white/[0.06] rounded-lg p-4 mb-8 text-left">
+				<div class="bg-surface-200 border border-white/[0.06] rounded-lg p-4 mb-8 text-start">
 					<p class="text-xs font-mono text-neutral-500 break-words">
 						{error.message}
 					</p>
@@ -118,8 +118,8 @@
 	</div>
 
 	<!-- Animated Background Elements -->
-	<div class="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
-		<div class="absolute top-20 right-20 w-72 h-72 bg-primary-500/5 rounded-full blur-3xl animate-pulse"></div>
-		<div class="absolute bottom-20 left-20 w-72 h-72 bg-indigo-500/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+	<div class="fixed top-0 start-0 w-full h-full pointer-events-none overflow-hidden -z-10">
+		<div class="absolute top-20 end-20 w-72 h-72 bg-primary-500/5 rounded-full blur-3xl animate-pulse"></div>
+		<div class="absolute bottom-20 start-20 w-72 h-72 bg-indigo-500/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
 	</div>
 </div>

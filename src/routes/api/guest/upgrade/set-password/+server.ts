@@ -14,9 +14,15 @@ import { getAppSettings } from '$lib/db/repositories/settings.repository.server'
 import type { GuestUpgradeSetPasswordResponse } from '$types/guest-session';
 import { updateUserPasswordAndActivate } from '$lib/db/repositories';
 import { guestUpgradeSetPasswordSchema } from '$lib/validation/api-schemas';
+import { user as userTable } from '$lib/db/schema/auth';
+import { db as dbConn } from '$lib/db';
+import { eq } from 'drizzle-orm';
+import { recordConsent } from '$lib/server/email-consent';
+import { getClientIP } from '$lib/server/geo-restriction';
 import { z } from 'zod';
 
-export const POST: RequestHandler = async ({ request, cookies, locals }) => {
+export const POST: RequestHandler = async (event) => {
+	const { request, cookies, locals } = event;
 	try {
 		const guestSession = locals.guestSession;
 		if (!guestSession) {
@@ -30,6 +36,7 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 		const validated = guestUpgradeSetPasswordSchema.parse(body);
 		const upgradeToken = validated.upgradeToken;
 		const password = validated.password;
+		const marketingConsent = validated.marketingConsent;
 
 		const ok = await consumeGuestUpgradeToken({
 			guestSessionId: guestSession.id,
@@ -72,6 +79,37 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 		}
 
 		await upgradeGuestSession(guestSession.token, upgradedUser.id);
+
+		// Re-stamp age + ToS + Privacy at upgrade time (explicit click-through
+		// supersedes the implicit-consent stamp from earn-points). Marketing
+		// consent is recorded via the audit-log helper.
+		const consentNow = new Date();
+		try {
+			await dbConn
+				.update(userTable)
+				.set({
+					ageVerified: true,
+					ageVerifiedAt: consentNow,
+					tosAcceptedAt: consentNow,
+					privacyAcceptedAt: consentNow,
+					updatedAt: consentNow,
+				})
+				.where(eq(userTable.id, upgradedUser.id));
+
+			if (marketingConsent) {
+				await recordConsent(upgradedUser.id, 'marketing', true, {
+					source: 'guest-upgrade-form',
+					ipAddress: getClientIP(event),
+					userAgent: request.headers.get('user-agent') ?? null,
+				});
+			}
+		} catch (consentErr) {
+			// Don't block account upgrade if consent stamping fails.
+			Logger.root.error(
+				{ context: 'consent', userId: upgradedUser.id, error: consentErr },
+				'Failed to stamp consent at guest upgrade'
+			);
+		}
 
 		// Credit signup bonus points
 		const settings = await getAppSettings(['signup_bonus_points']);

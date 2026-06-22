@@ -15,6 +15,8 @@ export const POST: RequestHandler = async (event) => {
 	if (rateLimited) return rateLimited;
 
 	const { request, cookies, getClientAddress } = event;
+	let userEmail = 'unknown';
+	
 	try {
 		const body = await request.json();
 		const validation = await validateInput(loginSchema, body);
@@ -26,6 +28,7 @@ export const POST: RequestHandler = async (event) => {
 		}
 
 		const { email, password, turnstileToken } = validation.data;
+		userEmail = email; // Store for error logging
 
 		// Verify Turnstile token
 		const turnstileError = await validateTurnstileToken(turnstileToken, getClientIP(event));
@@ -103,7 +106,39 @@ export const POST: RequestHandler = async (event) => {
 
 		return json(response);
 	} catch (error) {
-		Logger.root.error({ context: 'errors', reason: 'unexpected_exception', error: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined }, 'Login error');
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		const errorStack = error instanceof Error ? error.stack : undefined;
+		
+		// Determine error type for better diagnostics
+		let errorType = 'UNKNOWN_ERROR';
+		if (errorMessage.includes('connection') || errorMessage.includes('timeout')) {
+			errorType = 'DATABASE_CONNECTION_ERROR';
+		} else if (errorMessage.includes('query')) {
+			errorType = 'QUERY_ERROR';
+		} else if (errorMessage.includes('validation')) {
+			errorType = 'VALIDATION_ERROR';
+		}
+		
+		Logger.root.error(
+			{
+				context: 'errors',
+				reason: 'unexpected_exception',
+				errorType,
+				error: errorMessage,
+				stack: errorStack,
+				email: userEmail,
+			},
+			'Login error'
+		);
+		
+		// Return appropriate error based on type
+		if (errorType === 'DATABASE_CONNECTION_ERROR') {
+			return json(
+				{ error: 'Service temporarily unavailable. Please try again.' },
+				{ status: 503 }
+			);
+		}
+		
 		return json({ error: 'Internal server error' }, { status: 500 });
 	}
 };

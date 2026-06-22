@@ -11,13 +11,29 @@
 	} from '$lib/analytics';
 	import Turnstile from '$lib/components/Turnstile.svelte';
 	import { Check, ArrowRight, Sparkles, Shield, Zap } from '@lucide/svelte';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let showEmailModal = $state(false);
 	let email = $state('');
+	// Optional marketing opt-in. Required acknowledgements (age 18+, ToS,
+	// Privacy) are accepted implicitly by submitting — see notice line below.
+	let marketingConsent = $state(false);
 	let isSubmitting = $state(false);
 	let errorMessage = $state('');
 	let turnstileToken = $state<string | null>(null);
+	let needsInteraction = $state(false);
 	let turnstileRef = $state<any>(null);
+
+	async function waitForToken(): Promise<string | null> {
+		if (turnstileToken) return turnstileToken;
+		const start = Date.now();
+		while (!turnstileToken) {
+			const timeoutMs = needsInteraction ? 60000 : 8000;
+			if (Date.now() - start >= timeoutMs) break;
+			await new Promise((r) => setTimeout(r, 100));
+		}
+		return turnstileToken;
+	}
 
 	onMount(() => {
 		markVisitStart();
@@ -47,13 +63,18 @@
 			errorMessage = 'Please enter a valid email address';
 			return;
 		}
-		if (!turnstileToken) {
-			errorMessage = 'Please complete the verification';
-			return;
-		}
 
 		isSubmitting = true;
 		errorMessage = '';
+
+		const token = await waitForToken();
+		if (!token) {
+			isSubmitting = false;
+			errorMessage = needsInteraction
+				? 'Please complete the security check below.'
+				: 'Verification timed out. Please refresh and try again.';
+			return;
+		}
 
 		try {
 			const visitorId = getVisitorId();
@@ -64,7 +85,7 @@
 			const response = await fetch('/api/save-email', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email, visitorId, sessionId, utmParams, timeToConvert, turnstileToken })
+				body: JSON.stringify({ email, visitorId, sessionId, utmParams, timeToConvert, turnstileToken: token, marketingConsent })
 			});
 
 			const data = await response.json();
@@ -88,10 +109,12 @@
 
 	function handleTurnstileVerify(token: string) {
 		turnstileToken = token;
+		needsInteraction = false;
 		errorMessage = '';
 	}
 	function handleTurnstileError() { turnstileToken = null; }
 	function handleTurnstileExpire() { turnstileToken = null; }
+	function handleBeforeInteractive() { needsInteraction = true; }
 </script>
 
 <svelte:head>
@@ -138,9 +161,9 @@
 
 	<!-- Animated blobs -->
 	<div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-		<div class="absolute -top-20 left-[5%] w-[450px] h-[450px] bg-white/10 rounded-full blur-[100px] bl-a"></div>
-		<div class="absolute bottom-[-10%] right-[5%] w-[400px] h-[400px] bg-amber-400/10 rounded-full blur-[90px] bl-b"></div>
-		<div class="absolute top-[40%] left-[50%] w-[300px] h-[300px] bg-cyan-400/8 rounded-full blur-[80px] bl-a" style="animation-delay:3s"></div>
+		<div class="absolute -top-20 start-[5%] w-[450px] h-[450px] bg-white/10 rounded-full blur-[100px] bl-a"></div>
+		<div class="absolute bottom-[-10%] end-[5%] w-[400px] h-[400px] bg-amber-400/10 rounded-full blur-[90px] bl-b"></div>
+		<div class="absolute top-[40%] start-[50%] w-[300px] h-[300px] bg-cyan-400/8 rounded-full blur-[80px] bl-a" style="animation-delay:3s"></div>
 	</div>
 
 	<div class="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
@@ -171,7 +194,7 @@
 				aria-label="Start earning points now for free"
 			>
 				Start Earning Now — It's Free
-				<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+				<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform rtl:-scale-x-100" />
 			</button>
 		</div>
 	</div>
@@ -205,8 +228,8 @@
 <section class="relative py-14 sm:py-20 overflow-hidden" aria-labelledby="cta-heading">
 	<div class="absolute inset-0 bg-gradient-to-br from-indigo-700 via-violet-600 to-fuchsia-600 grad-x"></div>
 	<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-		<div class="absolute top-[10%] left-[10%] w-40 h-40 bg-white/5 rounded-full blur-2xl glow-p"></div>
-		<div class="absolute bottom-[10%] right-[10%] w-32 h-32 bg-white/5 rounded-full blur-2xl glow-p" style="animation-delay:2s"></div>
+		<div class="absolute top-[10%] start-[10%] w-40 h-40 bg-white/5 rounded-full blur-2xl glow-p"></div>
+		<div class="absolute bottom-[10%] end-[10%] w-32 h-32 bg-white/5 rounded-full blur-2xl glow-p" style="animation-delay:2s"></div>
 	</div>
 
 	<div class="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
@@ -225,7 +248,7 @@
 			aria-label="Sign up now to start earning points for free"
 		>
 			Start Earning — It's Free
-			<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+			<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform rtl:-scale-x-100" />
 		</button>
 
 		<div class="mt-8 flex flex-wrap justify-center gap-5 text-xs sm:text-sm text-white/60">
@@ -259,7 +282,7 @@
 		>
 			<button
 				onclick={closeEmailModal}
-				class="absolute top-4 right-4 text-neutral-600 hover:text-white transition-colors"
+				class="absolute top-4 end-4 text-neutral-600 hover:text-white transition-colors"
 				aria-label="Close modal"
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,20 +318,34 @@
 					</div>
 				{/if}
 
-				<div class="flex justify-center py-1">
+				<div class="flex flex-col items-center gap-2 py-1">
+					{#if needsInteraction}
+						<p class="text-sm text-amber-400">Please complete the security check below.</p>
+					{/if}
 					<Turnstile
 						bind:this={turnstileRef}
 						onVerify={handleTurnstileVerify}
 						onError={handleTurnstileError}
 						onExpire={handleTurnstileExpire}
+						onBeforeInteractive={handleBeforeInteractive}
 						theme="dark"
 						size="normal"
 					/>
 				</div>
 
+				<!-- Optional marketing opt-in (UNCHECKED by default per GDPR / DPDP) -->
+				<label class="flex items-start gap-2 cursor-pointer text-sm text-neutral-400 leading-relaxed">
+					<input
+						type="checkbox"
+						bind:checked={marketingConsent}
+						class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+					/>
+					<span>Send me product updates and offers from EarnMaze.</span>
+				</label>
+
 				<button
 					type="submit"
-					disabled={isSubmitting || !turnstileToken}
+					disabled={isSubmitting}
 					class="btn-primary w-full !py-3.5 !text-base"
 				>
 					{#if isSubmitting}
@@ -319,9 +356,17 @@
 						Processing...
 					{:else}
 						Continue
-						<ArrowRight class="w-4 h-4" />
+						<ArrowRight class="w-4 h-4 rtl:-scale-x-100" />
 					{/if}
 				</button>
+
+				<!-- Implicit consent notice — clicking Continue is the affirmative action. -->
+				<p class="text-xs text-neutral-500 text-center leading-relaxed">
+					By continuing you confirm you are 18+ and agree to our
+					<a href={localizeHref('/terms-of-service')} class="link" target="_blank" rel="noopener">Terms</a>
+					and
+					<a href={localizeHref('/privacy-policy')} class="link" target="_blank" rel="noopener">Privacy Policy</a>.
+				</p>
 			</form>
 
 			<p class="mt-4 text-[10px] text-center text-neutral-600">

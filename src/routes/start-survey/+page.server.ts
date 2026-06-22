@@ -1,12 +1,15 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { createHmac } from 'crypto';
+import { eq } from 'drizzle-orm';
 import { getAuthUser } from '$lib/server/auth';
 import { db, getSurveyById, createSurveyTransaction, getUserByEmail } from '$lib/db';
 import { surveyTransactionDetails } from '$lib/db/schema/surveys';
+import { user as userTable } from '$lib/db/schema/auth';
 import { nanoid } from 'nanoid';
 import { Logger } from '$lib/utils/app-logger';
 import { linkSurveyTransactionToSession } from '$lib/db/repositories/guest-session.repository.server';
+import { notifyUpdate } from '$lib/utils/telegram';
 
 type UserContext = {
 	panelistId: string;
@@ -85,6 +88,21 @@ export const load: PageServerLoad = async (event) => {
 		throw error(401, 'Unauthorized');
 	}
 
+	// Survey-data-sharing consent gate (GDPR Art. 6/7).
+	// First-time survey takers must accept the disclosure that demographic
+	// data is shared with external survey providers. Subsequent surveys
+	// skip this check.
+	const [consentRow] = await db
+		.select({ acceptedAt: userTable.surveyDataSharingAcceptedAt })
+		.from(userTable)
+		.where(eq(userTable.id, userContext.panelistId))
+		.limit(1);
+
+	if (!consentRow?.acceptedAt) {
+		const next = `/start-survey?surveyId=${encodeURIComponent(surveyId)}`;
+		throw redirect(302, `/survey-consent?next=${encodeURIComponent(next)}`);
+	}
+
 	try {
 		// Validate survey exists
 		const surveyData = await getSurveyById(surveyId);
@@ -98,7 +116,20 @@ export const load: PageServerLoad = async (event) => {
 			panelistId: userContext.panelistId,
 			surveyId
 		});
-		
+
+		// Best-effort Telegram update — only on first start, not on resume.
+		if (isNew) {
+			try {
+				notifyUpdate(
+					`▶️ Survey started: <code>${surveyData.title ?? surveyId}</code>`
+				).catch(() => {
+					/* swallow */
+				});
+			} catch {
+				/* swallow sync throw */
+			}
+		}
+
 		Logger.root.info(
 			{
 				context: 'surveys',

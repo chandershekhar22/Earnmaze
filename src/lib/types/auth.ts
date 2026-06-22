@@ -30,4 +30,10 @@ export interface RegisterData {
 	utmMedium?: string;
 	utmCampaign?: string;
 	registrationSource?: string;
+	// Required acknowledgements — must all be true.
+	ageVerified: true;
+	tosAccepted: true;
+	privacyAccepted: true;
+	// Optional marketing opt-in.
+	marketingConsent?: boolean;
 }

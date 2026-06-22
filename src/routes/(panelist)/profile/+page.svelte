@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { Logger } from '$lib/utils/app-logger';
-	import { untrack } from 'svelte';
-	import { Check, User, Users, ClipboardList, Bell, Mail, Smartphone, Loader, ShieldCheck, AlertCircle, Compass } from '@lucide/svelte';
+	import { onMount, untrack } from 'svelte';
+	import { Check, User, Users, ClipboardList, Bell, Mail, Smartphone, Loader, ShieldCheck, AlertCircle, Compass, Megaphone } from '@lucide/svelte';
 	import InfoBanner from '$lib/components/InfoBanner.svelte';
 	import { toastStore } from '$lib/stores/toast.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 
 	let { data }: { data: { profile: { name: string; email: string; emailVerified: boolean; demographics: { age: string; gender: string; country: string; education: string; employment: string; income: string }; preferences: { emailNotifications: boolean; smsNotifications: boolean; surveyCategories: string[] }; dashboardView: 'surveys' | 'discover' } } } = $props();
 
@@ -53,10 +55,63 @@
 	})));
 	let saving = $state(false);
 
-	const surveyCategories = [
-		'Consumer Products', 'Technology', 'Healthcare', 'Finance', 'Education',
-		'Travel', 'Food & Dining', 'Entertainment', 'Politics', 'Sports'
-	];
+	// Marketing email consent — fetched + toggled separately from profile
+	// preferences because every change writes to the consent audit log.
+	let marketingConsent = $state(false);
+	let marketingConsentAt = $state<string | null>(null);
+	let marketingSaving = $state(false);
+
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/panelist/email-preferences');
+			if (response.ok) {
+				const data = await response.json();
+				marketingConsent = data.marketingConsent ?? false;
+				marketingConsentAt = data.marketingConsentAt ?? null;
+			}
+		} catch (err) {
+			Logger.root.warn({ context: 'errors', error: err }, 'Failed to load email preferences');
+		}
+	});
+
+	async function toggleMarketingConsent() {
+		const next = !marketingConsent;
+		marketingSaving = true;
+		try {
+			const response = await fetch('/api/panelist/email-preferences', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ marketingConsent: next }),
+			});
+			if (response.ok) {
+				marketingConsent = next;
+				marketingConsentAt = new Date().toISOString();
+				toastStore.success(m.prof_toast_saved(), next ? m.prof_toast_saved_subscribed() : m.prof_toast_saved_unsubscribed());
+			} else {
+				toastStore.error(m.prof_toast_error(), m.prof_toast_error_prefs());
+			}
+		} catch (err) {
+			Logger.root.error({ context: 'errors', error: err }, 'Failed to toggle marketing consent');
+			toastStore.error(m.prof_toast_error(), m.prof_toast_error_prefs());
+		} finally {
+			marketingSaving = false;
+		}
+	}
+
+	// Survey category options. We pair the canonical English value (sent
+	// to the API + persisted) with the localized label shown to the user.
+	let surveyCategories = $derived([
+		{ value: 'Consumer Products', label: m.prof_cat_consumer() },
+		{ value: 'Technology', label: m.prof_cat_tech() },
+		{ value: 'Healthcare', label: m.prof_cat_health() },
+		{ value: 'Finance', label: m.prof_cat_finance() },
+		{ value: 'Education', label: m.prof_cat_education() },
+		{ value: 'Travel', label: m.prof_cat_travel() },
+		{ value: 'Food & Dining', label: m.prof_cat_food() },
+		{ value: 'Entertainment', label: m.prof_cat_entertainment() },
+		{ value: 'Politics', label: m.prof_cat_politics() },
+		{ value: 'Sports', label: m.prof_cat_sports() },
+	]);
 
 	async function saveProfile() {
 		saving = true;
@@ -67,34 +122,34 @@
 				body: JSON.stringify(profile)
 			});
 			if (response.ok) {
-				toastStore.success('Saved', 'Profile updated successfully!');
+				toastStore.success(m.prof_toast_saved(), m.prof_toast_saved_profile());
 			} else {
-				toastStore.error('Error', 'Failed to update profile.');
+				toastStore.error(m.prof_toast_error(), m.prof_toast_error_save());
 			}
 		} catch (error) {
 			Logger.root.error({ context: 'errors', error }, 'Failed to save profile');
-			toastStore.error('Error', 'Failed to update profile.');
+			toastStore.error(m.prof_toast_error(), m.prof_toast_error_save());
 		} finally {
 			saving = false;
 		}
 	}
 
-	function toggleCategory(category: string) {
-		if (profile.preferences.surveyCategories.includes(category)) {
-			profile.preferences.surveyCategories = profile.preferences.surveyCategories.filter(c => c !== category);
+	function toggleCategory(value: string) {
+		if (profile.preferences.surveyCategories.includes(value)) {
+			profile.preferences.surveyCategories = profile.preferences.surveyCategories.filter(c => c !== value);
 		} else {
-			profile.preferences.surveyCategories = [...profile.preferences.surveyCategories, category];
+			profile.preferences.surveyCategories = [...profile.preferences.surveyCategories, value];
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Profile - EarnMaze</title>
-	<meta name="description" content="Manage your profile and preferences." />
+	<title>{m.prof_meta_title()}</title>
+	<meta name="description" content={m.prof_meta_description()} />
 </svelte:head>
 
 <div class="space-y-[18px] animate-fade-in">
-	<InfoBanner id="profile-how" message="Complete your profile to get matched with more relevant surveys. The more we know about you, the better surveys we can offer — and more points you'll earn." color="amber" />
+	<InfoBanner id="profile-how" message={m.prof_info()} color="amber" />
 
 	<!-- Profile Header -->
 	<div class="flex items-center gap-[18px]">
@@ -102,7 +157,7 @@
 			{profile.name ? profile.name.charAt(0).toUpperCase() : 'U'}
 		</div>
 		<div>
-			<h1 class="text-[24px] font-bold text-white tracking-tight">{profile.name || 'Your Profile'}</h1>
+			<h1 class="text-[24px] font-bold text-white tracking-tight">{profile.name || m.prof_default_title()}</h1>
 			<p class="font-mono text-[13px] text-neutral-400">{profile.email}</p>
 		</div>
 	</div>
@@ -115,25 +170,25 @@
 					<User class="w-5 h-5" />
 				</span>
 				<div>
-					<h3 class="text-[15px] font-semibold text-white tracking-tight">Basic information</h3>
-					<p class="text-[12.5px] text-neutral-400">Your personal details</p>
+					<h3 class="text-[15px] font-semibold text-white tracking-tight">{m.prof_basic_title()}</h3>
+					<p class="text-[12.5px] text-neutral-400">{m.prof_basic_desc()}</p>
 				</div>
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
 				<div>
-					<label for="name" class="block text-[12.5px] font-medium text-neutral-400 mb-2">Full Name</label>
+					<label for="name" class="block text-[12.5px] font-medium text-neutral-400 mb-2">{m.prof_full_name()}</label>
 					<input type="text" id="name" bind:value={profile.name} class="input" required />
 				</div>
 				<div>
 					<label for="email" class="block text-[12.5px] font-medium text-neutral-400 mb-2">
-						Email Address
+						{m.prof_email_label()}
 						{#if emailVerified}
 							<span class="ml-2 inline-flex items-center gap-1 text-[9.5px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full uppercase tracking-[0.06em]">
-								<ShieldCheck class="w-3 h-3" /> Verified
+								<ShieldCheck class="w-3 h-3" /> {m.prof_email_verified()}
 							</span>
 						{:else}
 							<span class="ml-2 inline-flex items-center gap-1 text-[9.5px] font-semibold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-full uppercase tracking-[0.06em]">
-								<AlertCircle class="w-3 h-3" /> Unverified
+								<AlertCircle class="w-3 h-3" /> {m.prof_email_unverified()}
 							</span>
 						{/if}
 					</label>
@@ -149,15 +204,15 @@
 					<Users class="w-5 h-5" />
 				</span>
 				<div>
-					<h3 class="text-[15px] font-semibold text-white tracking-tight">Demographics</h3>
-					<p class="text-[12.5px] text-neutral-400">Helps match you with relevant surveys</p>
+					<h3 class="text-[15px] font-semibold text-white tracking-tight">{m.prof_demographics_title()}</h3>
+					<p class="text-[12.5px] text-neutral-400">{m.prof_demographics_desc()}</p>
 				</div>
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
 				<div>
-					<label for="age" class="block text-[12.5px] font-medium text-neutral-400 mb-2">Age Range</label>
+					<label for="age" class="block text-[12.5px] font-medium text-neutral-400 mb-2">{m.prof_age_label()}</label>
 					<select id="age" bind:value={profile.demographics.age} class="select">
-						<option value="">Select age range</option>
+						<option value="">{m.prof_age_select()}</option>
 						<option value="18-24">18-24</option>
 						<option value="25-34">25-34</option>
 						<option value="35-44">35-44</option>
@@ -167,36 +222,36 @@
 					</select>
 				</div>
 				<div>
-					<label for="gender" class="block text-[12.5px] font-medium text-neutral-400 mb-2">Gender</label>
+					<label for="gender" class="block text-[12.5px] font-medium text-neutral-400 mb-2">{m.prof_gender_label()}</label>
 					<select id="gender" bind:value={profile.demographics.gender} class="select">
-						<option value="">Select gender</option>
-						<option value="male">Male</option>
-						<option value="female">Female</option>
-						<option value="non-binary">Non-binary</option>
-						<option value="prefer-not-to-say">Prefer not to say</option>
+						<option value="">{m.prof_gender_select()}</option>
+						<option value="male">{m.prof_gender_male()}</option>
+						<option value="female">{m.prof_gender_female()}</option>
+						<option value="non-binary">{m.prof_gender_nonbinary()}</option>
+						<option value="prefer-not-to-say">{m.prof_gender_prefer_not()}</option>
 					</select>
 				</div>
 				<div>
-					<label for="education" class="block text-[12.5px] font-medium text-neutral-400 mb-2">Education Level</label>
+					<label for="education" class="block text-[12.5px] font-medium text-neutral-400 mb-2">{m.prof_education_label()}</label>
 					<select id="education" bind:value={profile.demographics.education} class="select">
-						<option value="">Select education level</option>
-						<option value="high-school">High School</option>
-						<option value="some-college">Some College</option>
-						<option value="bachelors">Bachelor's Degree</option>
-						<option value="masters">Master's Degree</option>
-						<option value="doctorate">Doctorate</option>
+						<option value="">{m.prof_education_select()}</option>
+						<option value="high-school">{m.prof_education_hs()}</option>
+						<option value="some-college">{m.prof_education_some_college()}</option>
+						<option value="bachelors">{m.prof_education_bachelors()}</option>
+						<option value="masters">{m.prof_education_masters()}</option>
+						<option value="doctorate">{m.prof_education_doctorate()}</option>
 					</select>
 				</div>
 				<div>
-					<label for="employment" class="block text-[12.5px] font-medium text-neutral-400 mb-2">Employment Status</label>
+					<label for="employment" class="block text-[12.5px] font-medium text-neutral-400 mb-2">{m.prof_employment_label()}</label>
 					<select id="employment" bind:value={profile.demographics.employment} class="select">
-						<option value="">Select employment status</option>
-						<option value="employed-full-time">Employed (Full-time)</option>
-						<option value="employed-part-time">Employed (Part-time)</option>
-						<option value="self-employed">Self-employed</option>
-						<option value="student">Student</option>
-						<option value="retired">Retired</option>
-						<option value="unemployed">Unemployed</option>
+						<option value="">{m.prof_employment_select()}</option>
+						<option value="employed-full-time">{m.prof_employment_ft()}</option>
+						<option value="employed-part-time">{m.prof_employment_pt()}</option>
+						<option value="self-employed">{m.prof_employment_self()}</option>
+						<option value="student">{m.prof_employment_student()}</option>
+						<option value="retired">{m.prof_employment_retired()}</option>
+						<option value="unemployed">{m.prof_employment_unemployed()}</option>
 					</select>
 				</div>
 			</div>
@@ -214,7 +269,7 @@
 				</div>
 			</div>
 			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-				{#each [{ id: 'surveys', icon: ClipboardList, title: 'Surveys', desc: 'Paid surveys, steady points' }, { id: 'discover', icon: Compass, title: 'Discover', desc: 'Streaks, quizzes, games & deals' }] as opt}
+				{#each [{ id: 'surveys', icon: ClipboardList, title: 'Surveys', desc: 'Paid surveys, steady points' }, { id: 'discover', icon: Compass, title: 'Discover', desc: 'Streaks, quizzes, games & deals' }] as opt (opt.id)}
 					{@const active = dashboardView === opt.id}
 					<button
 						type="button"
@@ -245,22 +300,22 @@
 					<ClipboardList class="w-5 h-5" />
 				</span>
 				<div>
-					<h3 class="text-[15px] font-semibold text-white tracking-tight">Survey preferences</h3>
-					<p class="text-[12.5px] text-neutral-400">Select categories you're interested in</p>
+					<h3 class="text-[15px] font-semibold text-white tracking-tight">{m.prof_categories_title()}</h3>
+					<p class="text-[12.5px] text-neutral-400">{m.prof_categories_desc()}</p>
 				</div>
 			</div>
 			<div class="flex flex-wrap gap-2">
-				{#each surveyCategories as category}
-					{@const on = profile.preferences.surveyCategories.includes(category)}
+				{#each surveyCategories as cat (cat.value)}
+					{@const on = profile.preferences.surveyCategories.includes(cat.value)}
 					<button
 						type="button"
-						onclick={() => toggleCategory(category)}
+						onclick={() => toggleCategory(cat.value)}
 						class="px-4 py-2 rounded-full text-[13px] transition-all duration-200
 							{on
 								? 'bg-primary-400/12 border border-primary-400/40 text-primary-500 font-medium'
 								: 'bg-white/[0.03] border border-white/[0.07] text-neutral-400 hover:text-white hover:border-white/[0.13]'}"
 					>
-						{category}
+						{cat.label}
 					</button>
 				{/each}
 			</div>
@@ -273,8 +328,8 @@
 					<Bell class="w-5 h-5" />
 				</span>
 				<div>
-					<h3 class="text-[15px] font-semibold text-white tracking-tight">Notifications</h3>
-					<p class="text-[12.5px] text-neutral-400">How you'd like to be notified</p>
+					<h3 class="text-[15px] font-semibold text-white tracking-tight">{m.prof_notif_title()}</h3>
+					<p class="text-[12.5px] text-neutral-400">{m.prof_notif_desc()}</p>
 				</div>
 			</div>
 			<button type="button" onclick={() => profile.preferences.emailNotifications = !profile.preferences.emailNotifications} class="w-full flex items-center justify-between py-4 text-left">
@@ -283,8 +338,8 @@
 						<Mail class="w-[18px] h-[18px]" />
 					</span>
 					<div>
-						<h4 class="text-sm font-semibold text-white">Email Notifications</h4>
-						<p class="text-xs text-neutral-500">Survey invitations and updates</p>
+						<h4 class="text-sm font-semibold text-white">{m.prof_notif_email_label()}</h4>
+						<p class="text-xs text-neutral-500">{m.prof_notif_email_desc()}</p>
 					</div>
 				</div>
 				<div class="relative w-[46px] h-[26px] rounded-full border transition-colors flex-shrink-0
@@ -299,8 +354,8 @@
 						<Smartphone class="w-[18px] h-[18px]" />
 					</span>
 					<div>
-						<h4 class="text-sm font-semibold text-white">SMS Notifications</h4>
-						<p class="text-xs text-neutral-500">Important updates via text</p>
+						<h4 class="text-sm font-semibold text-white">{m.prof_notif_sms_label()}</h4>
+						<p class="text-xs text-neutral-500">{m.prof_notif_sms_desc()}</p>
 					</div>
 				</div>
 				<div class="relative w-[46px] h-[26px] rounded-full border transition-colors flex-shrink-0
@@ -311,13 +366,56 @@
 			</button>
 		</div>
 
+		<!-- Marketing Email Consent -->
+		<div class="card animate-slide-up" style="animation-delay: 175ms">
+			<div class="flex items-center gap-3 mb-6">
+				<div class="p-2.5 bg-violet-500/10 rounded-xl">
+					<Megaphone class="w-5 h-5 text-violet-400" />
+				</div>
+				<div>
+					<h2 class="text-sm font-bold text-white">{m.prof_marketing_title()}</h2>
+					<p class="text-xs text-neutral-600">{m.prof_marketing_desc()}</p>
+				</div>
+			</div>
+			<button
+				type="button"
+				onclick={toggleMarketingConsent}
+				disabled={marketingSaving}
+				class="w-full flex items-center justify-between p-4 bg-surface-200 rounded-xl cursor-pointer hover:bg-surface-300 transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-start"
+			>
+				<div class="flex items-center gap-3">
+					<div class="w-9 h-9 rounded-lg bg-surface-100 border border-white/[0.06] flex items-center justify-center">
+						<Mail class="w-4 h-4 text-neutral-500" />
+					</div>
+					<div>
+						<span class="text-sm font-medium text-white">{m.prof_marketing_label()}</span>
+						<p class="text-[10px] text-neutral-600">
+							{#if marketingConsent && marketingConsentAt}
+								{m.prof_marketing_opted_in({ date: new Date(marketingConsentAt).toLocaleDateString(getLocale()) })}
+							{:else}
+								{m.prof_marketing_off()}
+							{/if}
+						</p>
+					</div>
+				</div>
+				<div class="relative">
+					<input type="checkbox" checked={marketingConsent} class="sr-only peer" tabindex="-1" readonly />
+					<div class="w-10 h-6 bg-surface-300 peer-focus:ring-2 peer-focus:ring-primary-500/20 rounded-full peer peer-checked:bg-primary-600 transition-colors"></div>
+					<div class="absolute start-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm"></div>
+				</div>
+			</button>
+			<p class="mt-3 text-[10px] text-neutral-600 leading-relaxed">
+				{m.prof_marketing_disclaimer()}
+			</p>
+		</div>
+
 		<!-- Save -->
 		<div class="flex justify-end pt-2">
 			<button type="submit" disabled={saving} class="btn-primary">
 				{#if saving}
-					<Loader class="w-4 h-4 animate-spin" /> Saving...
+					<Loader class="w-4 h-4 animate-spin" /> {m.prof_save_loading()}
 				{:else}
-					<Check class="w-4 h-4" /> Save changes
+					<Check class="w-4 h-4" /> {m.prof_save()}
 				{/if}
 			</button>
 		</div>

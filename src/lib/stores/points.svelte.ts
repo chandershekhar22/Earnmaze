@@ -25,7 +25,10 @@ class PointsStore {
 			API.response(requestId, response.status, duration);
 
 			if (response.ok) {
-				const pointsData = await response.json();
+				const body = await response.json();
+				// API wraps the payload in { success, data }. Older code assumed the
+				// payload was at the top level, which left currentBalance undefined.
+				const pointsData = body?.data ?? body;
 				Logger.root.info({ context: 'points', currentBalance: pointsData.currentBalance }, 'Points fetched successfully');
 				this.data = pointsData;
 				return pointsData;

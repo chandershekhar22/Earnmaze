@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { requirePanelist } from '$lib/server/auth/guards';
 import { getPanelistActivityHistory } from '$lib/db/repositories';
+import { signedTransactionPoints } from '$lib/constants/constants';
 
 function formatPointsTitle(type: string): string {
 	switch (type) {
@@ -57,7 +58,10 @@ export const load: PageServerLoad = async (event) => {
 			title: formatPointsTitle(tx.type),
 			description: tx.description,
 			createdAt: tx.createdAt?.toISOString() ?? new Date().toISOString(),
-			points: tx.type === 'redeemed' || tx.type === 'penalty' ? -(tx.points ?? 0) : (tx.points ?? 0),
+			// DB stores `points` as positive magnitude; effect is encoded by
+			// `tx.type`. The shared helper renders the correct sign for all
+			// types (redeemed/penalty/expired/disqualified → negative; etc).
+			points: signedTransactionPoints(tx.type, tx.points ?? 0),
 			status: 'completed',
 		})),
 

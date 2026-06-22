@@ -101,7 +101,7 @@
 			{#each redemptions as r}
 				{@const ss = getStatusStyle(r.status)}
 				<div class="card !p-0 overflow-hidden">
-					<button type="button" onclick={() => expandedId = expandedId === r.id ? null : r.id} class="w-full px-5 py-3.5 flex items-center gap-4 text-left hover:bg-white/[0.02] transition-colors">
+					<button type="button" onclick={() => expandedId = expandedId === r.id ? null : r.id} class="w-full px-5 py-3.5 flex items-center gap-4 text-start hover:bg-white/[0.02] transition-colors">
 						<div class="p-2 {ss.class} rounded-xl flex-shrink-0">
 							<ss.icon class="w-4 h-4" />
 						</div>
@@ -190,12 +190,12 @@
 				<div class="flex gap-2">
 					{#if data.pagination.page > 1}
 						<a href="/admin/redemptions?page={data.pagination.page - 1}{data.filters.status !== 'all' ? `&status=${data.filters.status}` : ''}" class="btn-secondary !text-xs">
-							<ArrowLeft class="w-3.5 h-3.5" /> Prev
+							<ArrowLeft class="w-3.5 h-3.5 rtl:-scale-x-100" /> Prev
 						</a>
 					{/if}
 					{#if data.pagination.page < data.pagination.totalPages}
 						<a href="/admin/redemptions?page={data.pagination.page + 1}{data.filters.status !== 'all' ? `&status=${data.filters.status}` : ''}" class="btn-secondary !text-xs">
-							Next <ArrowRight class="w-3.5 h-3.5" />
+							Next <ArrowRight class="w-3.5 h-3.5 rtl:-scale-x-100" />
 						</a>
 					{/if}
 				</div>

@@ -24,14 +24,19 @@ export function generateSessionId(): string {
 }
 
 export async function createSession(userId: string): Promise<string> {
+	const { withRetry } = await import('../retry');
 	const sessionId = generateSessionId();
 	const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-	await db.insert(session).values({
-		userId,
-		token: sessionId,
-		expiresAt,
-	});
+	await withRetry(
+		() =>
+			db.insert(session).values({
+				userId,
+				token: sessionId,
+				expiresAt,
+			}),
+		`createSession(${userId})`
+	);
 
 	return sessionId;
 }
@@ -39,15 +44,21 @@ export async function createSession(userId: string): Promise<string> {
 export async function validateSession(sessionId: string): Promise<typeof user.$inferSelect | null> {
 	if (!sessionId) return null;
 
-	const result = await db
-		.select({
-			user: user,
-			session: session,
-		})
-		.from(session)
-		.innerJoin(user, eq(session.userId, user.id))
-		.where(eq(session.token, sessionId))
-		.limit(1);
+	const { withRetry } = await import('../retry');
+	
+	const result = await withRetry(
+		() =>
+			db
+				.select({
+					user: user,
+					session: session,
+				})
+				.from(session)
+				.innerJoin(user, eq(session.userId, user.id))
+				.where(eq(session.token, sessionId))
+				.limit(1),
+		`validateSession(${sessionId})`
+	);
 
 	if (!result.length) return null;
 
@@ -81,7 +92,12 @@ export async function invalidateSession(sessionId: string): Promise<void> {
 }
 
 export async function getUserByEmail(email: string) {
-	const result = await db.select().from(user).where(eq(user.email, email)).limit(1);
+	// Use withRetry for resilience against transient connection issues
+	const { withRetry } = await import('../retry');
+	const result = await withRetry(
+		() => db.select().from(user).where(eq(user.email, email)).limit(1),
+		`getUserByEmail(${email})`
+	);
 	return result[0] || null;
 }
 

@@ -4,7 +4,7 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { LayoutDashboard, BarChart3, Users, ClipboardList, Gift, Coins, Settings, HelpCircle, Globe, LogOut, Menu, X, ArrowLeftRight, MessageSquareText, Repeat, Share2 } from '@lucide/svelte';
+	import { LayoutDashboard, BarChart3, Users, ClipboardList, Gift, Coins, Settings, HelpCircle, Globe, LogOut, Menu, X, ArrowLeftRight, MessageSquareText, Repeat, Share2, ShieldCheck } from '@lucide/svelte';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
@@ -21,6 +21,7 @@
 		{ href: '/admin/referrals', label: 'Referrals', icon: Share2 },
 		{ href: '/admin/support', label: 'Support', icon: HelpCircle },
 		{ href: '/admin/geo-settings', label: 'Geo', icon: Globe },
+		{ href: '/admin/consent', label: 'Consent', icon: ShieldCheck },
 		{ href: '/admin/settings', label: 'Settings', icon: Settings },
 	];
 
@@ -40,7 +41,10 @@
 	let isActive = $derived.by(() => (href: string) => $page.url.pathname.startsWith(href));
 </script>
 
-<div class="min-h-screen bg-surface">
+<!-- Admin UI is English-only and always LTR. Force dir=ltr so RTL locales
+     (Arabic) don't flip the admin layout — admins may have an em_locale
+     cookie set from earlier visits to public pages. -->
+<div class="min-h-screen bg-surface" dir="ltr">
 	<!-- Admin Header -->
 	<header class="bg-surface-50/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-40">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

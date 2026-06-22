@@ -149,7 +149,7 @@
 			<div class="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
 				<h2 class="text-sm font-bold text-white">Recent Users</h2>
 				<a href="/admin/users" class="text-[10px] font-bold text-primary-400 hover:text-primary-300 uppercase tracking-wider flex items-center gap-1 transition-colors">
-					All <ArrowRight class="w-3 h-3" />
+					All <ArrowRight class="w-3 h-3 rtl:-scale-x-100" />
 				</a>
 			</div>
 			{#if data.recentUsers.length > 0}
@@ -177,7 +177,7 @@
 			<div class="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
 				<h2 class="text-sm font-bold text-white">Recent Responses</h2>
 				<a href="/admin/responses" class="text-[10px] font-bold text-primary-400 hover:text-primary-300 uppercase tracking-wider flex items-center gap-1 transition-colors">
-					All <ArrowRight class="w-3 h-3" />
+					All <ArrowRight class="w-3 h-3 rtl:-scale-x-100" />
 				</a>
 			</div>
 			{#if data.recentResponses.length > 0}
@@ -208,7 +208,7 @@
 			<div class="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
 				<h2 class="text-sm font-bold text-white">Recent Conversions</h2>
 				<a href="/admin/analytics" class="text-[10px] font-bold text-primary-400 hover:text-primary-300 uppercase tracking-wider flex items-center gap-1 transition-colors">
-					All <ArrowRight class="w-3 h-3" />
+					All <ArrowRight class="w-3 h-3 rtl:-scale-x-100" />
 				</a>
 			</div>
 			<div class="overflow-x-auto">

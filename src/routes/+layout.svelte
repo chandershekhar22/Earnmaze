@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page, navigating } from '$app/stores';
+	import { beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { themeStore } from '$lib/stores/theme.svelte';
@@ -12,7 +13,41 @@
 	let { children }: { children: Snippet } = $props();
 
 	let mounted = $state(false);
-	let appliedTheme = $state<'light' | 'dark'>('light');
+
+	// Locales that get a URL prefix. Mirrors the server-side hook config.
+	const LOCALE_PREFIXED = ['es', 'fr', 'pt', 'ar'];
+
+	// SvelteKit's SPA router intercepts popstate (browser Back/Forward) and
+	// fetches `<route>/__data.json` instead of doing a full document reload.
+	// That data fetch DOES get our cookie-locale redirect server-side, but
+	// SvelteKit then renders the popped-to URL in the address bar (the un-
+	// prefixed one) regardless. The cleanest fix is to detect the mismatch
+	// up front and force a full-document navigation to the localized URL —
+	// the server then renders the correct locale and the URL bar matches.
+	beforeNavigate((nav) => {
+		console.log('[beforeNavigate]', { type: nav.type, to: nav.to?.url.pathname });
+		if (nav.type !== 'popstate' || !nav.to) return;
+		const pathname = nav.to.url.pathname;
+		if (
+			pathname.startsWith('/admin') ||
+			pathname.startsWith('/client') ||
+			pathname.startsWith('/moderator') ||
+			pathname.startsWith('/api/') ||
+			pathname.startsWith('/_app/')
+		)
+			return;
+		const cookieLocale = document.cookie
+			.split('; ')
+			.find((c) => c.startsWith('em_locale='))
+			?.split('=')[1];
+		console.log('[beforeNavigate] cookie:', cookieLocale, 'path:', pathname);
+		if (!cookieLocale || !LOCALE_PREFIXED.includes(cookieLocale)) return;
+		if (/^\/(es|fr|pt|ar)(\/|$)/.test(pathname)) return;
+		const target = `/${cookieLocale}${pathname === '/' ? '' : pathname}${nav.to.url.search}`;
+		console.log('[beforeNavigate] FORCING RELOAD to', target);
+		nav.cancel();
+		window.location.assign(target);
+	});
 
 	onMount(() => {
 		mounted = true;
@@ -25,12 +60,30 @@
 			authStore.checkAuth();
 		}
 
-		// Initialize theme
+		// Initialize theme — applies the `dark` class to <html> directly
 		themeStore.initialize();
-		appliedTheme = themeStore.getAppliedTheme();
 
 		// Log application startup
 		Logger.root.info({ context: 'app', route: $page.route.id, url: $page.url.pathname, timestamp: new Date().toISOString() }, 'Application mounted and initialized');
+
+		// Force reload when the page is restored from bfcache (back/forward
+		// cache) and the active locale no longer matches the user's cookie
+		// preference. Without this, clicking Browser Back after a language
+		// switch shows the page in the previous locale because the bfcache
+		// restore skips the server entirely (and our cookie-driven redirect
+		// in hooks.server.ts never runs).
+		const onPageShow = (e: PageTransitionEvent) => {
+			if (!e.persisted) return;
+			const cookieLocale = document.cookie
+				.split('; ')
+				.find((c) => c.startsWith('em_locale='))
+				?.split('=')[1];
+			if (cookieLocale && cookieLocale !== document.documentElement.lang) {
+				location.reload();
+			}
+		};
+		window.addEventListener('pageshow', onPageShow);
+		return () => window.removeEventListener('pageshow', onPageShow);
 	});
 
 	// Track route changes
@@ -49,12 +102,6 @@
 		}
 	});
 
-	// Update applied theme when themeStore changes
-	$effect(() => {
-		if (mounted) {
-			appliedTheme = themeStore.getAppliedTheme();
-		}
-	});
 </script>
 
 <svelte:head>
@@ -68,20 +115,16 @@
 <ErrorBoundary>
 	<!-- Global navigation loader -->
 	{#if $navigating}
-		<div class="fixed top-0 left-0 right-0 z-[100]">
+		<div class="fixed top-0 start-0 end-0 z-[100]">
 			<div class="h-0.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 nav-progress"></div>
 		</div>
 	{/if}
 
-	{#if mounted}
-		<div class="min-h-screen {appliedTheme === 'dark' ? 'dark' : ''}">
-			{@render children()}
-			<ToastContainer />
-		</div>
-	{:else}
-		<!-- Loading state -->
-		<div class="min-h-screen flex items-center justify-center bg-surface">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
-		</div>
-	{/if}
+	<!-- Render content unconditionally so SSR delivers real HTML to crawlers
+	     and social-card scrapers. The theme class is set on <html> by
+	     themeStore.applyTheme() in onMount, not on a wrapping div. -->
+	<div class="min-h-screen">
+		{@render children()}
+		<ToastContainer />
+	</div>
 </ErrorBoundary>

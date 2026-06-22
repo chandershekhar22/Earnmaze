@@ -4,9 +4,13 @@ import { toastStore } from './toast.svelte';
 import { pointsStore } from './points.svelte';
 
 class AuthStore {
+	// Initialize as loading so any panelist/auth-gated layout waits for the
+	// initial checkAuth() to resolve before deciding to redirect. Without
+	// this, a child layout's onMount can fire before the root layout has
+	// even started checkAuth, causing a brief redirect to /login.
 	state = $state<AuthState>({
 		user: null,
-		isLoading: false,
+		isLoading: true,
 		error: null
 	});
 

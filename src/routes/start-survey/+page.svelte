@@ -93,7 +93,7 @@
 						<span>Redirecting...</span>
 					{:else}
 						<span>Start Survey Now</span>
-						<ArrowRight class="w-5 h-5" />
+						<ArrowRight class="w-5 h-5 rtl:-scale-x-100" />
 					{/if}
 				</button>
 			</div>

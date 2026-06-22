@@ -13,6 +13,23 @@
 
 	// Step 1: Send OTP
 	let turnstileToken = $state('');
+	let needsInteraction = $state(false);
+	let turnstileRef = $state<{ reset: () => void } | null>(null);
+
+	async function waitForToken(): Promise<string | null> {
+		if (turnstileToken) return turnstileToken;
+		const start = Date.now();
+		while (!turnstileToken) {
+			const timeoutMs = needsInteraction ? 60000 : 8000;
+			if (Date.now() - start >= timeoutMs) break;
+			await new Promise((r) => setTimeout(r, 100));
+		}
+		return turnstileToken || null;
+	}
+
+	function handleBeforeInteractive() {
+		needsInteraction = true;
+	}
 	let otpExpiresAt = $state<string | null>(null);
 
 	// Step 2: Verify OTP
@@ -25,6 +42,12 @@
 
 	// Step 3: Set password
 	let password = $state('');
+	// Required acknowledgements at upgrade — same as register form.
+	let ageVerified = $state(false);
+	let tosAccepted = $state(false);
+	let privacyAccepted = $state(false);
+	// Optional marketing opt-in (UNCHECKED by default).
+	let marketingConsent = $state(false);
 	let confirmPassword = $state('');
 
 	// Common
@@ -85,25 +108,31 @@
 
 	function handleTurnstileVerify(token: string) {
 		turnstileToken = token;
+		needsInteraction = false;
 		error = '';
 	}
 
 	// Step 1: Send OTP
 	async function handleSendOtp() {
-		if (!turnstileToken) {
-			error = 'Please complete the verification';
+		isLoading = true;
+		error = '';
+
+		const token = await waitForToken();
+		if (!token) {
+			isLoading = false;
+			error = needsInteraction
+				? 'Please complete the security check below.'
+				: 'Verification timed out. Please refresh and try again.';
 			return;
 		}
 
-		isLoading = true;
-		error = '';
 		Logger.root.info({ context: 'security' }, 'Sending OTP for guest upgrade');
 
 		try {
 			const response = await fetch('/api/guest/upgrade/start', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ turnstileToken }),
+				body: JSON.stringify({ turnstileToken: token }),
 			});
 
 			const result = (await response.json()) as GuestUpgradeStartResponse;
@@ -114,6 +143,9 @@
 				otpExpiresAt = result.data.expiresAt;
 				currentStep = 2;
 				error = '';
+				// Token consumed by Cloudflare; reset widget so resend can get a fresh one
+				turnstileRef?.reset();
+				turnstileToken = '';
 				// Set rate limit timer
 				resendCountdown = 60;
 
@@ -190,13 +222,23 @@
 
 		isLoading = true;
 		error = '';
+
+		const token = await waitForToken();
+		if (!token) {
+			isLoading = false;
+			error = needsInteraction
+				? 'Please complete the security check below.'
+				: 'Verification timed out. Please refresh and try again.';
+			return;
+		}
+
 		Logger.root.info({ context: 'security' }, 'Resending OTP for guest upgrade');
 
 		try {
 			const response = await fetch('/api/guest/upgrade/start', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ turnstileToken }),
+				body: JSON.stringify({ turnstileToken: token }),
 			});
 
 			const result = (await response.json()) as GuestUpgradeStartResponse;
@@ -208,6 +250,10 @@
 				otp = '';
 				otpAttempts = 0;
 				error = '';
+
+				// Token consumed; reset widget so the next resend gets a fresh token
+				turnstileRef?.reset();
+				turnstileToken = '';
 
 				// Set rate limit timer
 				resendCountdown = 60;
@@ -265,6 +311,11 @@
 			return;
 		}
 
+		if (!ageVerified || !tosAccepted || !privacyAccepted) {
+			error = 'Please confirm age and accept the Terms and Privacy Policy';
+			return;
+		}
+
 		isLoading = true;
 		error = '';
 		Logger.root.info({ context: 'security' }, 'Setting password and finalizing upgrade');
@@ -273,7 +324,14 @@
 			const response = await fetch('/api/guest/upgrade/set-password', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ upgradeToken, password }),
+				body: JSON.stringify({
+					upgradeToken,
+					password,
+					ageVerified: true,
+					tosAccepted: true,
+					privacyAccepted: true,
+					marketingConsent,
+				}),
 			});
 
 			const result = await response.json();
@@ -395,19 +453,19 @@
 				<h3 class="font-bold text-lg mb-3">Full Account Benefits:</h3>
 				<ul class="space-y-2 text-sm">
 				<li class="flex items-start">
-					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
+					<Check class="h-5 w-5 me-2 flex-shrink-0" />
 					Save and track all your points permanently
 				</li>
 				<li class="flex items-start">
-					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
+					<Check class="h-5 w-5 me-2 flex-shrink-0" />
 					Redeem rewards and gift cards
 				</li>
 				<li class="flex items-start">
-					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
+					<Check class="h-5 w-5 me-2 flex-shrink-0" />
 					Access complete survey history
 				</li>
 				<li class="flex items-start">
-					<Check class="h-5 w-5 mr-2 flex-shrink-0" />
+					<Check class="h-5 w-5 me-2 flex-shrink-0" />
 					Unlock tier rewards and bonuses
 				</li>
 			</ul>
@@ -422,7 +480,7 @@
 						<div class="flex-shrink-0">
 							<AlertTriangle class="h-5 w-5 text-amber-400" />
 						</div>
-						<div class="ml-3">
+						<div class="ms-3">
 							<h3 class="text-sm font-medium text-amber-300">Account Already Exists</h3>
 							<p class="text-sm text-amber-400/80 mt-1">
 								An account with this email already has a password set. Please <a href="/login" class="underline font-semibold hover:text-amber-200">log in with your password</a> instead.
@@ -466,7 +524,16 @@
 					</div>
 
 					<div>
-						<Turnstile onVerify={handleTurnstileVerify} />
+						<div class="flex flex-col items-center gap-2">
+						{#if needsInteraction}
+							<p class="text-sm text-amber-400">Please complete the security check below.</p>
+						{/if}
+						<Turnstile
+							bind:this={turnstileRef}
+							onVerify={handleTurnstileVerify}
+							onBeforeInteractive={handleBeforeInteractive}
+						/>
+					</div>
 					</div>
 
 					<div class="flex space-x-3">
@@ -481,7 +548,7 @@
 						<button
 							type="button"
 							onclick={handleSendOtp}
-							disabled={isLoading || !turnstileToken || isPasswordAlreadySet}
+							disabled={isLoading || isPasswordAlreadySet}
 							class="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{isLoading ? 'Sending...' : 'Send Code'}
@@ -628,6 +695,64 @@
 						/>
 					</div>
 
+					<!-- Required acknowledgements -->
+					<div class="p-4 bg-surface-200 rounded-xl space-y-3">
+						<label class="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={ageVerified}
+								required
+								disabled={isLoading || isUpgradeTokenExpired()}
+								class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+							/>
+							<span class="text-sm text-neutral-400 leading-relaxed">
+								I confirm I am at least 18 years old.
+							</span>
+						</label>
+						<label class="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={tosAccepted}
+								required
+								disabled={isLoading || isUpgradeTokenExpired()}
+								class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+							/>
+							<span class="text-sm text-neutral-400 leading-relaxed">
+								I agree to the
+								<a href="/terms-of-service" class="link" target="_blank" rel="noopener">Terms of Service</a>.
+							</span>
+						</label>
+						<label class="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={privacyAccepted}
+								required
+								disabled={isLoading || isUpgradeTokenExpired()}
+								class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+							/>
+							<span class="text-sm text-neutral-400 leading-relaxed">
+								I agree to the
+								<a href="/privacy-policy" class="link" target="_blank" rel="noopener">Privacy Policy</a>.
+							</span>
+						</label>
+					</div>
+
+					<!-- Optional marketing opt-in (UNCHECKED by default) -->
+					<div class="p-4 bg-surface-200 rounded-xl">
+						<label class="flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={marketingConsent}
+								disabled={isLoading || isUpgradeTokenExpired()}
+								class="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500 border-white/10 rounded bg-surface-50 flex-shrink-0"
+							/>
+							<span class="text-sm text-neutral-400 leading-relaxed">
+								Send me product updates and offers from EarnMaze. You can opt
+								out any time.
+							</span>
+						</label>
+					</div>
+
 					<div class="flex space-x-3">
 						<button
 							type="button"
@@ -640,7 +765,7 @@
 						<button
 							type="button"
 							onclick={handleSetPassword}
-							disabled={isLoading || !password || !confirmPassword || isUpgradeTokenExpired()}
+							disabled={isLoading || !password || !confirmPassword || !ageVerified || !tosAccepted || !privacyAccepted || isUpgradeTokenExpired()}
 							class="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{isLoading ? 'Creating Account...' : 'Create Account'}

@@ -67,8 +67,8 @@
 						<th class="table-th">Type</th>
 						<th class="table-th">Panelist</th>
 						<th class="table-th">Description</th>
-						<th class="table-th text-right">Points</th>
-						<th class="table-th text-right">Balance</th>
+						<th class="table-th text-end">Points</th>
+						<th class="table-th text-end">Balance</th>
 						<th class="table-th">Reference</th>
 						<th class="table-th">Date</th>
 					</tr>
@@ -90,12 +90,12 @@
 							<td class="table-td text-sm text-neutral-300 max-w-[200px] truncate">
 								{tx.description}
 							</td>
-							<td class="table-td text-right">
+							<td class="table-td text-end">
 								<span class="font-bold {tx.points > 0 ? 'text-emerald-400' : 'text-rose-400'}">
 									{tx.points > 0 ? '+' : ''}{tx.points}
 								</span>
 							</td>
-							<td class="table-td text-right text-neutral-500 text-sm">
+							<td class="table-td text-end text-neutral-500 text-sm">
 								{tx.currentBalance}
 							</td>
 							<td class="table-td text-[10px] text-neutral-600 font-mono">
@@ -129,7 +129,7 @@
 							href="/admin/transactions?page={data.pagination.page - 1}{data.filters.type !== 'all' ? `&type=${data.filters.type}` : ''}"
 							class="btn-secondary !text-xs"
 						>
-							<ArrowLeft class="w-3.5 h-3.5" /> Prev
+							<ArrowLeft class="w-3.5 h-3.5 rtl:-scale-x-100" /> Prev
 						</a>
 					{/if}
 					{#if data.pagination.page < data.pagination.totalPages}
@@ -137,7 +137,7 @@
 							href="/admin/transactions?page={data.pagination.page + 1}{data.filters.type !== 'all' ? `&type=${data.filters.type}` : ''}"
 							class="btn-secondary !text-xs"
 						>
-							Next <ArrowRight class="w-3.5 h-3.5" />
+							Next <ArrowRight class="w-3.5 h-3.5 rtl:-scale-x-100" />
 						</a>
 					{/if}
 				</div>

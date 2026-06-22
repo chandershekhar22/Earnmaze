@@ -8,6 +8,7 @@
 	let email = $state('');
 	let password = $state('');
 	let name = $state('');
+	let agreedTerms = $state(false);
 	let submitting = $state(false);
 	let turnstileToken = $state<string | null>(null);
 	let turnstileRef: { reset: () => void } | undefined = $state();
@@ -65,6 +66,7 @@
 	async function submitAuth(e: SubmitEvent) {
 		e.preventDefault();
 		if (submitting || !turnstileToken) return;
+		if (mode === 'signup' && !agreedTerms) return;
 		submitting = true;
 		const result =
 			mode === 'signin'
@@ -74,7 +76,10 @@
 						password,
 						name,
 						turnstileToken,
-						registrationSource: 'refer-earn-modal'
+						registrationSource: 'refer-earn-modal',
+						ageVerified: true,
+						tosAccepted: true,
+						privacyAccepted: true
 					});
 		submitting = false;
 
@@ -248,6 +253,17 @@
 					required
 				/>
 
+				{#if mode === 'signup'}
+					<label class="re-consent">
+						<input type="checkbox" bind:checked={agreedTerms} required />
+						<span>
+							I am 18 or older and agree to the
+							<a href="/terms" target="_blank" rel="noopener">Terms</a> and
+							<a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+						</span>
+					</label>
+				{/if}
+
 				<div class="re-turnstile">
 					<Turnstile
 						bind:this={turnstileRef}
@@ -266,7 +282,7 @@
 						!email ||
 						!password ||
 						!turnstileToken ||
-						(mode === 'signup' && !name)}
+						(mode === 'signup' && (!name || !agreedTerms))}
 				>
 					{submitting ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
 					{#if !submitting}<Icon name="arrow" />{/if}
@@ -529,6 +545,23 @@
 		outline: none;
 		border-color: var(--acc);
 		background: rgba(255, 255, 255, 0.05);
+	}
+	.re-consent {
+		display: flex;
+		align-items: flex-start;
+		gap: 9px;
+		margin-top: 16px;
+		font-size: 12.5px;
+		line-height: 1.4;
+		color: rgba(255, 255, 255, 0.7);
+	}
+	.re-consent input {
+		margin-top: 2px;
+		accent-color: #b06bff;
+	}
+	.re-consent a {
+		color: #b06bff;
+		text-decoration: underline;
 	}
 	.re-turnstile {
 		display: flex;

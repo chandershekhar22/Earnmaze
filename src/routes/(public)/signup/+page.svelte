@@ -58,9 +58,9 @@
 
 	<!-- Blobs -->
 	<div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-		<div class="absolute -top-20 left-[5%] w-[500px] h-[500px] bg-white/10 rounded-full blur-[100px] fl-a"></div>
-		<div class="absolute bottom-[-10%] right-[5%] w-[400px] h-[400px] bg-amber-400/10 rounded-full blur-[90px] fl-b"></div>
-		<div class="absolute top-[40%] left-[50%] w-[300px] h-[300px] bg-cyan-400/8 rounded-full blur-[80px] fl-c"></div>
+		<div class="absolute -top-20 start-[5%] w-[500px] h-[500px] bg-white/10 rounded-full blur-[100px] fl-a"></div>
+		<div class="absolute bottom-[-10%] end-[5%] w-[400px] h-[400px] bg-amber-400/10 rounded-full blur-[90px] fl-b"></div>
+		<div class="absolute top-[40%] start-[50%] w-[300px] h-[300px] bg-cyan-400/8 rounded-full blur-[80px] fl-c"></div>
 	</div>
 
 	<div class="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
@@ -87,7 +87,7 @@
 		<div class="r-3 flex flex-col sm:flex-row gap-3 justify-center mb-8">
 			<a href={registerUrl()} class="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-violet-700 font-black text-lg rounded-xl shadow-2xl shadow-black/20 hover:bg-neutral-100 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
 				Sign Up Free
-				<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+				<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform rtl:-scale-x-100" />
 			</a>
 		</div>
 
@@ -232,8 +232,8 @@
 <section class="relative py-16 md:py-24 overflow-hidden">
 	<div class="absolute inset-0 bg-gradient-to-br from-indigo-700 via-violet-600 to-fuchsia-600 grad-x"></div>
 	<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-		<div class="absolute top-[10%] left-[10%] w-40 h-40 bg-white/5 rounded-full blur-2xl glow-p"></div>
-		<div class="absolute bottom-[10%] right-[10%] w-32 h-32 bg-white/5 rounded-full blur-2xl glow-p" style="animation-delay:2s"></div>
+		<div class="absolute top-[10%] start-[10%] w-40 h-40 bg-white/5 rounded-full blur-2xl glow-p"></div>
+		<div class="absolute bottom-[10%] end-[10%] w-32 h-32 bg-white/5 rounded-full blur-2xl glow-p" style="animation-delay:2s"></div>
 	</div>
 
 	<div class="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
@@ -248,7 +248,7 @@
 
 		<a href={registerUrl()} class="group inline-flex items-center justify-center gap-2 px-10 py-5 bg-white text-violet-700 font-black text-lg rounded-xl shadow-2xl shadow-black/20 hover:bg-neutral-100 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
 			Create Free Account
-			<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+			<ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform rtl:-scale-x-100" />
 		</a>
 
 		<div class="mt-6 flex flex-wrap justify-center gap-5 text-xs text-white/50">

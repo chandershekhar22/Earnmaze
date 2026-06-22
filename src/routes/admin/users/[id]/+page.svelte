@@ -8,7 +8,23 @@
 
 	let { data }: { data: PageData } = $props();
 	import { Users, Share2 } from '@lucide/svelte';
-	let activeTab = $state<'transactions' | 'surveys' | 'tickets' | 'referrals'>('transactions');
+	let activeTab = $state<'transactions' | 'surveys' | 'tickets' | 'referrals' | 'consent'>('transactions');
+
+	const channelLabel: Record<string, string> = {
+		marketing: 'Marketing',
+		'survey-data-sharing': 'Survey data sharing',
+		newsletter: 'Newsletter',
+	};
+	const sourceLabel: Record<string, string> = {
+		'register-form': 'Register page',
+		'earn-points-form': 'Earn-points form',
+		'guest-upgrade-form': 'Guest upgrade',
+		'forgot-password-flow': 'Forgot password',
+		'survey-consent-page': 'Survey consent',
+		'profile-page': 'Profile settings',
+		'unsubscribe-link': 'Unsubscribe link',
+		'admin-action': 'Admin action',
+	};
 	let idCopied = $state(false);
 
 	function copyPanelistId() {
@@ -58,7 +74,7 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
 	<!-- Back -->
 	<a href="/admin/users" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-white mb-6 transition-colors">
-		<ArrowLeft class="w-3.5 h-3.5" /> Back to Users
+		<ArrowLeft class="w-3.5 h-3.5 rtl:-scale-x-100" /> Back to Users
 	</a>
 
 	<!-- Profile Header -->
@@ -155,16 +171,19 @@
 	<!-- Tabs -->
 	<div class="tab-group max-w-md mb-5">
 		<button onclick={() => activeTab = 'transactions'} class={activeTab === 'transactions' ? 'tab-active' : 'tab'}>
-			<Coins class="w-3.5 h-3.5 mr-1.5 inline" /> Transactions ({data.transactions.length})
+			<Coins class="w-3.5 h-3.5 me-1.5 inline" /> Transactions ({data.transactions.length})
 		</button>
 		<button onclick={() => activeTab = 'surveys'} class={activeTab === 'surveys' ? 'tab-active' : 'tab'}>
-			<ClipboardList class="w-3.5 h-3.5 mr-1.5 inline" /> Surveys ({data.surveys.length})
+			<ClipboardList class="w-3.5 h-3.5 me-1.5 inline" /> Surveys ({data.surveys.length})
 		</button>
 		<button onclick={() => activeTab = 'tickets'} class={activeTab === 'tickets' ? 'tab-active' : 'tab'}>
-			<HelpCircle class="w-3.5 h-3.5 mr-1.5 inline" /> Tickets ({data.tickets.length})
+			<HelpCircle class="w-3.5 h-3.5 me-1.5 inline" /> Tickets ({data.tickets.length})
 		</button>
 		<button onclick={() => activeTab = 'referrals'} class={activeTab === 'referrals' ? 'tab-active' : 'tab'}>
-			<Share2 class="w-3.5 h-3.5 mr-1.5 inline" /> Referrals ({data.referrals.length})
+			<Share2 class="w-3.5 h-3.5 me-1.5 inline" /> Referrals ({data.referrals.length})
+		</button>
+		<button onclick={() => activeTab = 'consent'} class={activeTab === 'consent' ? 'tab-active' : 'tab'}>
+			<Shield class="w-3.5 h-3.5 me-1.5 inline" /> Consent
 		</button>
 	</div>
 
@@ -183,8 +202,8 @@
 							<tr class="table-header">
 								<th class="table-th">Type</th>
 								<th class="table-th">Description</th>
-								<th class="table-th text-right">Points</th>
-								<th class="table-th text-right">Balance</th>
+								<th class="table-th text-end">Points</th>
+								<th class="table-th text-end">Balance</th>
 								<th class="table-th">Ref</th>
 								<th class="table-th">Date</th>
 							</tr>
@@ -195,8 +214,8 @@
 								<tr class="table-row">
 									<td class="table-td"><span class="badge {s.bg} {s.color} text-[10px]">{tx.type}</span></td>
 									<td class="table-td text-sm text-neutral-300 max-w-[200px] truncate">{tx.description}</td>
-									<td class="table-td text-right font-bold {tx.points > 0 ? 'text-emerald-400' : 'text-rose-400'}">{tx.points > 0 ? '+' : ''}{tx.points}</td>
-									<td class="table-td text-right text-neutral-500">{tx.currentBalance}</td>
+									<td class="table-td text-end font-bold {tx.points > 0 ? 'text-emerald-400' : 'text-rose-400'}">{tx.points > 0 ? '+' : ''}{tx.points}</td>
+									<td class="table-td text-end text-neutral-500">{tx.currentBalance}</td>
 									<td class="table-td text-[10px] text-neutral-600 font-mono">{tx.referenceType || '--'}</td>
 									<td class="table-td text-xs text-neutral-500 whitespace-nowrap">{formatDate(tx.createdAt)}</td>
 								</tr>
@@ -223,7 +242,7 @@
 							<tr class="table-header">
 								<th class="table-th">Survey ID</th>
 								<th class="table-th">Status</th>
-								<th class="table-th text-right">Points</th>
+								<th class="table-th text-end">Points</th>
 								<th class="table-th">Started</th>
 								<th class="table-th">Completed</th>
 							</tr>
@@ -233,7 +252,7 @@
 								<tr class="table-row">
 									<td class="table-td text-xs font-mono text-neutral-400">{s.surveyId?.slice(0, 8) ?? '--'}...</td>
 									<td class="table-td"><span class="badge {getSurveyStatusStyle(s.status)} text-[10px]">{s.status}</span></td>
-									<td class="table-td text-right font-bold text-white">{s.awardedPoints ?? 0}</td>
+									<td class="table-td text-end font-bold text-white">{s.awardedPoints ?? 0}</td>
 									<td class="table-td text-xs text-neutral-500 whitespace-nowrap">{formatDate(s.startedAt)}</td>
 									<td class="table-td text-xs text-neutral-500 whitespace-nowrap">{formatDate(s.completedAt)}</td>
 								</tr>
@@ -293,5 +312,122 @@
 				{/each}
 			</div>
 		{/if}
+	{/if}
+
+	<!-- Consent Tab -->
+	{#if activeTab === 'consent'}
+		<!-- Current state -->
+		<div class="card mb-4">
+			<h3 class="text-sm font-bold text-white mb-4">Current state</h3>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+				<div class="p-3 bg-surface-200 rounded-xl">
+					<div class="text-[10px] text-neutral-600 uppercase tracking-wider mb-1">Age verified</div>
+					{#if data.consent.ageVerifiedAt}
+						<div class="flex items-center gap-2 text-emerald-400 text-sm font-medium">
+							<Check class="w-4 h-4" />
+							{formatDate(data.consent.ageVerifiedAt)}
+						</div>
+					{:else}
+						<div class="flex items-center gap-2 text-neutral-500 text-sm">
+							<X class="w-4 h-4" />
+							Not verified
+						</div>
+					{/if}
+				</div>
+				<div class="p-3 bg-surface-200 rounded-xl">
+					<div class="text-[10px] text-neutral-600 uppercase tracking-wider mb-1">Terms of Service</div>
+					{#if data.consent.tosAcceptedAt}
+						<div class="flex items-center gap-2 text-emerald-400 text-sm font-medium">
+							<Check class="w-4 h-4" />
+							{formatDate(data.consent.tosAcceptedAt)}
+						</div>
+					{:else}
+						<div class="flex items-center gap-2 text-neutral-500 text-sm">
+							<X class="w-4 h-4" />
+							Not accepted
+						</div>
+					{/if}
+				</div>
+				<div class="p-3 bg-surface-200 rounded-xl">
+					<div class="text-[10px] text-neutral-600 uppercase tracking-wider mb-1">Privacy Policy</div>
+					{#if data.consent.privacyAcceptedAt}
+						<div class="flex items-center gap-2 text-emerald-400 text-sm font-medium">
+							<Check class="w-4 h-4" />
+							{formatDate(data.consent.privacyAcceptedAt)}
+						</div>
+					{:else}
+						<div class="flex items-center gap-2 text-neutral-500 text-sm">
+							<X class="w-4 h-4" />
+							Not accepted
+						</div>
+					{/if}
+				</div>
+				<div class="p-3 bg-surface-200 rounded-xl">
+					<div class="text-[10px] text-neutral-600 uppercase tracking-wider mb-1">Survey-data sharing</div>
+					{#if data.consent.surveyDataSharingAcceptedAt}
+						<div class="flex items-center gap-2 text-emerald-400 text-sm font-medium">
+							<Check class="w-4 h-4" />
+							{formatDate(data.consent.surveyDataSharingAcceptedAt)}
+						</div>
+					{:else}
+						<div class="flex items-center gap-2 text-neutral-500 text-sm">
+							<X class="w-4 h-4" />
+							Not accepted
+						</div>
+					{/if}
+				</div>
+				<div class="p-3 bg-surface-200 rounded-xl sm:col-span-2">
+					<div class="text-[10px] text-neutral-600 uppercase tracking-wider mb-1">Marketing email</div>
+					{#if data.consent.marketingConsent}
+						<div class="flex items-center gap-2 text-emerald-400 text-sm font-medium">
+							<Check class="w-4 h-4" />
+							Opted in
+							{#if data.consent.marketingConsentAt}
+								<span class="text-neutral-500 text-xs">since {formatDate(data.consent.marketingConsentAt)}</span>
+							{/if}
+						</div>
+					{:else}
+						<div class="flex items-center gap-2 text-neutral-500 text-sm">
+							<X class="w-4 h-4" />
+							Not opted in
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+
+		<!-- Audit log timeline -->
+		<div class="card">
+			<h3 class="text-sm font-bold text-white mb-4">Audit log ({data.consent.events.length})</h3>
+			{#if data.consent.events.length === 0}
+				<div class="text-center py-8 text-sm text-neutral-500">
+					No consent events recorded for this user yet.
+				</div>
+			{:else}
+				<div class="space-y-2">
+					{#each data.consent.events as ev}
+						<div class="flex items-start gap-3 p-3 bg-surface-200 rounded-xl text-xs">
+							<div class="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 {ev.granted ? 'bg-emerald-400' : 'bg-rose-400'}"></div>
+							<div class="flex-1 min-w-0">
+								<div class="flex items-baseline gap-2 flex-wrap">
+									<span class="font-semibold {ev.granted ? 'text-emerald-400' : 'text-rose-400'}">
+										{ev.granted ? 'Granted' : 'Revoked'}
+									</span>
+									<span class="text-neutral-300">{channelLabel[ev.channel] ?? ev.channel}</span>
+									<span class="text-neutral-600">via</span>
+									<span class="text-neutral-400">{sourceLabel[ev.source ?? ''] ?? ev.source ?? 'unknown'}</span>
+								</div>
+								{#if ev.ipAddress}
+									<div class="text-neutral-600 mt-0.5">
+										IP: <span class="font-mono">{ev.ipAddress}</span>
+									</div>
+								{/if}
+							</div>
+							<div class="text-neutral-500 tabular-nums flex-shrink-0">{formatDate(ev.createdAt)}</div>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
 	{/if}
 </div>

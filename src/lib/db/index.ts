@@ -6,16 +6,26 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 const pool = new pg.Pool({
 	connectionString: process.env.DATABASE_URL!,
 	max: 20,
+	min: 2, // Maintain minimum connections to avoid cold starts
 	idleTimeoutMillis: 30_000,
-	connectionTimeoutMillis: 5_000,
+	connectionTimeoutMillis: 10_000, // Increased from 5s to 10s for better reliability
 	keepAlive: true,
 	keepAliveInitialDelayMillis: 10_000,
+	application_name: 'em-panel', // Helpful for debugging
+	ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
-// Silently handle pool errors to prevent unhandled rejection crashes
+// Handle pool errors to prevent unhandled rejection crashes
 pool.on('error', (err: Error) => {
 	console.error('[db] Pool connection error:', err.message);
 });
+
+// Log when connections are acquired/released (only in dev)
+if (process.env.NODE_ENV === 'development') {
+	pool.on('connect', () => {
+		console.log('[db] New pool connection established');
+	});
+}
 
 export const db = drizzle(pool);
 

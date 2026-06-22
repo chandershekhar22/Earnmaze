@@ -5,6 +5,8 @@
 		Loader, BookOpen, Plus, ArrowLeft, CircleCheckBig, X
 	} from '@lucide/svelte';
 	import RichTextEditor from '$lib/components/RichTextEditor.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 
 	let { data }: { data: PageData } = $props();
 
@@ -102,22 +104,31 @@
 	}
 
 	function formatStatus(status: string) {
-		return status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+		const labels: Record<string, string> = {
+			open: m.sup_status_open(),
+			in_progress: m.sup_status_in_progress(),
+			resolved: m.sup_status_resolved(),
+			closed: m.sup_status_closed(),
+		};
+		return labels[status] || status.replace('_', ' ');
 	}
 
 	function formatDate(dateString: string) {
-		return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+		return new Date(dateString).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 	}
 
+	// Locale-aware relative time using Intl.RelativeTimeFormat.
 	function relDate(dateString: string) {
+		const locale = getLocale();
 		const ms = Date.now() - new Date(dateString).getTime();
-		const m = Math.floor(ms / 60000);
-		if (m < 1) return 'just now';
-		if (m < 60) return `${m}m ago`;
-		const h = Math.floor(m / 60);
-		if (h < 24) return `${h}h ago`;
-		const d = Math.floor(h / 24);
-		if (d < 7) return `${d}d ago`;
+		const minutes = Math.floor(ms / 60000);
+		const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+		if (minutes < 1) return rtf.format(0, 'second');
+		if (minutes < 60) return rtf.format(-minutes, 'minute');
+		const hours = Math.floor(minutes / 60);
+		if (hours < 24) return rtf.format(-hours, 'hour');
+		const days = Math.floor(hours / 24);
+		if (days < 7) return rtf.format(-days, 'day');
 		return formatDate(dateString);
 	}
 
@@ -126,7 +137,7 @@
 
 	async function handleSubmit() {
 		if (!subject.trim() || !stripHtml(message)) {
-			formMessage = 'Please fill in both subject and message.';
+			formMessage = m.sup_form_required();
 			formError = true;
 			return;
 		}
@@ -160,11 +171,11 @@
 				homeTab = 'tickets';
 				expandedTicket = result.data?.id ?? null;
 			} else {
-				formMessage = result.message || 'Failed to submit ticket.';
+				formMessage = result.message || m.sup_form_failed();
 				formError = true;
 			}
 		} catch {
-			formMessage = 'Failed to submit ticket. Please try again.';
+			formMessage = m.sup_form_failed_retry();
 			formError = true;
 		} finally {
 			submitting = false;
@@ -175,7 +186,7 @@
 </script>
 
 <svelte:head>
-	<title>Support - EarnMaze</title>
+	<title>{m.help_meta_title()}</title>
 </svelte:head>
 
 <div class="space-y-[22px] animate-fade-in">
@@ -184,7 +195,7 @@
 		<!-- ═══ CREATE TICKET VIEW ═══ -->
 		<div>
 			<button onclick={() => view = 'home'} class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-400 hover:text-white mb-4 transition-colors">
-				<ArrowLeft class="w-3.5 h-3.5" /> Back to Support
+				<ArrowLeft class="w-3.5 h-3.5 rtl:-scale-x-100" /> {m.sup_back()}
 			</button>
 
 			<div class="rounded-2xl bg-surface-50 border border-white/[0.07] p-6">
@@ -193,33 +204,33 @@
 						<Send class="w-5 h-5" />
 					</span>
 					<div>
-						<h2 class="text-[15px] font-semibold text-white tracking-tight">New Support Ticket</h2>
-						<p class="text-[12.5px] text-neutral-400">We'll get back to you as soon as possible</p>
+						<h2 class="text-[15px] font-semibold text-white tracking-tight">{m.sup_new_ticket_title()}</h2>
+						<p class="text-[12.5px] text-neutral-400">{m.sup_new_ticket_desc()}</p>
 					</div>
 				</div>
 
 				<div class="space-y-4">
 					<div>
-						<label for="subject" class="label">Subject</label>
-						<input id="subject" type="text" bind:value={subject} placeholder="Brief description of your issue" class="input w-full" maxlength="255" />
+						<label for="subject" class="label">{m.sup_subject()}</label>
+						<input id="subject" type="text" bind:value={subject} placeholder={m.sup_subject_placeholder()} class="input w-full" maxlength="255" />
 					</div>
 
 					<div>
-						<label class="label">Message</label>
-						<RichTextEditor bind:value={message} placeholder="Describe your issue in detail..." />
+						<label class="label">{m.sup_message()}</label>
+						<RichTextEditor bind:value={message} placeholder={m.sup_message_placeholder()} />
 					</div>
 
 					<!-- Related survey -->
 					{#if surveyAttempts.length > 0}
 						<div>
 							<label for="survey-ref" class="label">
-								Related survey <span class="text-neutral-600 font-normal">(optional)</span>
+								{m.sup_related_survey()} <span class="text-neutral-600 font-normal">{m.sup_optional()}</span>
 							</label>
 							<select id="survey-ref" bind:value={selectedSurveyId} class="select w-full">
-								<option value="">None</option>
+								<option value="">{m.sup_none()}</option>
 								{#each surveyAttempts as s}
 									<option value={String(s.id)}>
-										{s.surveyTitle} — {s.status}{s.awardedPoints > 0 ? ` (+${s.awardedPoints} pts)` : ''} — {new Date(s.startedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+										{s.surveyTitle} — {s.status}{s.awardedPoints > 0 ? ` (+${s.awardedPoints} ${m.dash_pts_short()})` : ''} — {new Date(s.startedAt).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' })}
 									</option>
 								{/each}
 							</select>
@@ -230,13 +241,13 @@
 					{#if transactions.length > 0}
 						<div>
 							<label for="transaction" class="label">
-								Related transaction <span class="text-neutral-600 font-normal">(optional)</span>
+								{m.sup_related_tx()} <span class="text-neutral-600 font-normal">{m.sup_optional()}</span>
 							</label>
 							<select id="transaction" bind:value={selectedTxId} class="select w-full">
-								<option value="">None</option>
+								<option value="">{m.sup_none()}</option>
 								{#each transactions as tx}
 									<option value={tx.id}>
-										{tx.description} ({tx.points > 0 ? '+' : ''}{tx.points} pts) — {new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+										{tx.description} ({tx.points > 0 ? '+' : ''}{tx.points} {m.dash_pts_short()}) — {new Date(tx.createdAt).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' })}
 									</option>
 								{/each}
 							</select>
@@ -251,12 +262,12 @@
 					{/if}
 
 					<div class="flex items-center gap-3 pt-2">
-						<button onclick={() => view = 'home'} class="btn-secondary">Cancel</button>
+						<button onclick={() => view = 'home'} class="btn-secondary">{m.common_cancel()}</button>
 						<button onclick={handleSubmit} disabled={submitting || !subject.trim() || !stripHtml(message)} class="btn-primary flex-1 sm:flex-none">
 							{#if submitting}
-								<Loader class="w-4 h-4 animate-spin" /> Submitting...
+								<Loader class="w-4 h-4 animate-spin" /> {m.sup_submitting()}
 							{:else}
-								<Send class="w-4 h-4" /> Submit Ticket
+								<Send class="w-4 h-4" /> {m.sup_submit()}
 							{/if}
 						</button>
 					</div>
@@ -274,25 +285,25 @@
 					<HelpCircle class="w-5 h-5" />
 				</span>
 				<div>
-					<h1 class="text-[18px] font-semibold text-white tracking-tight">Help & Support</h1>
-					<p class="text-[12.5px] text-neutral-400">Find answers or create a ticket</p>
+					<h1 class="text-[18px] font-semibold text-white tracking-tight">{m.sup_help_title()}</h1>
+					<p class="text-[12.5px] text-neutral-400">{m.sup_help_subtitle()}</p>
 				</div>
 			</div>
 			<button onclick={openCreateForm} class="btn-primary">
-				<Plus class="w-4 h-4" /> New ticket
+				<Plus class="w-4 h-4" /> {m.sup_new_ticket_btn()}
 			</button>
 		</div>
 
 		<!-- Segmented tabs -->
 		<div class="tab-group">
 			<button onclick={() => homeTab = 'faq'} class={homeTab === 'faq' ? 'tab-active' : 'tab'}>
-				<BookOpen class="w-[15px] h-[15px]" /> FAQ
+				<BookOpen class="w-[15px] h-[15px]" /> {m.sup_tab_faq()}
 				{#if faqs.length > 0}
 					<span class="font-mono text-[11px] opacity-80">{faqs.length}</span>
 				{/if}
 			</button>
 			<button onclick={() => homeTab = 'tickets'} class={homeTab === 'tickets' ? 'tab-active' : 'tab'}>
-				<MessageSquare class="w-[15px] h-[15px]" /> My Tickets
+				<MessageSquare class="w-[15px] h-[15px]" /> {m.sup_tab_my_tickets()}
 				{#if openTickets > 0}
 					<span class="ml-1 px-1.5 py-0.5 bg-primary-400/15 text-primary-400 rounded text-[9px] font-bold">{openTickets}</span>
 				{/if}
@@ -305,8 +316,8 @@
 				<div class="em-panel">
 					<div class="em-empty">
 						<span class="em-empty-icon"><BookOpen class="w-[30px] h-[30px]" /></span>
-						<h4 class="text-[17px] font-semibold text-white tracking-tight">No FAQs available yet</h4>
-						<p class="text-[13.5px] text-neutral-400">Check back later or create a support ticket.</p>
+						<h4 class="text-[17px] font-semibold text-white tracking-tight">{m.sup_no_faqs_title()}</h4>
+						<p class="text-[13.5px] text-neutral-400">{m.sup_no_faqs_desc()}</p>
 					</div>
 				</div>
 			{:else}
@@ -332,8 +343,8 @@
 				</div>
 
 				<div class="text-center pt-2">
-					<p class="text-xs text-neutral-500">Can't find what you need?
-						<button onclick={openCreateForm} class="text-primary-400 hover:text-primary-300 font-semibold transition-colors">Create a ticket</button>
+					<p class="text-xs text-neutral-500">{m.sup_cant_find()}
+						<button onclick={openCreateForm} class="text-primary-400 hover:text-primary-300 font-semibold transition-colors">{m.sup_create_ticket_link()}</button>
 					</p>
 				</div>
 			{/if}
@@ -345,10 +356,10 @@
 				<div class="em-panel">
 					<div class="em-empty">
 						<span class="em-empty-icon"><MessageSquare class="w-[30px] h-[30px]" /></span>
-						<h4 class="text-[17px] font-semibold text-white tracking-tight">No tickets yet</h4>
-						<p class="text-[13.5px] text-neutral-400 mb-4">Didn't find your answer in the FAQ?</p>
+						<h4 class="text-[17px] font-semibold text-white tracking-tight">{m.sup_no_tickets_title()}</h4>
+						<p class="text-[13.5px] text-neutral-400 mb-4">{m.sup_no_tickets_desc()}</p>
 						<button onclick={openCreateForm} class="btn-primary">
-							<Plus class="w-4 h-4" /> Create a ticket
+							<Plus class="w-4 h-4" /> {m.sup_create_ticket_btn()}
 						</button>
 					</div>
 				</div>
@@ -359,7 +370,7 @@
 							<button
 								type="button"
 								onclick={() => toggleTicket(ticket.id)}
-								class="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-white/[0.02] transition-colors"
+								class="w-full px-4 py-3 flex items-center gap-3 text-start hover:bg-white/[0.02] transition-colors"
 							>
 								<div class="w-2 h-2 rounded-full flex-shrink-0 {ticket.status === 'open' ? 'bg-primary-400' : ticket.status === 'in_progress' ? 'bg-amber-400' : ticket.status === 'resolved' ? 'bg-emerald-400' : 'bg-neutral-600'}"></div>
 								<div class="flex-1 min-w-0">
@@ -370,7 +381,7 @@
 									<div class="flex items-center gap-3 mt-0.5 text-[10px] text-neutral-600">
 										<span>{relDate(ticket.createdAt)}</span>
 										{#if ticket.adminReply}
-											<span class="text-emerald-400/70 font-semibold">Replied</span>
+											<span class="text-emerald-400/70 font-semibold">{m.sup_replied()}</span>
 										{/if}
 									</div>
 								</div>
@@ -384,7 +395,7 @@
 								<div class="px-4 pb-4 border-t border-white/[0.04] animate-fade-in">
 									<!-- Original message -->
 									<div class="mt-3">
-										<span class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Your message</span>
+										<span class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">{m.sup_your_message()}</span>
 										<div class="mt-1.5 bg-surface-200 rounded-lg p-3">
 											<div class="text-sm text-neutral-300 leading-relaxed ticket-content">{@html ticket.message}</div>
 										</div>
@@ -394,7 +405,7 @@
 									<!-- Admin reply (legacy single reply) -->
 									{#if ticket.adminReply}
 										<div class="mt-4">
-											<span class="text-[10px] font-bold text-emerald-400/60 uppercase tracking-widest">Support Reply</span>
+											<span class="text-[10px] font-bold text-emerald-400/60 uppercase tracking-widest">{m.sup_admin_reply()}</span>
 											<div class="mt-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-3">
 												<div class="text-sm text-neutral-300 leading-relaxed ticket-content">{@html ticket.adminReply}</div>
 											</div>
@@ -410,7 +421,7 @@
 											{#each ticketReplies[ticket.id] as reply (reply.id)}
 												<div>
 													<span class="text-[10px] font-bold uppercase tracking-widest {reply.isAdmin ? 'text-emerald-400/60' : 'text-primary-400/60'}">
-														{reply.isAdmin ? 'Support' : 'You'}
+														{reply.isAdmin ? m.sup_role_support() : m.sup_role_you()}
 													</span>
 													<div class="mt-1.5 rounded-lg p-3 {reply.isAdmin ? 'bg-emerald-500/5 border border-emerald-500/10' : 'bg-surface-200'}">
 														<div class="text-sm text-neutral-300 leading-relaxed ticket-content">{@html reply.message}</div>
@@ -425,7 +436,7 @@
 									{#if !ticket.adminReply && !ticketReplies[ticket.id]?.length && ticket.status === 'open'}
 										<div class="mt-4 flex items-center gap-2 text-xs text-neutral-600">
 											<Clock class="w-3.5 h-3.5" />
-											Waiting for support response...
+											{m.sup_waiting()}
 										</div>
 									{/if}
 
@@ -436,7 +447,7 @@
 												<input
 													type="text"
 													bind:value={replyText}
-													placeholder="Type your reply..."
+													placeholder={m.sup_reply_placeholder()}
 													class="input flex-1 !py-2 !text-sm"
 													maxlength="5000"
 													onkeydown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(ticket.id); } }}
@@ -455,7 +466,7 @@
 											</div>
 										</div>
 									{:else}
-										<div class="mt-4 text-center text-xs text-neutral-600">This ticket is closed.</div>
+										<div class="mt-4 text-center text-xs text-neutral-600">{m.sup_ticket_closed()}</div>
 									{/if}
 								</div>
 							{/if}
@@ -465,7 +476,7 @@
 
 				<div class="text-center pt-2">
 					<button onclick={openCreateForm} class="text-xs font-semibold text-primary-400 hover:text-primary-300 transition-colors">
-						Still need help? Create a new ticket →
+						{m.sup_still_need_help()}
 					</button>
 				</div>
 			{/if}

@@ -71,18 +71,41 @@
 		} catch { /* ignore */ }
 	}
 
-	// FAQ management
+	// FAQ management. The base locale ("en") edits the row's question/answer
+	// columns directly; non-base locales edit the JSONB translations map.
+	// Empty fields on a non-base locale are pruned before save so missing
+	// translations fall back to the base copy at read time.
+	type FaqLocale = 'en' | 'es' | 'fr' | 'pt' | 'ar';
+	const FAQ_LOCALES: { code: FaqLocale; label: string }[] = [
+		{ code: 'en', label: 'English' },
+		{ code: 'es', label: 'Español' },
+		{ code: 'fr', label: 'Français' },
+		{ code: 'pt', label: 'Português' },
+		{ code: 'ar', label: 'العربية' },
+	];
+
 	let faqs = $state(data.faqs ?? []);
 	let faqMode = $state<'list' | 'create' | 'edit'>('list');
 	let editingFaqId = $state<string | null>(null);
 	let faqQuestion = $state('');
 	let faqAnswer = $state('');
+	let faqTranslations = $state<Record<string, { question: string; answer: string }>>({});
+	let faqLocaleTab = $state<FaqLocale>('en');
 	let faqSubmitting = $state(false);
 	let activeTab = $state<'tickets' | 'faqs'>('tickets');
+
+	function emptyTranslations() {
+		return FAQ_LOCALES.filter((l) => l.code !== 'en').reduce(
+			(acc, l) => ({ ...acc, [l.code]: { question: '', answer: '' } }),
+			{} as Record<string, { question: string; answer: string }>,
+		);
+	}
 
 	function openCreateFaq() {
 		faqQuestion = '';
 		faqAnswer = '';
+		faqTranslations = emptyTranslations();
+		faqLocaleTab = 'en';
 		editingFaqId = null;
 		faqMode = 'create';
 	}
@@ -90,6 +113,16 @@
 	function openEditFaq(f: typeof faqs[0]) {
 		faqQuestion = f.question;
 		faqAnswer = f.answer;
+		const seed = emptyTranslations();
+		const existing = (f as any).translations ?? {};
+		for (const code of Object.keys(seed)) {
+			seed[code] = {
+				question: existing[code]?.question ?? '',
+				answer: existing[code]?.answer ?? '',
+			};
+		}
+		faqTranslations = seed;
+		faqLocaleTab = 'en';
 		editingFaqId = f.id;
 		faqMode = 'edit';
 	}
@@ -98,29 +131,59 @@
 		faqMode = 'list';
 		faqQuestion = '';
 		faqAnswer = '';
+		faqTranslations = {};
+		faqLocaleTab = 'en';
 		editingFaqId = null;
+	}
+
+	// Drop empty fields per locale; drop the locale entirely if both fields blank.
+	function compactTranslations() {
+		const out: Record<string, { question?: string; answer?: string }> = {};
+		for (const [code, val] of Object.entries(faqTranslations)) {
+			const q = val.question.trim();
+			const a = val.answer.trim();
+			if (!q && !a) continue;
+			out[code] = {};
+			if (q) out[code].question = q;
+			if (a) out[code].answer = a;
+		}
+		return out;
 	}
 
 	async function saveFaq() {
 		if (!faqQuestion.trim() || !faqAnswer.trim()) return;
 		faqSubmitting = true;
 		try {
+			const translations = compactTranslations();
 			if (faqMode === 'edit' && editingFaqId) {
 				const res = await fetch('/api/admin/faqs', {
 					method: 'PUT',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ id: editingFaqId, question: faqQuestion.trim(), answer: faqAnswer.trim() }),
+					body: JSON.stringify({
+						id: editingFaqId,
+						question: faqQuestion.trim(),
+						answer: faqAnswer.trim(),
+						translations,
+					}),
 				});
 				const result = await res.json();
 				if (res.ok && result.success) {
-					faqs = faqs.map(f => f.id === editingFaqId ? { ...f, question: faqQuestion.trim(), answer: faqAnswer.trim() } : f);
+					faqs = faqs.map(f =>
+						f.id === editingFaqId
+							? { ...f, question: faqQuestion.trim(), answer: faqAnswer.trim(), translations }
+							: f,
+					);
 					closeFaqForm();
 				}
 			} else {
 				const res = await fetch('/api/admin/faqs', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ question: faqQuestion.trim(), answer: faqAnswer.trim() }),
+					body: JSON.stringify({
+						question: faqQuestion.trim(),
+						answer: faqAnswer.trim(),
+						translations,
+					}),
 				});
 				const result = await res.json();
 				if (res.ok && result.success) {
@@ -338,10 +401,10 @@
 		</div>
 		<div class="tab-group">
 			<button onclick={() => activeTab = 'tickets'} class={activeTab === 'tickets' ? 'tab-active' : 'tab'}>
-				<MessageSquare class="w-3.5 h-3.5 mr-1 inline" /> Tickets <span class="ml-1 text-[10px] opacity-60">({ticketCounts.all})</span>
+				<MessageSquare class="w-3.5 h-3.5 me-1 inline" /> Tickets <span class="ms-1 text-[10px] opacity-60">({ticketCounts.all})</span>
 			</button>
 			<button onclick={() => activeTab = 'faqs'} class={activeTab === 'faqs' ? 'tab-active' : 'tab'}>
-				<BookOpen class="w-3.5 h-3.5 mr-1 inline" /> FAQs <span class="ml-1 text-[10px] opacity-60">({faqs.length})</span>
+				<BookOpen class="w-3.5 h-3.5 me-1 inline" /> FAQs <span class="ms-1 text-[10px] opacity-60">({faqs.length})</span>
 			</button>
 		</div>
 	</div>
@@ -360,14 +423,61 @@
 						</button>
 					</div>
 					<div class="space-y-4">
-						<div>
-							<label for="faq-q" class="label">Question</label>
-							<input id="faq-q" type="text" bind:value={faqQuestion} class="input" placeholder="e.g. How do I redeem points?" maxlength="500" />
+						<!-- Locale tabs. English is the source of truth; other locales
+						     are optional overrides that fall back to English per-field. -->
+						<div class="flex items-center gap-1 border-b border-white/[0.06]">
+							{#each FAQ_LOCALES as loc}
+								{@const filled = loc.code === 'en'
+									? !!faqQuestion.trim() && !!faqAnswer.trim()
+									: !!(faqTranslations[loc.code]?.question.trim() || faqTranslations[loc.code]?.answer.trim())}
+								<button
+									type="button"
+									onclick={() => faqLocaleTab = loc.code}
+									class="relative px-3 py-2 text-xs font-medium transition-colors {faqLocaleTab === loc.code ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'}"
+								>
+									{loc.label}
+									{#if loc.code !== 'en' && filled}
+										<span class="ms-1 inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" title="Has translation"></span>
+									{/if}
+									{#if faqLocaleTab === loc.code}
+										<span class="absolute bottom-0 inset-x-0 h-0.5 bg-primary-400"></span>
+									{/if}
+								</button>
+							{/each}
 						</div>
-						<div>
-							<label class="label">Answer</label>
-							<RichTextEditor bind:value={faqAnswer} placeholder="Write a clear, helpful answer..." />
-						</div>
+
+						{#if faqLocaleTab === 'en'}
+							<div>
+								<label for="faq-q" class="label">Question</label>
+								<input id="faq-q" type="text" bind:value={faqQuestion} class="input" placeholder="e.g. How do I redeem points?" maxlength="500" />
+							</div>
+							<div>
+								<label class="label">Answer</label>
+								<RichTextEditor bind:value={faqAnswer} placeholder="Write a clear, helpful answer..." />
+							</div>
+						{:else}
+							<p class="text-[11px] text-neutral-500">Leave a field blank to fall back to the English version for that field.</p>
+							<div>
+								<label for="faq-q-{faqLocaleTab}" class="label">Question ({faqLocaleTab})</label>
+								<input
+									id="faq-q-{faqLocaleTab}"
+									type="text"
+									bind:value={faqTranslations[faqLocaleTab].question}
+									class="input"
+									placeholder={faqQuestion || 'Translated question'}
+									maxlength="500"
+									dir={faqLocaleTab === 'ar' ? 'rtl' : 'ltr'}
+								/>
+							</div>
+							<div>
+								<label class="label">Answer ({faqLocaleTab})</label>
+								<RichTextEditor
+									bind:value={faqTranslations[faqLocaleTab].answer}
+									placeholder={faqAnswer ? 'Translate the English answer above…' : 'Translated answer'}
+								/>
+							</div>
+						{/if}
+
 						<div class="flex justify-end gap-2 pt-2">
 							<button onclick={closeFaqForm} class="btn-secondary !text-xs">Cancel</button>
 							<button onclick={saveFaq} disabled={faqSubmitting || !faqQuestion.trim() || !faqAnswer.trim()} class="btn-primary !text-xs">
@@ -435,7 +545,7 @@
 	<div class="flex items-center gap-1.5 mb-4">
 		{#each [['all','All',ticketCounts.all,'text-white'],['open','Open',ticketCounts.open,'text-primary-400'],['in_progress','In Progress',ticketCounts.in_progress,'text-amber-400'],['resolved','Resolved',ticketCounts.resolved,'text-emerald-400'],['closed','Closed',ticketCounts.closed,'text-neutral-400']] as [val,label,count,color]}
 			<button onclick={() => statusFilter = String(val)} class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {statusFilter === String(val) ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white hover:bg-white/5'}">
-				{label} <span class="ml-0.5 {color}">{count}</span>
+				{label} <span class="ms-0.5 {color}">{count}</span>
 			</button>
 		{/each}
 	</div>
@@ -449,18 +559,18 @@
 		<div class="flex gap-0 border border-white/[0.06] rounded-2xl overflow-hidden bg-surface-100" style="height: calc(100vh - 220px)">
 
 			<!-- LEFT: Ticket List -->
-			<div class="w-[340px] flex-shrink-0 border-r border-white/[0.06] overflow-y-auto">
+			<div class="w-[340px] flex-shrink-0 border-e border-white/[0.06] overflow-y-auto">
 				{#each filteredTickets as ticket (ticket.id)}
 					<button
 						type="button"
 						onclick={() => selectTicket(ticket.id)}
-						class="w-full px-4 py-3 text-left border-b border-white/[0.04] transition-colors {expandedTicket === ticket.id ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'}"
+						class="w-full px-4 py-3 text-start border-b border-white/[0.04] transition-colors {expandedTicket === ticket.id ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'}"
 					>
 						<div class="flex items-center gap-2 mb-1">
 							<div class="w-2 h-2 rounded-full flex-shrink-0 {ticket.status === 'open' ? 'bg-primary-400' : ticket.status === 'in_progress' ? 'bg-amber-400' : ticket.status === 'resolved' ? 'bg-emerald-400' : 'bg-neutral-600'}"></div>
 							<span class="text-sm font-semibold text-white truncate flex-1">{ticket.subject}</span>
 						</div>
-						<div class="flex items-center gap-2 text-[10px] text-neutral-600 pl-4">
+						<div class="flex items-center gap-2 text-[10px] text-neutral-600 ps-4">
 							<span class="truncate">{ticket.panelistName || ticket.panelistEmail}</span>
 							<span class="flex-shrink-0">{new Date(ticket.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
 							{#if ticket.adminReply || (ticketNotes[ticket.id]?.filter(n => !n.isInternal).length ?? 0) > 0}
@@ -569,7 +679,7 @@
 								{#each (ticketNotes[ticket.id] ?? []).filter(n => n.isInternal) as note}
 									<div class="text-xs text-neutral-400 mb-1">
 										<span class="font-medium text-neutral-300">{note.authorName}:</span> {note.message}
-										<span class="text-neutral-600 ml-1">{new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+										<span class="text-neutral-600 ms-1">{new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
 									</div>
 								{/each}
 							</div>

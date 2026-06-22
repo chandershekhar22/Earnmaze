@@ -5,6 +5,8 @@
 	import { getDashboardUrl } from '$lib/utils/dashboard-routing';
 	import { onMount } from 'svelte';
 	import Turnstile from '$lib/components/Turnstile.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let referralCode = $derived($page.url.searchParams.get('ref') || undefined);
 	let utmSource = $derived($page.url.searchParams.get('utm_source') || undefined);
@@ -20,7 +22,25 @@
 	let isLoading = $state(false);
 	let showPassword = $state(false);
 	let turnstileToken = $state<string | null>(null);
+	let needsInteraction = $state(false);
 	let turnstileRef: any;
+
+	// Required acknowledgements (must all be true to enable submit).
+	let ageVerified = $state(false);
+	let tosAccepted = $state(false);
+	let privacyAccepted = $state(false);
+	// Optional opt-in (default OFF for GDPR/CAN-SPAM compliance).
+	let marketingConsent = $state(false);
+
+	let canSubmit = $derived(
+		!!email &&
+			!!password &&
+			!!confirmPassword &&
+			!passwordMismatch &&
+			ageVerified &&
+			tosAccepted &&
+			privacyAccepted
+	);
 
 	let passwordMismatch = $derived(password !== confirmPassword && confirmPassword.length > 0);
 
@@ -50,24 +70,45 @@
 		handleSubmit();
 	}
 
+	async function waitForToken(): Promise<string | null> {
+		if (turnstileToken) return turnstileToken;
+		const start = Date.now();
+		while (!turnstileToken) {
+			const timeoutMs = needsInteraction ? 60000 : 8000;
+			if (Date.now() - start >= timeoutMs) break;
+			await new Promise((r) => setTimeout(r, 100));
+		}
+		return turnstileToken;
+	}
+
 	async function handleSubmit() {
-		if (!email || !password || !confirmPassword || passwordMismatch || !agreedTerms) return;
-		if (!turnstileToken) {
-			authStore.state.error = 'Please complete the CAPTCHA verification';
+		if (!email || !password || !confirmPassword || passwordMismatch) return;
+		if (!ageVerified || !tosAccepted || !privacyAccepted) return;
+
+		isLoading = true;
+		const token = await waitForToken();
+		if (!token) {
+			isLoading = false;
+			authStore.state.error = needsInteraction
+				? m.auth_security_check_msg()
+				: m.auth_verification_timeout();
 			return;
 		}
 
-		isLoading = true;
 		const result = await authStore.register({
 			email,
 			password,
 			name: name || undefined,
-			turnstileToken,
+			turnstileToken: token,
 			referralCode,
 			utmSource,
 			utmMedium,
 			utmCampaign,
-			registrationSource: utmSource ? 'ad-campaign' : 'registration-page'
+			registrationSource: utmSource ? 'ad-campaign' : 'registration-page',
+			ageVerified: true,
+			tosAccepted: true,
+			privacyAccepted: true,
+			marketingConsent,
 		});
 		isLoading = false;
 
@@ -82,9 +123,22 @@
 		}
 	}
 
-	function handleTurnstileVerify(token: string) { turnstileToken = token; }
-	function handleTurnstileError() { turnstileToken = null; }
-	function handleTurnstileExpire() { turnstileToken = null; }
+	function handleTurnstileVerify(token: string) {
+		turnstileToken = token;
+		needsInteraction = false;
+	}
+
+	function handleTurnstileError() {
+		turnstileToken = null;
+	}
+
+	function handleBeforeInteractive() {
+		needsInteraction = true;
+	}
+
+	function handleTurnstileExpire() {
+		turnstileToken = null;
+	}
 </script>
 
 <svelte:head>

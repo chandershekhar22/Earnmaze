@@ -10,6 +10,8 @@
 	} from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toastStore } from '$lib/stores/toast.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 
 	let { data }: { data: {
 		dashboardData: PanelistDashboardData;
@@ -26,7 +28,7 @@
 	let streakDays = $derived(dd?.engagement?.streakDays || 0);
 	let isLoaded = $derived(!!dd);
 	let isNewUser = $derived(isLoaded && completedSurveys === 0 && lifetimePoints === 0);
-	let firstName = $derived(authStore.state.user?.name?.split(' ')[0] || 'there');
+	let firstName = $derived(authStore.state.user?.name?.split(' ')[0] || m.dash_default_name());
 	let referralCode = $derived(dd?.panelist?.referralCode || '');
 	let referralLink = $derived(referralCode ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${referralCode}` : '');
 	let copied = $state(false);
@@ -41,9 +43,9 @@
 
 	let greeting = $derived(() => {
 		const h = new Date().getHours();
-		if (h < 12) return 'Good morning';
-		if (h < 17) return 'Good afternoon';
-		return 'Good evening';
+		if (h < 12) return m.dash_greeting_morning();
+		if (h < 17) return m.dash_greeting_afternoon();
+		return m.dash_greeting_evening();
 	});
 
 	let dPoints = $state(0);
@@ -73,20 +75,24 @@
 	});
 
 	function startSurvey(id: string, title: string) {
-		toastStore.info('Starting', `Loading ${title}...`);
+		toastStore.info(m.dash_toast_starting(), m.dash_toast_loading({ title }));
 		window.location.href = `/start-survey?surveyId=${id}`;
 	}
 
+	// Locale-aware relative time. Uses Intl.RelativeTimeFormat so we get
+	// natural strings ("hace 5 minutos", "il y a 2 heures") for free.
 	function relTime(date: Date | string): string {
+		const locale = getLocale();
 		const ms = Date.now() - new Date(date).getTime();
-		const m = Math.floor(ms / 60000);
-		if (m < 1) return 'just now';
-		if (m < 60) return `${m}m ago`;
-		const h = Math.floor(m / 60);
-		if (h < 24) return `${h}h ago`;
-		const d = Math.floor(h / 24);
-		if (d < 7) return `${d}d ago`;
-		return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+		const minutes = Math.floor(ms / 60000);
+		const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+		if (minutes < 1) return rtf.format(0, 'second');
+		if (minutes < 60) return rtf.format(-minutes, 'minute');
+		const hours = Math.floor(minutes / 60);
+		if (hours < 24) return rtf.format(-hours, 'hour');
+		const days = Math.floor(hours / 24);
+		if (days < 7) return rtf.format(-days, 'day');
+		return new Date(date).toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 	}
 
 	function actStyle(type: string) {
@@ -99,7 +105,7 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard - EarnMaze</title>
+	<title>{m.dash_meta_title()}</title>
 </svelte:head>
 
 <div class="space-y-[22px] animate-fade-in">
@@ -123,11 +129,11 @@
 					<span class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60"></span>
 					<span class="relative rounded-full h-[7px] w-[7px] bg-emerald-400 shadow-[0_0_8px_var(--tw-shadow-color)] shadow-emerald-400"></span>
 				</span>
-				<span class="font-mono text-[11px] font-semibold text-emerald-400 uppercase tracking-[0.12em]">Online</span>
+				<span class="font-mono text-[11px] font-semibold text-emerald-400 uppercase tracking-[0.12em]">{m.dash_status_online()}</span>
 				{#if streakDays > 0}
 					<span class="mx-1 text-white/15">·</span>
 					<Flame class="w-3.5 h-3.5 text-amber-400" />
-					<span class="font-mono text-[11px] font-semibold text-amber-400 uppercase tracking-[0.12em]">{streakDays}d streak</span>
+					<span class="font-mono text-[11px] font-semibold text-amber-400 uppercase tracking-[0.12em]">{m.dash_streak_days({ days: streakDays })}</span>
 				{/if}
 			</div>
 			<h2 class="text-[clamp(26px,3.4vw,38px)] font-bold text-white tracking-tight leading-[1.05] mb-2">
@@ -135,9 +141,9 @@
 			</h2>
 			<p class="text-[14.5px] text-neutral-400">
 				{#if totalAvailable > 0}
-					<span class="text-white font-semibold">{totalAvailable}</span> survey{totalAvailable !== 1 ? 's' : ''} ready to earn
+					{totalAvailable === 1 ? m.dash_surveys_ready_singular({ count: totalAvailable }) : m.dash_surveys_ready_plural({ count: totalAvailable })}
 				{:else}
-					We'll let you know when new surveys drop.
+					{m.dash_no_surveys()}
 				{/if}
 			</p>
 		</div>
@@ -146,10 +152,15 @@
 			<div class="relative z-10 px-6 py-4 rounded-2xl bg-surface/45 border border-white/[0.07] backdrop-blur-md text-right min-w-[150px]">
 				<div class="flex items-center justify-end gap-[7px] mb-2">
 					<Coins class="w-3.5 h-3.5 text-amber-400" />
-					<span class="font-mono text-[10px] font-semibold text-amber-400 uppercase tracking-[0.14em]">Balance</span>
+					<span class="font-mono text-[10px] font-semibold text-amber-400 uppercase tracking-[0.14em]">{m.dash_balance()}</span>
 				</div>
 				<div class="text-[42px] font-bold text-white tracking-tight leading-none tabular-nums">{dPoints.toLocaleString()}</div>
-				<div class="font-mono text-[11px] text-neutral-500 mt-1">pts</div>
+				<div class="font-mono text-[11px] text-neutral-500 mt-1">{m.dash_pts_short()}</div>
+				{#if currentPoints > 0}
+					<a href={localizeHref('/rewards')} class="mt-1 inline-flex items-center justify-end gap-0.5 text-[10px] font-bold text-fuchsia-400 hover:text-fuchsia-300 transition-colors uppercase tracking-wider">
+						{m.dash_redeem()} <ArrowUpRight class="w-2.5 h-2.5" />
+					</a>
+				{/if}
 			</div>
 		{/if}
 	</div>
@@ -161,10 +172,10 @@
 				<Rocket class="w-[26px] h-[26px]" />
 			</span>
 			<div class="flex-1 min-w-[200px]">
-				<h3 class="text-[17px] font-semibold text-white tracking-tight mb-1">Welcome to EarnMaze!</h3>
-				<p class="text-[13.5px] text-neutral-400">Complete your first survey to start earning points. It only takes a few minutes.</p>
+				<h3 class="text-[17px] font-semibold text-white tracking-tight mb-1">{m.dash_welcome_title()}</h3>
+				<p class="text-[13.5px] text-neutral-400">{m.dash_welcome_desc()}</p>
 			</div>
-			<a href="/surveys" class="btn-primary">Start earning <ArrowRight class="w-4 h-4" /></a>
+			<a href={localizeHref('/surveys')} class="btn-primary">{m.dash_start_earning()} <ArrowRight class="w-4 h-4" /></a>
 		</div>
 	{/if}
 
@@ -177,7 +188,7 @@
 					<span class="w-[30px] h-[30px] rounded-[9px] bg-primary-400/12 text-primary-400 grid place-items-center">
 						<TrendingUp class="w-4 h-4" />
 					</span>
-					<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">Lifetime</span>
+					<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">{m.dash_stat_lifetime()}</span>
 				</div>
 				<div class="text-[32px] font-bold text-white tracking-tight leading-none tabular-nums">{dLifetime.toLocaleString()}</div>
 				<div class="font-mono text-[11px] text-neutral-500 mt-2">total earned</div>
@@ -189,9 +200,9 @@
 					<span class="w-[30px] h-[30px] rounded-[9px] bg-sky-400/12 text-sky-400 grid place-items-center">
 						<Target class="w-4 h-4" />
 					</span>
-					<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">Available</span>
+					<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">{m.dash_stat_available()}</span>
 					{#if totalAvailable > 0}
-						<span class="relative flex h-2 w-2 ml-auto">
+						<span class="relative flex h-2 w-2 ms-auto">
 							<span class="animate-ping absolute h-full w-full rounded-full bg-sky-400 opacity-50"></span>
 							<span class="relative rounded-full h-2 w-2 bg-sky-400"></span>
 						</span>
@@ -207,7 +218,7 @@
 					<span class="w-[30px] h-[30px] rounded-[9px] bg-emerald-400/12 text-emerald-400 grid place-items-center">
 						<CircleCheckBig class="w-4 h-4" />
 					</span>
-					<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">Done</span>
+					<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">{m.dash_stat_done()}</span>
 				</div>
 				<div class="text-[32px] font-bold text-white tracking-tight leading-none tabular-nums">{dCompleted.toLocaleString()}</div>
 				<div class="font-mono text-[11px] text-neutral-500 mt-2">surveys completed</div>
@@ -219,7 +230,7 @@
 					<span class="w-[30px] h-[30px] rounded-[9px] bg-rose-400/12 text-rose-400 grid place-items-center">
 						<Gift class="w-4 h-4" />
 					</span>
-					<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">Redeemed</span>
+					<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">{m.dash_stat_redeemed()}</span>
 				</div>
 				<div class="text-[32px] font-bold text-white tracking-tight leading-none tabular-nums">{dRedeemed.toLocaleString()}</div>
 				<div class="font-mono text-[11px] text-neutral-500 mt-2">pts cashed out</div>
@@ -231,31 +242,31 @@
 
 	<!-- Quick actions -->
 	<div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-		<a href="/surveys" class="group relative overflow-hidden rounded-2xl p-6 text-white min-h-[118px] flex flex-col justify-between hover:-translate-y-0.5 transition-transform"
+		<a href={localizeHref('/surveys')} class="group relative overflow-hidden rounded-2xl p-6 text-white min-h-[118px] flex flex-col justify-between hover:-translate-y-0.5 transition-transform"
 		   style="background:linear-gradient(135deg,#b06bff,#7a3ed6)">
 			<ArrowUpRight class="absolute top-5 right-5 w-[18px] h-[18px] text-white/90 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
 			<span class="w-10 h-10 rounded-[11px] bg-white/[0.16] backdrop-blur-md grid place-items-center"><Rocket class="w-5 h-5" /></span>
 			<div>
-				<div class="text-[17px] font-bold tracking-tight">Surveys</div>
-				<div class="text-[12.5px] text-white/80">Earn points</div>
+				<div class="text-[17px] font-bold tracking-tight">{m.dash_q_surveys_title()}</div>
+				<div class="text-[12.5px] text-white/80">{m.dash_q_surveys_desc()}</div>
 			</div>
 		</a>
-		<a href="/points" class="group relative overflow-hidden rounded-2xl p-6 text-white min-h-[118px] flex flex-col justify-between hover:-translate-y-0.5 transition-transform"
+		<a href={localizeHref('/points')} class="group relative overflow-hidden rounded-2xl p-6 text-white min-h-[118px] flex flex-col justify-between hover:-translate-y-0.5 transition-transform"
 		   style="background:linear-gradient(135deg,#19c98f,#0f8f66)">
 			<ArrowUpRight class="absolute top-5 right-5 w-[18px] h-[18px] text-white/90 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
 			<span class="w-10 h-10 rounded-[11px] bg-white/[0.16] backdrop-blur-md grid place-items-center"><Coins class="w-5 h-5" /></span>
 			<div>
-				<div class="text-[17px] font-bold tracking-tight">Points</div>
-				<div class="text-[12.5px] text-white/80">Track balance</div>
+				<div class="text-[17px] font-bold tracking-tight">{m.dash_q_points_title()}</div>
+				<div class="text-[12.5px] text-white/80">{m.dash_q_points_desc()}</div>
 			</div>
 		</a>
-		<a href="/rewards" class="group relative overflow-hidden rounded-2xl p-6 text-white min-h-[118px] flex flex-col justify-between hover:-translate-y-0.5 transition-transform"
+		<a href={localizeHref('/rewards')} class="group relative overflow-hidden rounded-2xl p-6 text-white min-h-[118px] flex flex-col justify-between hover:-translate-y-0.5 transition-transform"
 		   style="background:linear-gradient(135deg,#ff5a7c,#d63356)">
 			<ArrowUpRight class="absolute top-5 right-5 w-[18px] h-[18px] text-white/90 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
 			<span class="w-10 h-10 rounded-[11px] bg-white/[0.16] backdrop-blur-md grid place-items-center"><Gift class="w-5 h-5" /></span>
 			<div>
-				<div class="text-[17px] font-bold tracking-tight">Rewards</div>
-				<div class="text-[12.5px] text-white/80">Gift cards</div>
+				<div class="text-[17px] font-bold tracking-tight">{m.dash_q_rewards_title()}</div>
+				<div class="text-[12.5px] text-white/80">{m.dash_q_rewards_desc()}</div>
 			</div>
 		</a>
 	</div>
@@ -268,8 +279,8 @@
 					<Users class="w-5 h-5" />
 				</span>
 				<div>
-					<h4 class="text-[15px] font-semibold text-white tracking-tight">Invite friends, earn bonus points</h4>
-					<p class="text-[12.5px] text-neutral-400">Share your link and earn when they sign up</p>
+					<h4 class="text-[15px] font-semibold text-white tracking-tight">{m.dash_referral_title()}</h4>
+					<p class="text-[12.5px] text-neutral-400">{m.dash_referral_desc()}</p>
 				</div>
 			</div>
 			<div class="flex gap-2">
@@ -295,9 +306,9 @@
 	{#if isLoaded}
 		<div class="em-panel">
 			<div class="em-panel-h">
-				<span class="em-panel-title"><Sparkles class="w-4 h-4 text-primary-400" /> Activity</span>
-				<a href="/history" class="font-mono text-[11px] text-neutral-500 hover:text-primary-400 uppercase tracking-[0.06em] inline-flex items-center gap-1 transition-colors">
-					All <ChevronRight class="w-3.5 h-3.5" />
+				<span class="em-panel-title"><Sparkles class="w-4 h-4 text-primary-400" /> {m.dash_activity()}</span>
+				<a href={localizeHref('/history')} class="font-mono text-[11px] text-neutral-500 hover:text-primary-400 uppercase tracking-[0.06em] inline-flex items-center gap-1 transition-colors">
+					{m.dash_activity_all()} <ChevronRight class="w-3.5 h-3.5" />
 				</a>
 			</div>
 
@@ -322,9 +333,9 @@
 			{:else}
 				<div class="em-empty">
 					<span class="em-empty-icon"><ClipboardList class="w-[30px] h-[30px]" /></span>
-					<h4 class="text-[17px] font-semibold text-white tracking-tight">No activity yet</h4>
-					<p class="text-[13.5px] text-neutral-400 mb-4">Complete a survey to get started.</p>
-					<a href="/surveys" class="btn-primary"><Rocket class="w-4 h-4" /> Start earning</a>
+					<h4 class="text-[17px] font-semibold text-white tracking-tight">{m.dash_activity_empty_title()}</h4>
+					<p class="text-[13.5px] text-neutral-400 mb-4">{m.dash_activity_empty_desc()}</p>
+					<a href={localizeHref('/surveys')} class="btn-primary"><Rocket class="w-4 h-4" /> {m.dash_activity_empty_cta()}</a>
 				</div>
 			{/if}
 		</div>

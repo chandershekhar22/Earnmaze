@@ -28,3 +28,19 @@ export const transactionEffects: Record<TransactionType, TransactionEffect> = {
     refund:       'positive',  // refund credited
     expired:      'negative',  // points expired
 };
+
+/**
+ * Compute the signed display amount for a points transaction. The DB stores
+ * `points` as a positive magnitude on every row; the `type` encodes whether
+ * the effect on the user's wallet is positive or negative. Use this to pick
+ * the sign + color in the UI without having to spread the same conditional
+ * everywhere.
+ */
+export function signedTransactionPoints(type: string, points: number): number {
+    const effect = transactionEffects[type as TransactionType];
+    if (effect === 'negative') return -Math.abs(points);
+    if (effect === 'neutral') return 0;
+    // 'variable' (adjustment) trusts the stored sign; 'positive' is always +.
+    if (effect === 'variable') return points;
+    return Math.abs(points);
+}

@@ -3,6 +3,8 @@
 	import { Users, Copy, Check, Clock, CircleCheckBig, Coins, Share2 } from '@lucide/svelte';
 	import { browser } from '$app/environment';
 	import InfoBanner from '$lib/components/InfoBanner.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 
 	let { data }: { data: PageData } = $props();
 
@@ -22,34 +24,36 @@
 
 	function getStatusStyle(status: string) {
 		switch (status) {
-			case 'pending': return { class: 'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20', icon: Clock, label: 'Pending' };
-			case 'qualified': return { class: 'bg-sky-500/15 text-sky-400 ring-1 ring-sky-500/20', icon: CircleCheckBig, label: 'Qualified' };
-			case 'completed': case 'paid': return { class: 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20', icon: Coins, label: 'Paid' };
-			case 'expired': return { class: 'bg-neutral-500/15 text-neutral-400 ring-1 ring-neutral-500/20', icon: Clock, label: 'Expired' };
+			case 'pending': return { class: 'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20', icon: Clock, label: m.ref_status_pending() };
+			case 'qualified': return { class: 'bg-sky-500/15 text-sky-400 ring-1 ring-sky-500/20', icon: CircleCheckBig, label: m.ref_status_qualified() };
+			case 'completed': case 'paid': return { class: 'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20', icon: Coins, label: m.ref_status_paid() };
+			case 'expired': return { class: 'bg-neutral-500/15 text-neutral-400 ring-1 ring-neutral-500/20', icon: Clock, label: m.ref_status_expired() };
 			default: return { class: 'bg-white/5 text-neutral-400 ring-1 ring-white/10', icon: Clock, label: status };
 		}
 	}
 
 	function formatDate(d: string) {
-		return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+		return new Date(d).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
 	}
 
+	// Locale-aware relative date using Intl.RelativeTimeFormat.
 	function relDate(d: string) {
+		const locale = getLocale();
 		const ms = Date.now() - new Date(d).getTime();
 		const days = Math.floor(ms / 86400000);
-		if (days < 1) return 'today';
-		if (days === 1) return 'yesterday';
-		if (days < 7) return `${days}d ago`;
+		const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+		if (days < 1) return rtf.format(0, 'day');
+		if (days < 7) return rtf.format(-days, 'day');
 		return formatDate(d);
 	}
 </script>
 
 <svelte:head>
-	<title>Referrals - EarnMaze</title>
+	<title>{m.ref_meta_title()}</title>
 </svelte:head>
 
 <div class="space-y-[22px] animate-fade-in">
-	<InfoBanner id="referral-how" message="Share your referral link with friends. When they sign up and complete their first survey, you both earn bonus points!" color="emerald" />
+	<InfoBanner id="referral-how" message={m.ref_info()} color="emerald" />
 
 	<!-- Invite Card -->
 	{#if referralCode}
@@ -61,26 +65,28 @@
 						<Share2 class="w-6 h-6" />
 					</span>
 					<div>
-						<h2 class="text-[19px] font-bold text-white tracking-tight">Invite friends</h2>
-						<p class="text-[13px] text-neutral-400">Share your link and earn bonus points</p>
+						<h2 class="text-[19px] font-bold text-white tracking-tight">{m.ref_invite_title()}</h2>
+						<p class="text-[13px] text-neutral-400">{m.ref_invite_desc()}</p>
 					</div>
 				</div>
 
+				<!-- Referral Link -->
 				<div class="flex gap-2 mb-4">
 					<div class="flex-1 px-4 py-3 rounded-xl bg-surface/50 border border-white/[0.07] font-mono text-[13px] text-primary-500 truncate">
-						{referralLink || 'Loading...'}
+						{referralLink || m.ref_loading()}
 					</div>
 					<button onclick={copyLink} class="btn-primary flex-shrink-0">
 						{#if copied}
-							<Check class="w-4 h-4" /> Copied
+							<Check class="w-4 h-4" /> {m.ref_copied()}
 						{:else}
-							<Copy class="w-4 h-4" /> Copy
+							<Copy class="w-4 h-4" /> {m.ref_copy()}
 						{/if}
 					</button>
 				</div>
 
+				<!-- Referral Code -->
 				<div class="font-mono text-[12.5px] text-neutral-500">
-					Your code: <span class="text-white font-semibold tracking-[0.04em]">{referralCode}</span>
+					{m.ref_your_code()} <span class="text-white font-semibold tracking-[0.04em]">{referralCode}</span>
 				</div>
 			</div>
 		</div>
@@ -94,7 +100,7 @@
 				<span class="w-[30px] h-[30px] rounded-[9px] bg-sky-400/12 text-sky-400 grid place-items-center">
 					<Users class="w-4 h-4" />
 				</span>
-				<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">Total</span>
+				<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">{m.ref_stat_total()}</span>
 			</div>
 			<div class="text-[32px] font-bold text-white tracking-tight leading-none tabular-nums">{stats.total}</div>
 			<div class="font-mono text-[11px] text-neutral-500 mt-2">invited</div>
@@ -106,7 +112,7 @@
 				<span class="w-[30px] h-[30px] rounded-[9px] bg-amber-400/12 text-amber-400 grid place-items-center">
 					<Clock class="w-4 h-4" />
 				</span>
-				<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">Pending</span>
+				<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">{m.ref_stat_pending()}</span>
 			</div>
 			<div class="text-[32px] font-bold text-white tracking-tight leading-none tabular-nums">{stats.pending}</div>
 			<div class="font-mono text-[11px] text-neutral-500 mt-2">awaiting</div>
@@ -118,7 +124,7 @@
 				<span class="w-[30px] h-[30px] rounded-[9px] bg-emerald-400/12 text-emerald-400 grid place-items-center">
 					<CircleCheckBig class="w-4 h-4" />
 				</span>
-				<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">Paid</span>
+				<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">{m.ref_stat_paid()}</span>
 			</div>
 			<div class="text-[32px] font-bold text-white tracking-tight leading-none tabular-nums">{stats.paid}</div>
 			<div class="font-mono text-[11px] text-neutral-500 mt-2">confirmed</div>
@@ -130,10 +136,10 @@
 				<span class="w-[30px] h-[30px] rounded-[9px] bg-primary-400/12 text-primary-400 grid place-items-center">
 					<Coins class="w-4 h-4" />
 				</span>
-				<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">Earned</span>
+				<span class="font-mono text-[10.5px] font-semibold text-neutral-500 uppercase tracking-[0.12em]">{m.ref_stat_earned()}</span>
 			</div>
 			<div class="text-[32px] font-bold text-white tracking-tight leading-none tabular-nums">{stats.totalEarned.toLocaleString()}</div>
-			<div class="font-mono text-[11px] text-neutral-500 mt-2">pts</div>
+			<div class="font-mono text-[11px] text-neutral-500 mt-2">{m.dash_pts_short()}</div>
 		</div>
 	</div>
 
@@ -142,22 +148,22 @@
 		<div class="flex items-center gap-3.5 px-5 py-4 rounded-2xl bg-surface-50 border border-white/[0.07]">
 			<span class="w-[34px] h-[34px] rounded-[10px] bg-primary-400/12 text-primary-500 grid place-items-center font-mono font-bold text-sm flex-shrink-0">1</span>
 			<div>
-				<h4 class="text-sm font-semibold text-white tracking-tight">Share your link</h4>
-				<p class="text-[12px] text-neutral-400 mt-0.5">Send your referral link to friends</p>
+				<h4 class="text-sm font-semibold text-white tracking-tight">{m.ref_step1_title()}</h4>
+				<p class="text-[12px] text-neutral-400 mt-0.5">{m.ref_step1_desc()}</p>
 			</div>
 		</div>
 		<div class="flex items-center gap-3.5 px-5 py-4 rounded-2xl bg-surface-50 border border-white/[0.07]">
 			<span class="w-[34px] h-[34px] rounded-[10px] bg-sky-400/12 text-sky-400 grid place-items-center font-mono font-bold text-sm flex-shrink-0">2</span>
 			<div>
-				<h4 class="text-sm font-semibold text-white tracking-tight">Friend signs up</h4>
-				<p class="text-[12px] text-neutral-400 mt-0.5">They create an account and complete a survey</p>
+				<h4 class="text-sm font-semibold text-white tracking-tight">{m.ref_step2_title()}</h4>
+				<p class="text-[12px] text-neutral-400 mt-0.5">{m.ref_step2_desc()}</p>
 			</div>
 		</div>
 		<div class="flex items-center gap-3.5 px-5 py-4 rounded-2xl bg-surface-50 border border-white/[0.07]">
 			<span class="w-[34px] h-[34px] rounded-[10px] bg-emerald-400/12 text-emerald-400 grid place-items-center font-mono font-bold text-sm flex-shrink-0">3</span>
 			<div>
-				<h4 class="text-sm font-semibold text-white tracking-tight">Both earn bonus</h4>
-				<p class="text-[12px] text-neutral-400 mt-0.5">You both receive bonus points automatically</p>
+				<h4 class="text-sm font-semibold text-white tracking-tight">{m.ref_step3_title()}</h4>
+				<p class="text-[12px] text-neutral-400 mt-0.5">{m.ref_step3_desc()}</p>
 			</div>
 		</div>
 	</div>
@@ -165,17 +171,17 @@
 	<!-- Referrals List -->
 	<div class="em-panel">
 		<div class="em-panel-h">
-			<span class="em-panel-title"><Users class="w-4 h-4 text-primary-400" /> Your Referrals</span>
+			<span class="em-panel-title"><Users class="w-4 h-4 text-primary-400" /> {m.ref_your_referrals()}</span>
 		</div>
 
 		{#if referrals.length === 0}
 			<div class="em-empty">
 				<span class="em-empty-icon"><Users class="w-[30px] h-[30px]" /></span>
-				<h4 class="text-[17px] font-semibold text-white tracking-tight">No referrals yet</h4>
-				<p class="text-[13.5px] text-neutral-400 mb-4">Share your link to start earning bonus points.</p>
+				<h4 class="text-[17px] font-semibold text-white tracking-tight">{m.ref_empty_title()}</h4>
+				<p class="text-[13.5px] text-neutral-400 mb-4">{m.ref_empty_desc()}</p>
 				{#if referralLink}
 					<button onclick={copyLink} class="btn-primary">
-						<Copy class="w-4 h-4" /> Copy referral link
+						<Copy class="w-4 h-4" /> {m.ref_copy_link_button()}
 					</button>
 				{/if}
 			</div>
@@ -196,22 +202,23 @@
 								</span>
 							</div>
 							<div class="font-mono text-[10px] text-neutral-500 mt-0.5">
-								{ref.referredEmail} · Joined {relDate(ref.createdAt)}
+								{ref.referredEmail} · {m.ref_joined()} {relDate(ref.createdAt)}
 								{#if ref.qualifiedAt}
-									· Qualified {relDate(ref.qualifiedAt)}
+									· {m.ref_qualified_at()} {relDate(ref.qualifiedAt)}
 								{/if}
 							</div>
 						</div>
+						<!-- Bonus -->
 						<div class="text-right flex-shrink-0">
 							{#if ref.status === 'completed' || ref.status === 'paid'}
 								<div class="font-mono text-sm font-bold text-primary-400">+{ref.bonus}</div>
-								<div class="font-mono text-[10px] text-primary-400/60">pts earned</div>
+								<div class="font-mono text-[10px] text-primary-400/60">{m.ref_pts_earned()}</div>
 							{:else if ref.status === 'qualified'}
 								<div class="font-mono text-sm font-bold text-sky-400">+{ref.bonus}</div>
-								<div class="font-mono text-[10px] text-sky-400/60">processing</div>
+								<div class="font-mono text-[10px] text-sky-400/60">{m.ref_processing()}</div>
 							{:else}
 								<div class="font-mono text-sm font-bold text-neutral-500">--</div>
-								<div class="font-mono text-[10px] text-neutral-600">awaiting</div>
+								<div class="font-mono text-[10px] text-neutral-600">{m.ref_awaiting()}</div>
 							{/if}
 						</div>
 					</div>

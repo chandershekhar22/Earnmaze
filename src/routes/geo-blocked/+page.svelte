@@ -52,7 +52,7 @@
 		</p>
 
 		<!-- Info Box -->
-		<div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 mb-6 text-left">
+		<div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 mb-6 text-start">
 			<h3 class="font-semibold text-rose-300 mb-2">Why am I seeing this?</h3>
 			<ul class="text-sm text-rose-400/80 space-y-2">
 				<li>&#8226; Our service is only available in specific countries</li>

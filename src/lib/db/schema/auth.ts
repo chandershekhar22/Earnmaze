@@ -43,6 +43,26 @@ export const user = pgTable("users", {
     loginCount: integer("login_count").default(0),
     referralCode: varchar("referral_code", { length: 20 }).unique(),
     referredBy: uuid("referred_by"),
+    // Email consent — GDPR/CAN-SPAM compliance.
+    // Transactional email (OTP, password reset, redemption) is always allowed
+    // for active users; only marketing needs explicit opt-in. The audit-log
+    // table's `channel` column can hold other channels later (e.g. 'newsletter')
+    // without a schema migration.
+    marketingConsent: boolean("marketing_consent").default(false).notNull(),
+    marketingConsentAt: timestamp("marketing_consent_at"),
+    // Age + legal acceptance — required at signup. ToS/Privacy timestamps
+    // double as proof that the user clicked through the current version
+    // (when you publish a new version, force re-acceptance by clearing).
+    ageVerified: boolean("age_verified").default(false).notNull(),
+    ageVerifiedAt: timestamp("age_verified_at"),
+    tosAcceptedAt: timestamp("tos_accepted_at"),
+    privacyAcceptedAt: timestamp("privacy_accepted_at"),
+    // GDPR Art. 6/7 — informed consent before sharing demographic data with
+    // external survey providers. Null = never accepted, value = acceptance date.
+    surveyDataSharingAcceptedAt: timestamp("survey_data_sharing_accepted_at"),
+    // Preferred UI language. Used by the worker for email templates and by
+    // the client for panelist pages (public pages use URL prefix instead).
+    locale: varchar("locale", { length: 10 }).default("en").notNull(),
     isActive: boolean("is_active").default(true).notNull(),
     status: userStatusEnum("status").notNull().default("active"),
     isDeleted: boolean("is_deleted").default(false),
@@ -121,4 +141,26 @@ export const passwordReset = pgTable("password_resets", {
     index("password_resets_user_id_idx").on(table.userId),
     index("password_resets_token_idx").on(table.token),
     index("password_resets_expires_at_idx").on(table.expiresAt),
+]);
+
+// Email-consent audit log — proof of when each user granted/revoked consent
+// for each channel. Required by GDPR Art. 7(1) and Indian DPDP Act §6(2).
+export const emailConsentLog = pgTable("email_consent_log", {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id").notNull(),
+    // Logical channel name. Known values today: 'marketing', 'survey-data-sharing'.
+    // Reserved future values: 'newsletter', 'transactional-receipts'. Keep this
+    // generous so a future migration isn't needed when channels are added.
+    channel: varchar("channel", { length: 50 }).notNull(),
+    granted: boolean("granted").notNull(),
+    source: varchar("source", { length: 50 }),  // 'register-form' | 'profile-page' | 'unsubscribe-link' | etc.
+    ipAddress: varchar("ip_address", { length: 45 }),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at")
+        .$defaultFn(() => new Date())
+        .notNull(),
+}, (table) => [
+    index("email_consent_log_user_id_idx").on(table.userId),
+    index("email_consent_log_channel_idx").on(table.channel),
+    index("email_consent_log_created_at_idx").on(table.createdAt),
 ]);

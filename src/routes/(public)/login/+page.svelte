@@ -4,6 +4,8 @@
 	import { getDashboardUrl } from '$lib/utils/dashboard-routing';
 	import { onMount } from 'svelte';
 	import Turnstile from '$lib/components/Turnstile.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let email = $state('');
 	let password = $state('');
@@ -12,6 +14,7 @@
 	let isLoading = $state(false);
 	let isRedirecting = $state(false);
 	let turnstileToken = $state<string | null>(null);
+	let needsInteraction = $state(false);
 	let turnstileRef: any;
 
 	let redirectUrl = $derived($page.url.searchParams.get('redirect'));
@@ -37,16 +40,32 @@
 		handleSubmit();
 	}
 
+	async function waitForToken(): Promise<string | null> {
+		if (turnstileToken) return turnstileToken;
+		const start = Date.now();
+		while (!turnstileToken) {
+			// Recompute each tick: if interaction kicks in mid-wait, extend the deadline
+			const timeoutMs = needsInteraction ? 60000 : 8000;
+			if (Date.now() - start >= timeoutMs) break;
+			await new Promise((r) => setTimeout(r, 100));
+		}
+		return turnstileToken;
+	}
+
 	async function handleSubmit() {
 		if (!email || !password) return;
 
-		if (!turnstileToken) {
-			authStore.state.error = 'Please complete the CAPTCHA verification';
+		isLoading = true;
+		const token = await waitForToken();
+		if (!token) {
+			isLoading = false;
+			authStore.state.error = needsInteraction
+				? m.auth_security_check_msg()
+				: m.auth_verification_timeout();
 			return;
 		}
 
-		isLoading = true;
-		const result = await authStore.login({ email, password, turnstileToken });
+		const result = await authStore.login({ email, password, turnstileToken: token });
 		isLoading = false;
 
 		if (result.success && authStore.state.user) {
@@ -60,9 +79,22 @@
 		}
 	}
 
-	function handleTurnstileVerify(token: string) { turnstileToken = token; }
-	function handleTurnstileError() { turnstileToken = null; }
-	function handleTurnstileExpire() { turnstileToken = null; }
+	function handleTurnstileVerify(token: string) {
+		turnstileToken = token;
+		needsInteraction = false;
+	}
+
+	function handleTurnstileError() {
+		turnstileToken = null;
+	}
+
+	function handleTurnstileExpire() {
+		turnstileToken = null;
+	}
+
+	function handleBeforeInteractive() {
+		needsInteraction = true;
+	}
 </script>
 
 <svelte:head>
@@ -267,7 +299,7 @@
 					{/if}
 
 					<div class="lg-field">
-						<label class="lg-label" for="email">Email address</label>
+						<label class="lg-label" for="email">{m.common_email()}</label>
 						<div class="lg-input-wrap">
 							<span class="lg-input-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
 							<input
@@ -276,7 +308,7 @@
 								bind:value={email}
 								required
 								class="lg-input"
-								placeholder="you@example.com"
+								placeholder={m.auth_email_placeholder()}
 								autocomplete="email"
 							/>
 						</div>
@@ -326,7 +358,7 @@
 
 					<button
 						type="submit"
-						disabled={isLoading || !email || !password || !turnstileToken}
+						disabled={isLoading || !email || !password}
 						class="lg-submit"
 					>
 						{#if isLoading}

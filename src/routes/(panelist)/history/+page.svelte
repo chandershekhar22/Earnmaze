@@ -2,6 +2,8 @@
 	import { untrack } from 'svelte';
 	import { AlignJustify, ClipboardList, CircleDollarSign, Gift, BarChart2, Rocket } from '@lucide/svelte';
 	import InfoBanner from '$lib/components/InfoBanner.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 
 	interface HistoryItem {
 		type: string;
@@ -29,7 +31,7 @@
 	}
 
 	function formatDate(dateString: string) {
-		return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+		return new Date(dateString).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 	}
 
 	function getStatusStyle(status: string) {
@@ -57,30 +59,30 @@
 </script>
 
 <svelte:head>
-	<title>History - EarnMaze</title>
-	<meta name="description" content="View your complete activity history." />
+	<title>{m.hist_meta_title()}</title>
+	<meta name="description" content={m.hist_meta_description()} />
 </svelte:head>
 
 <div class="space-y-5 animate-fade-in">
-	<InfoBanner id="history-how" message="View your complete activity log. Filter by surveys, points, or rewards. Green amounts are earned, red are spent or deducted." color="primary" />
+	<InfoBanner id="history-how" message={m.hist_info()} color="primary" />
 
 	<!-- Filter Tabs -->
 	<div class="tab-group">
 		<button onclick={() => filter = 'all'} class={filter === 'all' ? 'tab-active' : 'tab'}>
-			<AlignJustify class="w-4 h-4 mr-1.5 inline" />
-			All
+			<AlignJustify class="w-4 h-4 me-1.5 inline" />
+			{m.hist_filter_all()}
 		</button>
 		<button onclick={() => filter = 'surveys'} class={filter === 'surveys' ? 'tab-active' : 'tab'}>
-			<ClipboardList class="w-4 h-4 mr-1.5 inline" />
-			Surveys
+			<ClipboardList class="w-4 h-4 me-1.5 inline" />
+			{m.hist_filter_surveys()}
 		</button>
 		<button onclick={() => filter = 'points'} class={filter === 'points' ? 'tab-active' : 'tab'}>
-			<CircleDollarSign class="w-4 h-4 mr-1.5 inline" />
-			Points
+			<CircleDollarSign class="w-4 h-4 me-1.5 inline" />
+			{m.hist_filter_points()}
 		</button>
 		<button onclick={() => filter = 'rewards'} class={filter === 'rewards' ? 'tab-active' : 'tab'}>
-			<Gift class="w-4 h-4 mr-1.5 inline" />
-			Rewards
+			<Gift class="w-4 h-4 me-1.5 inline" />
+			{m.hist_filter_rewards()}
 		</button>
 	</div>
 
@@ -89,22 +91,32 @@
 			<div class="w-16 h-16 bg-white/[0.04] rounded-2xl flex items-center justify-center mx-auto mb-4">
 				<BarChart2 class="w-8 h-8 text-neutral-600" />
 			</div>
-			<h3 class="text-lg font-bold text-white mb-2">No activity found</h3>
+			<h3 class="text-lg font-bold text-white mb-2">{m.hist_empty_title()}</h3>
 			<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">
 				{filter === 'all'
-					? 'Start completing surveys to build your history.'
-					: `No ${filter} activity found.`}
+					? m.hist_empty_all()
+					: filter === 'surveys'
+					? m.hist_empty_filter_surveys()
+					: filter === 'points'
+					? m.hist_empty_filter_points()
+					: m.hist_empty_filter_rewards()}
 			</p>
-			<a href="/surveys" class="btn-primary">
+			<a href={localizeHref('/surveys')} class="btn-primary">
 				<Rocket class="w-4 h-4" />
-				Browse Surveys
+				{m.hist_browse_surveys()}
 			</a>
 		</div>
 	{:else}
 		<div class="card !p-0 overflow-hidden">
 			<div class="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
 				<h2 class="text-sm font-bold text-white">
-					{filteredHistory.length} {filter === 'all' ? 'activities' : filter}
+					{filter === 'all'
+						? m.hist_count_all({ count: filteredHistory.length })
+						: filter === 'surveys'
+						? m.hist_count_surveys({ count: filteredHistory.length })
+						: filter === 'points'
+						? m.hist_count_points({ count: filteredHistory.length })
+						: m.hist_count_rewards({ count: filteredHistory.length })}
 				</h2>
 			</div>
 
@@ -122,7 +134,7 @@
 								<span class="text-[10px] text-neutral-700">{formatDate(item.createdAt)}</span>
 								{#if item.points}
 									<span class="text-xs font-black {item.points > 0 ? 'text-emerald-400' : 'text-rose-400'}">
-										{item.points > 0 ? '+' : ''}{item.points} pts
+										{item.points > 0 ? '+' : ''}{item.points} {m.dash_pts_short()}
 									</span>
 								{/if}
 							</div>
