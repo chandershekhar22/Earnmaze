@@ -4,7 +4,7 @@
 	import { pointsStore } from '$lib/stores/points.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { LayoutDashboard, ClipboardList, Coins, Gift, User, HelpCircle, Users, X, LogOut, Sparkles, Gamepad2, Zap, Flame } from '@lucide/svelte';
+	import { LayoutDashboard, ClipboardList, Coins, Gift, User, HelpCircle, Users, X, LogOut, Sparkles } from '@lucide/svelte';
 
 	let { isOpen = $bindable(false), variant = 'surveys' }: { isOpen?: boolean; variant?: 'surveys' | 'discover' } = $props();
 
@@ -24,7 +24,6 @@
 	const surveyNav = [
 		{ name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
 		{ name: 'Surveys', href: '/surveys', icon: ClipboardList },
-		{ name: 'Games', href: '/games', icon: Gamepad2 },
 		{ name: 'Points', href: '/points', icon: Coins },
 		{ name: 'Rewards', href: '/rewards', icon: Gift },
 		{ name: 'Referrals', href: '/referrals', icon: Users },
@@ -34,9 +33,6 @@
 
 	const discoverNav = [
 		{ name: 'Dashboard', href: '/discover', icon: LayoutDashboard },
-		{ name: 'Quizzes', href: '/discover?tab=quizzes', icon: Zap },
-		{ name: 'Streaks', href: '/discover?tab=streaks', icon: Flame },
-		{ name: 'Games', href: '/games', icon: Gamepad2 },
 		{ name: 'Points', href: '/points', icon: Coins },
 		{ name: 'Rewards', href: '/rewards', icon: Gift },
 		{ name: 'Referrals', href: '/referrals', icon: Users },

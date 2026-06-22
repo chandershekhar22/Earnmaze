@@ -58,12 +58,12 @@
 	};
 
 	const waysToEarn = [
-		{ icon: Flame, title: 'Daily Streaks', desc: 'Show up daily, earn bonus multipliers. The longer your streak, the bigger your rewards.', tag: 'Up to 5× multiplier', color: 'amber' },
-		{ icon: Zap, title: 'Daily Quizzes', desc: 'Fun, bite-sized quizzes on trending topics — pop culture, science, history, sports.', tag: '50–200 pts per quiz', color: 'primary' },
+		{ icon: Flame, title: 'Daily Streaks', desc: 'Show up daily, earn bonus multipliers. The longer your streak, the bigger your rewards.', tag: 'Up to 5× multiplier', href: '/streaks', color: 'amber' },
+		{ icon: Zap, title: 'Daily Quizzes', desc: 'Fun, bite-sized quizzes on trending topics — pop culture, science, history, sports.', tag: '50–200 pts per quiz', href: '/quizzes', color: 'primary' },
 		{ icon: Layers, title: 'Interactive Artifacts', desc: 'Hand-picked interactive experiences — explore, play with, and learn from curated stories.', tag: 'Curated · Live', href: '/artifacts', color: 'sky' },
 		{ icon: Gamepad2, title: 'Play & Earn', desc: 'Level up in mobile games and earn real rewards. Gaming meets earning.', tag: 'Earn while you play', href: '/games', color: 'violet' },
-		{ icon: ShoppingBag, title: 'Exclusive Deals', desc: "Cashback on everyday purchases and app sign-ups you'd already do.", tag: 'Instant cashback', color: 'emerald' },
-		{ icon: Trophy, title: 'Weekly Challenges', desc: 'Limited-time challenges with bonus point pools and massive reward drops.', tag: 'Bonus reward pools', color: 'rose' },
+		{ icon: ShoppingBag, title: 'Exclusive Deals', desc: "Cashback on everyday purchases and app sign-ups you'd already do.", tag: 'Instant cashback', href: '/exclusive-deals', color: 'emerald' },
+		{ icon: Trophy, title: 'Weekly Challenges', desc: 'Limited-time challenges with bonus point pools and massive reward drops.', tag: 'Bonus reward pools', href: '/weekly-challenges', color: 'rose' },
 	];
 
 	const colorMap: Record<string, string> = {
@@ -245,15 +245,18 @@
 		</div>
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
 			{#each waysToEarn as w}
-				<svelte:element this={w.href ? 'a' : 'div'} href={w.href}
-					class="em-panel p-6 flex flex-col {w.href ? 'hover:-translate-y-0.5 transition-transform cursor-pointer' : ''}">
-					<span class="w-11 h-11 rounded-[12px] grid place-items-center mb-5 {colorMap[w.color]}">
+				<a href={w.href}
+					class="group relative em-panel p-6 flex flex-col cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-white/15 hover:shadow-[0_16px_40px_rgba(0,0,0,0.35)]">
+					<span class="absolute top-6 right-6 w-7 h-7 rounded-full grid place-items-center text-neutral-500 border border-white/[0.06] opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-white group-hover:border-white/20">
+						<ArrowRight class="w-3.5 h-3.5" />
+					</span>
+					<span class="w-11 h-11 rounded-[12px] grid place-items-center mb-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105 {colorMap[w.color]}">
 						<w.icon class="w-[22px] h-[22px]" />
 					</span>
 					<h4 class="text-[16px] font-semibold text-white tracking-tight mb-2">{w.title}</h4>
 					<p class="text-[13px] text-neutral-400 leading-relaxed mb-5 flex-1">{w.desc}</p>
-					<span class="self-start px-3 py-1.5 rounded-lg bg-white/[0.03] border font-mono text-[11px] {tagColorMap[w.color]}">{w.tag}</span>
-				</svelte:element>
+					<span class="self-start px-3 py-1.5 rounded-lg bg-white/[0.03] border font-mono text-[11px] transition-colors {tagColorMap[w.color]}">{w.tag}</span>
+				</a>
 			{/each}
 		</div>
 	</div>

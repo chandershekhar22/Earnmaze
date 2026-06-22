@@ -10,7 +10,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 
-	let { children }: { children: Snippet } = $props();
+	let { children, data }: { children: Snippet; data: { dashboardView: 'surveys' | 'discover' } } = $props();
 
 	let mounted = $state(false);
 	let authChecked = $state(false);
@@ -18,9 +18,15 @@
 	let mainEl: HTMLElement;
 
 	// Discover dashboard gets a different sidebar; both dashboards show the
-	// quick view toggle so users can flip between them.
+	// quick view toggle so users can flip between them. On shared pages
+	// (points, rewards, …) fall back to the saved preference so the sidebar
+	// stays in the view the user is browsing in.
 	let dashboardView = $derived<'surveys' | 'discover'>(
-		$page.url.pathname.startsWith('/discover') ? 'discover' : 'surveys'
+		$page.url.pathname.startsWith('/discover')
+			? 'discover'
+			: $page.url.pathname === '/dashboard'
+				? 'surveys'
+				: data.dashboardView
 	);
 	let isDashboardRoute = $derived(
 		$page.url.pathname === '/dashboard' || $page.url.pathname.startsWith('/discover')

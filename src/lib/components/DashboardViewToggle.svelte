@@ -17,10 +17,13 @@
 				body: JSON.stringify({ view, onboarded: true }),
 			});
 			if (!res.ok) throw new Error('failed');
-			await goto(view === 'discover' ? '/discover' : '/dashboard');
+			// invalidateAll so the panelist layout reloads the saved view and the
+			// sidebar stays correct on shared pages (points, rewards, …).
+			await goto(view === 'discover' ? '/discover' : '/dashboard', { invalidateAll: true });
 		} catch {
-			saving = false;
 			toastStore.error('Could not switch view', 'Please try again.');
+		} finally {
+			saving = false;
 		}
 	}
 </script>
