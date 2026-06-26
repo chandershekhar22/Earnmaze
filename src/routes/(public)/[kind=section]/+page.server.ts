@@ -14,10 +14,13 @@ export const load: PageServerLoad = async ({ params }) => {
 		likes: stats[a.id]?.likes ?? 0,
 		shares: stats[a.id]?.shares ?? 0,
 	}));
+	const featured = withStats.find((a) => a.featuredToday) ?? null;
 	return {
 		items: withStats,
 		kind: params.kind,
 		kindLabel: KIND_META[params.kind].label,
+		kindSingular: KIND_META[params.kind].singular,
 		accent: KIND_META[params.kind].accent,
+		featured,
 	};
 };

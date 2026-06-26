@@ -2,13 +2,14 @@
 	import { invalidateAll } from '$app/navigation';
 	import { Sparkles, Upload, Trash2, ExternalLink, Loader2, X, CheckCircle2, Image as ImageIcon, Heart, Share2 } from '@lucide/svelte';
 
-	let { data } = $props<{ data: { items: any[]; kind: string; kindLabel: string } }>();
+	let { data } = $props<{ data: { items: any[]; kind: string; kindLabel: string; kindSingular: string } }>();
 
 	let title = $state('');
 	let desc = $state('');
 	let cat = $state<'data' | 'lifestyle' | 'other'>('data');
 	let trending = $state(false);
 	let isNew = $state(true);
+	let featuredToday = $state(false);
 	let file = $state<File | null>(null);
 	let dragOver = $state(false);
 	let thumb = $state<File | null>(null);
@@ -79,6 +80,7 @@
 		fd.append('cat', cat);
 		if (trending) fd.append('trending', 'on');
 		if (isNew) fd.append('new', 'on');
+		if (featuredToday) fd.append('featuredToday', 'on');
 		fd.append('file', file);
 		if (thumb) fd.append('thumb', thumb);
 
@@ -96,6 +98,7 @@
 			setThumb(null);
 			trending = false;
 			isNew = true;
+			featuredToday = false;
 			await invalidateAll();
 		} catch (e: any) {
 			err = e.message || 'Upload failed';
@@ -108,6 +111,21 @@
 		if (!confirm('Delete this item? Users will no longer see it.')) return;
 		const res = await fetch(`/api/uploads/${data.kind}?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
 		if (res.ok) await invalidateAll();
+	}
+
+	let settingFeatured = $state<string | null>(null);
+	async function setFeaturedToday(id: string) {
+		settingFeatured = id;
+		try {
+			const res = await fetch(`/api/uploads/${data.kind}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ id }),
+			});
+			if (res.ok) await invalidateAll();
+		} finally {
+			settingFeatured = null;
+		}
 	}
 </script>
 
@@ -163,6 +181,9 @@
 			</label>
 			<label class="flex items-center gap-2 text-sm text-neutral-300 cursor-pointer">
 				<input type="checkbox" bind:checked={isNew} class="accent-blue-500" /> Mark as New
+			</label>
+			<label class="flex items-center gap-2 text-sm text-neutral-300 cursor-pointer">
+				<input type="checkbox" bind:checked={featuredToday} class="accent-green-500" /> Mark as today's {data.kindSingular}
 			</label>
 		</div>
 
@@ -249,6 +270,9 @@
 								</div>
 							</div>
 							<div class="flex flex-col gap-1 items-end shrink-0">
+								{#if a.featuredToday}
+									<span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-green-500/20 text-green-300">★ Today's {data.kindSingular}</span>
+								{/if}
 								<span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md
 									{a.cat === 'data' ? 'bg-green-500/20 text-green-300' : a.cat === 'lifestyle' ? 'bg-violet-500/20 text-violet-300' : 'bg-blue-500/20 text-blue-300'}">{a.cat}</span>
 								{#each a.tags as t}
@@ -268,6 +292,12 @@
 								</span>
 							</div>
 							<div class="flex gap-1">
+								{#if !a.featuredToday}
+									<button type="button" onclick={() => setFeaturedToday(a.id)} disabled={settingFeatured === a.id}
+										class="inline-flex items-center gap-1 px-2.5 py-1 bg-green-500/10 hover:bg-green-500/20 disabled:opacity-50 text-xs text-green-300 rounded-md transition">
+										{#if settingFeatured === a.id}<Loader2 class="w-3 h-3 animate-spin" />{:else}★{/if} Set as today's {data.kindSingular}
+									</button>
+								{/if}
 								<a href={a.file} target="_blank" rel="noopener"
 									class="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-200 hover:bg-surface-300 text-xs text-white rounded-md transition">
 									<ExternalLink class="w-3 h-3" /> Open

@@ -1,9 +1,9 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-export type UploadKind = 'streaks' | 'quizzes' | 'weekly-challenges' | 'exclusive-deals';
+export type UploadKind = 'streaks' | 'quizzes' | 'weekly-challenges' | 'exclusive-deals' | 'artifacts';
 
-export const UPLOAD_KINDS: UploadKind[] = ['streaks', 'quizzes', 'weekly-challenges', 'exclusive-deals'];
+export const UPLOAD_KINDS: UploadKind[] = ['streaks', 'quizzes', 'weekly-challenges', 'exclusive-deals', 'artifacts'];
 
 export type UploadCat = 'data' | 'lifestyle' | 'other';
 export type UploadTag = 'TRENDING' | 'NEW';
@@ -20,6 +20,7 @@ export interface UploadItem {
 	file: string;
 	thumb?: string;
 	createdAt: string;
+	featuredToday?: boolean;
 }
 
 export const KIND_META: Record<UploadKind, { label: string; singular: string; accent: string; staticDir: string; }> = {
@@ -27,6 +28,7 @@ export const KIND_META: Record<UploadKind, { label: string; singular: string; ac
 	'quizzes': { label: 'Daily Quizzes', singular: 'quiz', accent: '#8f7cff', staticDir: 'quizzes-uploaded' },
 	'weekly-challenges': { label: 'Weekly Challenges', singular: 'challenge', accent: '#ffd166', staticDir: 'weekly-challenges-uploaded' },
 	'exclusive-deals': { label: 'Exclusive Deals', singular: 'deal', accent: '#56a8ff', staticDir: 'exclusive-deals-uploaded' },
+	'artifacts': { label: 'Interactive Artifacts', singular: 'artifact', accent: '#5ee6c6', staticDir: 'artifacts-uploaded' },
 };
 
 export function isUploadKind(s: string | undefined | null): s is UploadKind {
@@ -80,6 +82,21 @@ export async function removeUpload(kind: UploadKind, id: string) {
 		await fs.rm(dir, { recursive: true, force: true });
 	}
 	await writeUploads(kind, items.filter((a) => a.id !== id));
+}
+
+export async function markFeaturedToday(kind: UploadKind, id: string) {
+	const items = await readUploads(kind);
+	let found = false;
+	const next = items.map((a) => {
+		if (a.id === id) {
+			found = true;
+			return { ...a, featuredToday: true };
+		}
+		if (a.featuredToday) return { ...a, featuredToday: false };
+		return a;
+	});
+	if (!found) throw new Error('Item not found');
+	await writeUploads(kind, next);
 }
 
 export async function saveUploadHtml(kind: UploadKind, id: string, html: string) {

@@ -16,5 +16,10 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		likes: stats[a.id]?.likes ?? 0,
 		shares: stats[a.id]?.shares ?? 0,
 	}));
-	return { items: withStats, kind: params.kind, kindLabel: KIND_META[params.kind].label };
+	return {
+		items: withStats,
+		kind: params.kind,
+		kindLabel: KIND_META[params.kind].label,
+		kindSingular: KIND_META[params.kind].singular,
+	};
 };
