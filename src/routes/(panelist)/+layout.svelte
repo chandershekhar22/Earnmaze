@@ -6,6 +6,7 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import DashboardViewToggle from '$lib/components/DashboardViewToggle.svelte';
+	import FeedbackWidget from '$lib/components/FeedbackWidget.svelte';
 	import { page } from '$app/stores';
 	import { afterNavigate } from '$app/navigation';
 	import type { Snippet } from 'svelte';
@@ -97,6 +98,7 @@
 		</div>
 		{#if isDashboardRoute}
 			<DashboardViewToggle current={dashboardView} />
+			<FeedbackWidget />
 		{/if}
 	</div>
 {:else}

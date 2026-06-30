@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { RequestHandler } from './$types';
 import { Logger } from '$lib/utils/app-logger';
 import { getClientIP } from '$lib/server/geo-restriction';
+import { createFeedback } from '$lib/db/repositories';
 
 const feedbackSchema = z.object({
 	rating: z.number().int().min(1).max(5).nullable().optional(),
@@ -28,17 +29,27 @@ export const POST: RequestHandler = async (event) => {
 			return json({ error: 'Please add a rating or a message' }, { status: 400 });
 		}
 
+		const ip = getClientIP(event);
+
+		await createFeedback({
+			userId: event.locals.user?.id ?? null,
+			rating: rating ?? null,
+			topic: topic ?? null,
+			message,
+			email: email ?? null,
+			ipAddress: ip
+		});
+
 		Logger.root.info(
 			{
 				context: 'feedback',
 				rating: rating ?? null,
 				topic: topic ?? null,
 				hasMessage: Boolean(message),
-				message,
-				email: email ?? null,
-				ip: getClientIP(event)
+				userId: event.locals.user?.id ?? null,
+				ip
 			},
-			'Landing page feedback received'
+			'Feedback received'
 		);
 
 		return json({ success: true });

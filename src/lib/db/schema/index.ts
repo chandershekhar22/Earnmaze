@@ -11,3 +11,4 @@ export * from "./settings";
 export * from "./guest-sessions";
 export * from "./guest-upgrade-verifications";
 export * from "./support-tickets";
+export * from "./feedback";

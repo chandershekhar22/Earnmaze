@@ -50,3 +50,6 @@ export * from './support-tickets.repository.server';
 
 // FAQ repository
 export * from './faq.repository.server';
+
+// Feedback repository
+export * from './feedback.repository.server';

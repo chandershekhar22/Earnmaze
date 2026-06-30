@@ -495,11 +495,10 @@ const handleApp: Handle = async ({ event, resolve }) => {
 
   // Resolve the request and add security headers
   const response = await resolve(event);
-  // Embedded artifact/section/game HTML (served from the /*-content endpoints
-  // and rendered in a sandboxed iframe) needs a relaxed CSP so it can load
+  // Embedded section/game HTML (served from the /*-content endpoints and
+  // rendered in a sandboxed iframe) needs a relaxed CSP so it can load
   // libraries from CDNs; everything else gets the strict app policy.
   if (
-    pathname.startsWith('/artifact-content/') ||
     pathname.startsWith('/section-content/') ||
     pathname.startsWith('/game-content/')
   ) {

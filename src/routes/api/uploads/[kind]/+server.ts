@@ -9,6 +9,7 @@ import {
 	slugify,
 	isUploadKind,
 	publicHtmlPath,
+	markFeaturedToday,
 	type UploadCat,
 	type UploadTag,
 } from '$lib/server/uploads-store';
@@ -61,6 +62,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 	const cat: UploadCat = catRaw === 'data' || catRaw === 'lifestyle' ? catRaw : 'other';
 	const trending = form.get('trending') === 'on';
 	const isNew = form.get('new') === 'on';
+	const featuredToday = form.get('featuredToday') === 'on';
 	const file = form.get('file') as File | null;
 	const thumbFile = form.get('thumb') as File | null;
 
@@ -107,7 +109,21 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 		thumb: thumbUrl,
 	});
 
+	if (featuredToday) {
+		await markFeaturedToday(kind, id);
+	}
+
 	return json({ ok: true, id });
+};
+
+export const PATCH: RequestHandler = async ({ request, locals, params }) => {
+	requireAdmin(locals);
+	const kind = resolveKind(params.kind!);
+	const body = await request.json().catch(() => ({}));
+	const id = String(body?.id || '');
+	if (!id) throw error(400, 'id required');
+	await markFeaturedToday(kind, id);
+	return json({ ok: true });
 };
 
 export const DELETE: RequestHandler = async ({ url, locals, params }) => {
