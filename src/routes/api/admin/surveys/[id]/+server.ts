@@ -14,7 +14,9 @@ const updateSurveySchema = z.object({
 	quotaFullPoints: z.number().int().min(0).optional(),
 	link: z.string().url('Must be a valid URL').optional(),
 	isActive: z.boolean().optional(),
-	priority: z.enum(['low', 'medium', 'high']).optional()
+	priority: z.enum(['low', 'medium', 'high']).optional(),
+	thumbnailUrl: z.string().optional().nullable(),
+	isTodaySurvey: z.boolean().optional()
 });
 
 // GET - Get a single survey by ID

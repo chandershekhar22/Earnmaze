@@ -32,11 +32,11 @@
 			tag: { pre: 'Earn while you play', em: '', post: '' }
 		},
 		{
-			href: '/exclusive-deals',
-			icon: 'bag',
-			title: 'Exclusive Deals',
-			body: "Cashback on everyday purchases and app sign-ups you'd already do.",
-			tag: { pre: 'Instant cashback', em: '', post: '' }
+			href: '/paid-surveys',
+			icon: 'doc',
+			title: 'Paid Surveys',
+			body: 'Share opinions with major brands. Quick 2–10 minute surveys matched to your profile.',
+			tag: { pre: '', em: '$0.50–$5', post: ' per survey' }
 		},
 		{
 			href: '/weekly-challenges',

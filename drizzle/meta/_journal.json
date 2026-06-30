@@ -92,6 +92,13 @@
       "when": 1782287510634,
       "tag": "0012_magical_domino",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1782600000000,
+      "tag": "0013_survey_thumb_today",
+      "breakpoints": true
     }
   ]
 }

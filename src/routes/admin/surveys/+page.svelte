@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { goto, invalidateAll } from '$app/navigation';
-	import { Plus, ClipboardList, Check, CircleX, CircleCheck, Pencil, Trash, X, AlertTriangle, Eye, ChevronDown, ChevronUp, ExternalLink, Coins, Users, BarChart2 } from '@lucide/svelte';
+	import { Plus, ClipboardList, Check, CircleX, CircleCheck, Pencil, Trash, X, AlertTriangle, Eye, ChevronDown, ChevronUp, ExternalLink, Coins, Users, BarChart2, Image as ImageIcon, Star } from '@lucide/svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -29,8 +29,28 @@
 	let formLink = $state('');
 	let formIsActive = $state(true);
 	let formPriority = $state<'low' | 'medium' | 'high'>('medium');
+	let formThumbnailUrl = $state<string | null>(null);
+	let formThumbPreview = $state<string | null>(null);
+	let formThumbFile = $state<File | null>(null);
+	let formIsTodaySurvey = $state(false);
+	let isUploadingThumb = $state(false);
 	let isSubmitting = $state(false);
 	let formError = $state('');
+
+	const ALLOWED_THUMB = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+
+	function setThumb(f: File | null | undefined) {
+		if (formThumbPreview && !formThumbnailUrl) URL.revokeObjectURL(formThumbPreview);
+		if (!f) { formThumbFile = null; formThumbPreview = null; return; }
+		if (!ALLOWED_THUMB.includes(f.type)) { formError = 'Thumbnail must be PNG, JPG, WEBP, or GIF'; return; }
+		if (f.size > 2 * 1024 * 1024) { formError = 'Thumbnail too large (max 2 MB)'; return; }
+		formError = '';
+		formThumbFile = f;
+		formThumbPreview = URL.createObjectURL(f);
+	}
+
+	function pickThumb(e: Event) { setThumb((e.target as HTMLInputElement).files?.[0]); }
+	function clearThumb() { formThumbFile = null; formThumbPreview = null; formThumbnailUrl = null; }
 
 	// Expanded detail view
 	let expandedSurvey = $state<string | null>(null);
@@ -66,6 +86,10 @@
 		formLink = '';
 		formIsActive = true;
 		formPriority = 'medium';
+		formThumbnailUrl = null;
+		formThumbPreview = null;
+		formThumbFile = null;
+		formIsTodaySurvey = false;
 		formError = '';
 		editingSurvey = null;
 		showModal = true;
@@ -82,6 +106,10 @@
 		formLink = survey.link;
 		formIsActive = survey.isActive;
 		formPriority = survey.priority ?? 'medium';
+		formThumbnailUrl = survey.thumbnailUrl ?? null;
+		formThumbPreview = survey.thumbnailUrl ?? null;
+		formThumbFile = null;
+		formIsTodaySurvey = survey.isTodaySurvey ?? false;
 		formError = '';
 		showModal = true;
 	}
@@ -98,6 +126,24 @@
 		formError = '';
 
 		try {
+			// For edit mode with a new thumb file, upload first to get the URL
+			let resolvedThumbUrl = formThumbnailUrl;
+			if (formThumbFile && modalMode === 'edit' && editingSurvey) {
+				isUploadingThumb = true;
+				const fd = new FormData();
+				fd.append('file', formThumbFile);
+				const thumbRes = await fetch(`/api/admin/surveys/${editingSurvey.id}/thumbnail`, { method: 'POST', body: fd });
+				const thumbResult = await thumbRes.json();
+				isUploadingThumb = false;
+				if (!thumbRes.ok || !thumbResult.success) {
+					formError = thumbResult.message || 'Thumbnail upload failed';
+					isSubmitting = false;
+					return;
+				}
+				resolvedThumbUrl = thumbResult.thumbnailUrl;
+			}
+			// For create mode, thumbnail will be uploaded after we get the new survey ID
+
 			const payload = {
 				title: formTitle,
 				description: formDescription || null,
@@ -106,7 +152,9 @@
 				quotaFullPoints: formQuotaFullPoints,
 				link: formLink,
 				isActive: formIsActive,
-				priority: formPriority
+				priority: formPriority,
+				thumbnailUrl: resolvedThumbUrl ?? null,
+				isTodaySurvey: formIsTodaySurvey
 			};
 
 			const url = modalMode === 'create'
@@ -128,12 +176,22 @@
 				return;
 			}
 
+			// After create, upload thumb if one was selected
+			if (modalMode === 'create' && formThumbFile && result.data?.id) {
+				isUploadingThumb = true;
+				const fd = new FormData();
+				fd.append('file', formThumbFile);
+				await fetch(`/api/admin/surveys/${result.data.id}/thumbnail`, { method: 'POST', body: fd });
+				isUploadingThumb = false;
+			}
+
 			closeModal();
 			await invalidateAll();
 		} catch (error) {
 			formError = 'An error occurred. Please try again.';
 		} finally {
 			isSubmitting = false;
+			isUploadingThumb = false;
 		}
 	}
 
@@ -376,11 +434,21 @@
 						{#each data.surveys as survey}
 							<tr class="table-row cursor-pointer" onclick={() => toggleSurveyDetail(survey.id)}>
 								<td class="table-td">
-									<div class="max-w-xs">
-										<div class="font-medium text-white truncate">{survey.title}</div>
-										{#if survey.description}
-											<div class="text-sm text-neutral-500 truncate">{survey.description}</div>
+									<div class="flex items-center gap-3 max-w-xs">
+										{#if survey.thumbnailUrl}
+											<img src={survey.thumbnailUrl} alt="" class="w-9 h-9 rounded-lg object-cover flex-shrink-0 border border-white/[0.06]" />
 										{/if}
+										<div class="min-w-0">
+											<div class="font-medium text-white truncate flex items-center gap-1.5">
+												{survey.title}
+												{#if survey.isTodaySurvey}
+													<span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20 flex-shrink-0">TODAY</span>
+												{/if}
+											</div>
+											{#if survey.description}
+												<div class="text-sm text-neutral-500 truncate">{survey.description}</div>
+											{/if}
+										</div>
 									</div>
 								</td>
 								<td class="table-td whitespace-nowrap">
@@ -462,6 +530,20 @@
 
 											<!-- Info Rows -->
 											<div class="space-y-3">
+												{#if survey.thumbnailUrl}
+													<div>
+														<span class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Thumbnail</span>
+														<img src={survey.thumbnailUrl} alt="Survey thumbnail" class="mt-1 h-24 w-auto rounded-xl object-cover border border-white/[0.06]" />
+													</div>
+												{/if}
+
+												{#if survey.isTodaySurvey}
+													<div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/[0.08] border border-amber-500/20">
+														<Star class="w-3.5 h-3.5 text-amber-400" />
+														<span class="text-xs font-semibold text-amber-300">Marked as Today's Survey</span>
+													</div>
+												{/if}
+
 												{#if survey.description}
 													<div>
 														<span class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Description</span>
@@ -707,6 +789,25 @@
 							</select>
 						</div>
 
+						<!-- Thumbnail Upload -->
+						<div>
+							<label class="label">Thumbnail Image</label>
+							{#if formThumbPreview}
+								<div class="relative mb-2">
+									<img src={formThumbPreview} alt="Thumbnail preview" class="w-full h-32 object-cover rounded-xl border border-white/[0.06]" />
+									<button type="button" onclick={clearThumb} class="absolute top-2 right-2 p-1 bg-black/60 text-white rounded-lg hover:bg-black/80 transition-colors" aria-label="Remove thumbnail">
+										<X class="w-4 h-4" />
+									</button>
+								</div>
+							{:else}
+								<label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-white/[0.12] rounded-xl cursor-pointer hover:border-primary-500/50 hover:bg-white/[0.02] transition-colors">
+									<ImageIcon class="w-6 h-6 text-neutral-500 mb-1" />
+									<span class="text-xs text-neutral-500">Click to upload thumbnail (PNG, JPG, WEBP · max 2 MB)</span>
+									<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" onchange={pickThumb} />
+								</label>
+							{/if}
+						</div>
+
 						<!-- Active Status -->
 						<div class="flex items-center gap-3">
 							<input
@@ -718,6 +819,20 @@
 							<label for="isActive" class="text-sm font-medium text-neutral-300">
 								Active (visible to panelists)
 							</label>
+						</div>
+
+						<!-- Today's Survey -->
+						<div class="flex items-center gap-3 p-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06]">
+							<input
+								id="isTodaySurvey"
+								type="checkbox"
+								bind:checked={formIsTodaySurvey}
+								class="w-4 h-4 text-amber-500 bg-surface-50 border-white/[0.06] rounded focus:ring-amber-400"
+							/>
+							<label for="isTodaySurvey" class="text-sm font-medium text-amber-300 flex items-center gap-1.5">
+								<Star class="w-3.5 h-3.5" /> Mark as Today's Survey
+							</label>
+							<span class="text-xs text-neutral-500 ms-auto">Clears any existing today's survey</span>
 						</div>
 					</div>
 
@@ -732,10 +847,10 @@
 						</button>
 						<button
 							type="submit"
-							disabled={isSubmitting}
+							disabled={isSubmitting || isUploadingThumb}
 							class="btn-primary"
 						>
-							{isSubmitting ? 'Saving...' : (modalMode === 'create' ? 'Create Survey' : 'Save Changes')}
+							{isUploadingThumb ? 'Uploading...' : isSubmitting ? 'Saving...' : (modalMode === 'create' ? 'Create Survey' : 'Save Changes')}
 						</button>
 					</div>
 				</form>
