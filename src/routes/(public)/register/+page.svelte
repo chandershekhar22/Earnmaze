@@ -32,17 +32,9 @@
 	// Optional opt-in (default OFF for GDPR/CAN-SPAM compliance).
 	let marketingConsent = $state(false);
 
-	let canSubmit = $derived(
-		!!email &&
-			!!password &&
-			!!confirmPassword &&
-			!passwordMismatch &&
-			ageVerified &&
-			tosAccepted &&
-			privacyAccepted
-	);
 
 	let passwordMismatch = $derived(password !== confirmPassword && confirmPassword.length > 0);
+	
 
 	let pwScore = $derived(
 		[password.length >= 8, /[A-Z]/.test(password), /[a-z]/.test(password), /[0-9]/.test(password)]
@@ -83,7 +75,9 @@
 
 	async function handleSubmit() {
 		if (!email || !password || !confirmPassword || passwordMismatch) return;
-		if (!ageVerified || !tosAccepted || !privacyAccepted) return;
+		// The page uses a single "agreedTerms" checkbox. Require that instead
+		// of the unused individual flags so the form actually submits.
+		if (!agreedTerms) return;
 
 		isLoading = true;
 		const token = await waitForToken();
