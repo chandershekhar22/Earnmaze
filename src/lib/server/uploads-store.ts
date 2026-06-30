@@ -106,6 +106,15 @@ export function publicHtmlPath(kind: UploadKind, id: string) {
 	return `/${KIND_META[kind].staticDir}/${id}/index.html`;
 }
 
+/** Raw HTML of an uploaded item, or null if it doesn't exist on disk. */
+export async function readUploadHtml(kind: UploadKind, id: string): Promise<string | null> {
+	try {
+		return await fs.readFile(path.join(rootFor(kind), id, 'index.html'), 'utf-8');
+	} catch {
+		return null;
+	}
+}
+
 export function slugify(s: string) {
 	return s
 		.toLowerCase()

@@ -67,6 +67,15 @@ export async function saveArtifactHtml(id: string, html: string) {
 	await fs.writeFile(path.join(dir, 'index.html'), html, 'utf-8');
 }
 
+/** Raw HTML of an uploaded artifact, or null if it doesn't exist on disk. */
+export async function readArtifactHtml(id: string): Promise<string | null> {
+	try {
+		return await fs.readFile(path.join(ROOT, id, 'index.html'), 'utf-8');
+	} catch {
+		return null;
+	}
+}
+
 export async function saveArtifactThumb(
 	id: string,
 	bytes: Uint8Array,

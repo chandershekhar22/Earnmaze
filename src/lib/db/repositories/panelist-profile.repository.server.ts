@@ -53,6 +53,60 @@ export async function getPanelistProfile(panelistId: string) {
 	return { userData, demographics, geography, professional, preferences };
 }
 
+export type DashboardView = 'surveys' | 'discover';
+
+export type DashboardPreference = {
+	dashboardView: DashboardView;
+	dashboardOnboarded: boolean;
+};
+
+/**
+ * Get a panelist's dashboard view preference. Falls back to defaults
+ * (surveys view, not yet onboarded) when no preferences row exists.
+ */
+export async function getDashboardPreference(panelistId: string): Promise<DashboardPreference> {
+	const row = await db
+		.select({
+			dashboardView: panelistPreferences.dashboardView,
+			dashboardOnboarded: panelistPreferences.dashboardOnboarded,
+		})
+		.from(panelistPreferences)
+		.where(eq(panelistPreferences.panelistId, panelistId))
+		.limit(1)
+		.then((r) => r[0] ?? null);
+
+	return {
+		dashboardView: (row?.dashboardView as DashboardView) ?? 'surveys',
+		dashboardOnboarded: row?.dashboardOnboarded ?? false,
+	};
+}
+
+/**
+ * Persist a panelist's dashboard view preference. Upserts the preferences row
+ * so it works even before the panelist has any other preferences saved.
+ */
+export async function setDashboardPreference(
+	panelistId: string,
+	data: { dashboardView?: DashboardView; dashboardOnboarded?: boolean }
+): Promise<void> {
+	const set: Record<string, unknown> = { updatedBy: panelistId };
+	if (data.dashboardView !== undefined) set.dashboardView = data.dashboardView;
+	if (data.dashboardOnboarded !== undefined) set.dashboardOnboarded = data.dashboardOnboarded;
+
+	await db
+		.insert(panelistPreferences)
+		.values({
+			panelistId,
+			dashboardView: data.dashboardView ?? 'surveys',
+			dashboardOnboarded: data.dashboardOnboarded ?? false,
+			updatedBy: panelistId,
+		})
+		.onConflictDoUpdate({
+			target: panelistPreferences.panelistId,
+			set,
+		});
+}
+
 export type ProfileUpdateData = {
 	name?: string;
 	demographics?: {

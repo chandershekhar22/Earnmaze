@@ -189,23 +189,23 @@
 	<title>{m.help_meta_title()}</title>
 </svelte:head>
 
-<div class="space-y-5 animate-fade-in">
+<div class="space-y-[22px] animate-fade-in">
 
 	{#if view === 'create'}
 		<!-- ═══ CREATE TICKET VIEW ═══ -->
 		<div>
-			<button onclick={() => view = 'home'} class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-white mb-4 transition-colors">
+			<button onclick={() => view = 'home'} class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-400 hover:text-white mb-4 transition-colors">
 				<ArrowLeft class="w-3.5 h-3.5 rtl:-scale-x-100" /> {m.sup_back()}
 			</button>
 
-			<div class="card">
-				<div class="flex items-center gap-3 mb-5">
-					<div class="p-2.5 bg-primary-500/10 rounded-xl">
-						<Send class="w-5 h-5 text-primary-400" />
-					</div>
+			<div class="rounded-2xl bg-surface-50 border border-white/[0.07] p-6">
+				<div class="flex items-center gap-3.5 mb-5">
+					<span class="w-10 h-10 rounded-[11px] bg-primary-400/12 text-primary-500 grid place-items-center">
+						<Send class="w-5 h-5" />
+					</span>
 					<div>
-						<h2 class="text-base font-bold text-white">{m.sup_new_ticket_title()}</h2>
-						<p class="text-xs text-neutral-600">{m.sup_new_ticket_desc()}</p>
+						<h2 class="text-[15px] font-semibold text-white tracking-tight">{m.sup_new_ticket_title()}</h2>
+						<p class="text-[12.5px] text-neutral-400">{m.sup_new_ticket_desc()}</p>
 					</div>
 				</div>
 
@@ -278,34 +278,34 @@
 	{:else}
 		<!-- ═══ SUPPORT HOME VIEW ═══ -->
 
-		<!-- Header -->
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-3">
-				<div class="p-2.5 bg-gradient-to-br from-primary-500/15 to-fuchsia-500/10 rounded-xl">
-					<HelpCircle class="w-5 h-5 text-primary-400" />
-				</div>
+		<!-- Header strip -->
+		<div class="flex items-center justify-between gap-5 px-6 py-5 rounded-2xl bg-surface-50 border border-white/[0.07] flex-wrap">
+			<div class="flex items-center gap-3.5">
+				<span class="w-[42px] h-[42px] rounded-[11px] bg-fuchsia-500/12 border border-fuchsia-400/20 text-fuchsia-400 grid place-items-center">
+					<HelpCircle class="w-5 h-5" />
+				</span>
 				<div>
-					<h1 class="text-lg font-bold text-white">{m.sup_help_title()}</h1>
-					<p class="text-xs text-neutral-600">{m.sup_help_subtitle()}</p>
+					<h1 class="text-[18px] font-semibold text-white tracking-tight">{m.sup_help_title()}</h1>
+					<p class="text-[12.5px] text-neutral-400">{m.sup_help_subtitle()}</p>
 				</div>
 			</div>
-			<button onclick={openCreateForm} class="btn-primary !text-xs !py-2">
-				<Plus class="w-3.5 h-3.5" /> {m.sup_new_ticket_btn()}
+			<button onclick={openCreateForm} class="btn-primary">
+				<Plus class="w-4 h-4" /> {m.sup_new_ticket_btn()}
 			</button>
 		</div>
 
-		<!-- Tabs -->
-		<div class="tab-group max-w-xs">
+		<!-- Segmented tabs -->
+		<div class="tab-group">
 			<button onclick={() => homeTab = 'faq'} class={homeTab === 'faq' ? 'tab-active' : 'tab'}>
-				<BookOpen class="w-3.5 h-3.5 me-1.5 inline" /> {m.sup_tab_faq()}
+				<BookOpen class="w-[15px] h-[15px]" /> {m.sup_tab_faq()}
 				{#if faqs.length > 0}
-					<span class="text-[10px] ms-1 opacity-60">({faqs.length})</span>
+					<span class="font-mono text-[11px] opacity-80">{faqs.length}</span>
 				{/if}
 			</button>
 			<button onclick={() => homeTab = 'tickets'} class={homeTab === 'tickets' ? 'tab-active' : 'tab'}>
-				<MessageSquare class="w-3.5 h-3.5 me-1.5 inline" /> {m.sup_tab_my_tickets()}
+				<MessageSquare class="w-[15px] h-[15px]" /> {m.sup_tab_my_tickets()}
 				{#if openTickets > 0}
-					<span class="ms-1 px-1.5 py-0.5 bg-primary-500/15 text-primary-400 rounded text-[9px] font-bold">{openTickets}</span>
+					<span class="ml-1 px-1.5 py-0.5 bg-primary-400/15 text-primary-400 rounded text-[9px] font-bold">{openTickets}</span>
 				{/if}
 			</button>
 		</div>
@@ -313,36 +313,37 @@
 		<!-- FAQ Tab -->
 		{#if homeTab === 'faq'}
 			{#if faqs.length === 0}
-				<div class="bg-surface-100 border border-white/[0.06] rounded-2xl text-center py-12 px-6">
-					<BookOpen class="w-10 h-10 text-neutral-700 mx-auto mb-3" />
-					<p class="text-sm font-semibold text-white/30 mb-1">{m.sup_no_faqs_title()}</p>
-					<p class="text-xs text-neutral-600">{m.sup_no_faqs_desc()}</p>
+				<div class="em-panel">
+					<div class="em-empty">
+						<span class="em-empty-icon"><BookOpen class="w-[30px] h-[30px]" /></span>
+						<h4 class="text-[17px] font-semibold text-white tracking-tight">{m.sup_no_faqs_title()}</h4>
+						<p class="text-[13.5px] text-neutral-400">{m.sup_no_faqs_desc()}</p>
+					</div>
 				</div>
 			{:else}
-				<div class="space-y-1.5">
+				<div class="rounded-2xl overflow-hidden border border-white/[0.07] divide-y divide-white/[0.07]">
 					{#each faqs as faq (faq.id)}
-						<div class="bg-surface-100 border border-white/[0.06] rounded-xl overflow-hidden">
+						<div class="bg-surface-50">
 							<button
 								type="button"
 								onclick={() => toggleFaq(faq.id)}
-								class="w-full px-4 py-3 flex items-center justify-between text-start hover:bg-white/[0.02] transition-colors"
+								class="w-full px-5 py-4 flex items-center justify-between text-left hover:text-primary-400 transition-colors"
 							>
-								<span class="text-sm font-medium text-white/80 pe-4">{faq.question}</span>
-								<div class="text-neutral-600 flex-shrink-0">
-									{#if openFaq === faq.id}<ChevronUp class="w-4 h-4" />{:else}<ChevronDown class="w-4 h-4" />{/if}
-								</div>
+								<span class="text-[14.5px] font-medium text-white pr-4">{faq.question}</span>
+								<span class="w-6 h-6 rounded-md border border-white/[0.13] grid place-items-center text-neutral-400 flex-shrink-0 transition-all
+									{openFaq === faq.id ? 'bg-primary-400 text-surface border-primary-400 rotate-45' : ''}">
+									{#if openFaq === faq.id}<ChevronUp class="w-3.5 h-3.5" />{:else}<ChevronDown class="w-3.5 h-3.5" />{/if}
+								</span>
 							</button>
 							{#if openFaq === faq.id}
-								<div class="px-4 pb-3 border-t border-white/[0.04]">
-									<div class="text-sm text-neutral-400 pt-3 leading-relaxed faq-content">{@html faq.answer}</div>
-								</div>
+								<div class="px-5 pb-5 text-[13.5px] text-neutral-400 leading-relaxed max-w-[70ch] faq-content">{@html faq.answer}</div>
 							{/if}
 						</div>
 					{/each}
 				</div>
 
 				<div class="text-center pt-2">
-					<p class="text-xs text-neutral-600">{m.sup_cant_find()}
+					<p class="text-xs text-neutral-500">{m.sup_cant_find()}
 						<button onclick={openCreateForm} class="text-primary-400 hover:text-primary-300 font-semibold transition-colors">{m.sup_create_ticket_link()}</button>
 					</p>
 				</div>
@@ -352,15 +353,15 @@
 		<!-- Tickets Tab -->
 		{#if homeTab === 'tickets'}
 			{#if tickets.length === 0}
-				<div class="bg-surface-100 border border-white/[0.06] rounded-2xl text-center py-12 px-6">
-					<div class="w-12 h-12 bg-white/[0.03] rounded-xl flex items-center justify-center mx-auto mb-3">
-						<MessageSquare class="w-6 h-6 text-neutral-700" />
+				<div class="em-panel">
+					<div class="em-empty">
+						<span class="em-empty-icon"><MessageSquare class="w-[30px] h-[30px]" /></span>
+						<h4 class="text-[17px] font-semibold text-white tracking-tight">{m.sup_no_tickets_title()}</h4>
+						<p class="text-[13.5px] text-neutral-400 mb-4">{m.sup_no_tickets_desc()}</p>
+						<button onclick={openCreateForm} class="btn-primary">
+							<Plus class="w-4 h-4" /> {m.sup_create_ticket_btn()}
+						</button>
 					</div>
-					<p class="text-sm font-semibold text-white/30 mb-1">{m.sup_no_tickets_title()}</p>
-					<p class="text-xs text-neutral-600 mb-4">{m.sup_no_tickets_desc()}</p>
-					<button onclick={openCreateForm} class="btn-primary !text-xs">
-						<Plus class="w-3.5 h-3.5" /> {m.sup_create_ticket_btn()}
-					</button>
 				</div>
 			{:else}
 				<div class="space-y-2">

@@ -47,6 +47,10 @@ export const panelistPreferences = pgTable("panelist_preferences", {
   preferredSurveyLength: varchar("preferred_survey_length", { length: 20 }),
   preferredSurveyTime: varchar("preferred_survey_time", { length: 50 }),
   surveyTopicsInterest: jsonb("survey_topics_interest"),
+  // Which panelist dashboard the user prefers ('surveys' | 'discover') and
+  // whether they have completed the post-signup dashboard chooser.
+  dashboardView: varchar("dashboard_view", { length: 20 }).default("surveys").notNull(),
+  dashboardOnboarded: boolean("dashboard_onboarded").default(false).notNull(),
   privacyLevel: privacyLevelEnum("privacy_level").default("standard"),
   dataSharing: boolean("data_sharing").default(true),
   updatedBy: uuid("updated_by"),

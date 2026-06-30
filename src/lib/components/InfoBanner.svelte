@@ -19,18 +19,19 @@
 	}
 
 	const colors = {
-		primary: 'bg-primary-500/8 border-primary-500/15 text-primary-300',
-		amber: 'bg-amber-500/8 border-amber-500/15 text-amber-300',
-		emerald: 'bg-emerald-500/8 border-emerald-500/15 text-emerald-300',
+		primary: { wrap: 'bg-primary-400/[0.05] border-primary-400/15', ico: 'text-primary-500' },
+		amber:   { wrap: 'bg-amber-500/[0.05] border-amber-500/15',     ico: 'text-amber-400' },
+		emerald: { wrap: 'bg-emerald-500/[0.05] border-emerald-500/15', ico: 'text-emerald-400' },
 	};
+	let c = $derived(colors[color]);
 </script>
 
 {#if !dismissed}
-	<div class="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl border text-xs leading-relaxed {colors[color]} animate-fade-in">
-		<Info class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 opacity-60" />
+	<div class="flex items-start gap-3 px-4 py-3 rounded-xl border text-[13.5px] leading-relaxed text-neutral-400 animate-fade-in {c.wrap}">
+		<Info class="w-[18px] h-[18px] flex-shrink-0 mt-0.5 {c.ico}" />
 		<span class="flex-1">{message}</span>
-		<button onclick={dismiss} class="p-0.5 opacity-40 hover:opacity-80 transition-opacity flex-shrink-0" aria-label="Dismiss">
-			<X class="w-3 h-3" />
+		<button onclick={dismiss} class="text-neutral-500 hover:text-white transition-colors flex-shrink-0" aria-label="Dismiss">
+			<X class="w-4 h-4" />
 		</button>
 	</div>
 {/if}

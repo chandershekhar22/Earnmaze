@@ -27,10 +27,14 @@ static/games-repo/
 
 # User-uploaded content (admin upload sections)
 static/artifacts-uploaded/
+static/games-uploaded/
 static/streaks-uploaded/
 static/quizzes-uploaded/
 static/weekly-challenges-uploaded/
 static/exclusive-deals-uploaded/
+
+# Anonymous like/share engagement counters (runtime data)
+static/engagement.json
 
 # Environment variables
 .env

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import SocialButtons from '$lib/components/SocialButtons.svelte';
 
   let { data } = $props<{ data: { items: any[] } }>();
   let activeFilter = $state('all');
@@ -44,8 +45,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-  {@html `<style>
+</svelte:head>
+
+<!-- Styles injected in body (not <svelte:head>) so SvelteKit nav/preload can't drop them. -->
+<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+{@html `<style>
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
   :root{
     --bg:#0a0c10;--bg2:#0e1117;--bg3:#141821;--line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.12);
@@ -53,7 +57,7 @@
     --acc:#c7f463;--acc-d:#9bd136;--acc-soft:rgba(199,244,99,.12);--acc-text:#0a0c10;
     --warn:#ffb74a;--pos:#7eddb5;--bad:#ff7a8a;--info:#7ab8ff;--purple:#b48cff;
     --r1:8px;--r2:12px;--r3:16px;--r4:22px;--r5:999px;
-    --f:'Inter',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+    --f:'Inter','Inter Fallback',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
     --ease:cubic-bezier(.2,.7,.2,1);--max:1200px;
   }
   html{scroll-behavior:smooth;background:var(--bg)}
@@ -137,7 +141,8 @@
   .card-body{padding:22px 22px 18px;display:flex;flex-direction:column;flex:1;gap:8px;min-width:0}
   .card h3{font-size:18px;font-weight:600;letter-spacing:-.015em;line-height:1.25;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .card .desc{font-size:14px;color:var(--t2);line-height:1.55;flex:1;overflow-wrap:anywhere;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .card-foot{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-top:1px solid var(--line);background:rgba(0,0,0,.18);gap:10px}
+  .card-foot{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-top:1px solid var(--line);background:rgba(0,0,0,.18);gap:10px;flex-wrap:wrap}
+  .card-foot-l{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
   .card-meta{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--t3)}
   .card-meta .dot{width:5px;height:5px;border-radius:50%;background:var(--acc)}
   .open-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--acc);color:var(--acc-text);border-radius:var(--r5);font-size:12px;font-weight:600;transition:.2s}
@@ -202,7 +207,6 @@
     .tb-right{flex:1;width:100%}
   }
   </style>`}
-</svelte:head>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -307,8 +311,11 @@
               <h3>{a.title}</h3>
               <p class="desc">{a.desc}</p>
               <div class="card-foot">
-                <div class="card-meta">
-                  <span><svg class="i" viewBox="0 0 24 24"><use href="#i-clock"/></svg> {a.readTime}</span>
+                <div class="card-foot-l">
+                  <div class="card-meta">
+                    <span><svg class="i" viewBox="0 0 24 24"><use href="#i-clock"/></svg> {a.readTime}</span>
+                  </div>
+                  <SocialButtons kind="artifacts" id={a.id} title={a.title} likes={a.likes} shares={a.shares} variant="card" />
                 </div>
                 <span class="open-btn">Open <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></span>
               </div>

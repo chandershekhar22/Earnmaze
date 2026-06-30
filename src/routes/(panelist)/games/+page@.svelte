@@ -1,26 +1,41 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
-  import { authStore } from '$lib/stores/auth.svelte';
+  import { persistState } from '$lib/utils/iframe-state';
 
-  let mounted = $state(false);
+  type UploadedGame = { id: string; title: string; file: string; thumb?: string };
+  let { data } = $props<{ data: { todaysGame: UploadedGame | null } }>();
+
+  // The modal only needs name/path/reward; allow both catalog games and the uploaded pick.
+  type PlayableGame = { id: string; name: string; path: string; reward: string; thumb?: string | null };
+
   let activeFilter = $state('all');
   let sortBy = $state('popular');
-  let openGame = $state<(typeof GAMES)[number] | null>(null);
+  let openGame = $state<PlayableGame | null>(null);
   let faqOpen = $state<number>(0);
+  let resetCountdown = $state('00:00:00');
 
   onMount(() => {
-    mounted = true;
     const nav = document.getElementById('nav');
     const onScroll = () => nav?.classList.toggle('scrolled', window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  });
 
-  $effect(() => {
-    if (mounted && !authStore.state.isLoading && !authStore.state.user) {
-      goto('/login?redirect=%2Fgames');
-    }
+    const tick = () => {
+      const now = new Date();
+      const end = new Date(now);
+      end.setHours(24, 0, 0, 0);
+      let s = Math.max(0, Math.floor((end.getTime() - now.getTime()) / 1000));
+      const h = String(Math.floor(s / 3600)).padStart(2, '0');
+      const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+      const sec = String(s % 60).padStart(2, '0');
+      resetCountdown = `${h}:${m}:${sec}`;
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      clearInterval(timer);
+    };
   });
 
   $effect(() => {
@@ -167,6 +182,36 @@
     { initials: 'MR', name: 'mike_runs', sub: 'Solitaire · cleared', pts: '+120', color: '#9aa0ad' },
   ];
 
+  // The hero "Today's game" card features the most recently uploaded admin game.
+  // When nothing has been uploaded yet, fall back to a catalog game preview.
+  const dailyPick: PlayableGame = $derived.by(() => {
+    if (data.todaysGame) {
+      return {
+        id: data.todaysGame.id,
+        name: data.todaysGame.title,
+        // Served with the state-persistence layer injected (uploaded games are
+        // single self-contained HTML); see $lib/server/html-inject.
+        path: `/game-content/${data.todaysGame.id}`,
+        thumb: data.todaysGame.thumb ?? null,
+        reward: '500',
+      };
+    }
+    const g = GAMES.find((x) => x.id === 'pac-man') ?? GAMES[0];
+    return { id: g.id, name: g.name, path: g.path, reward: g.reward, thumb: null };
+  });
+  const dailyPickTitle = $derived(data.todaysGame ? data.todaysGame.title : "Daily Earnmaze's Pick");
+  const todayLabel = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+
+  const CASHOUTS = [
+    { initials: 'JK', name: 'jules_k', sub: 'Solitaire · 14s ago', pts: '+1,240', color: '#ff5f8f' },
+    { initials: 'RB', name: 'rb_studio', sub: 'Pac-Man · 32s ago', pts: '+820', color: '#56a8ff' },
+    { initials: 'MC', name: 'midnight_owl', sub: 'Flappy · 1m ago', pts: '+560', color: '#ff8a3d' },
+  ];
+
   const WEEKEND_LB = [
     { rank: 1, name: 'siren_kai', pts: '48,210 points', prize: '$1,200', color: '#ffb74a' },
     { rank: 2, name: 'mike_runs', pts: '42,094 points', prize: '$600', color: '#9aa0ad' },
@@ -191,8 +236,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-  {@html `<style>
+</svelte:head>
+
+<!--
+  Global page styles are injected in the component body (not in <svelte:head>)
+  on purpose: {@html} content inside <svelte:head> is unreliably retained
+  across SvelteKit client navigation / hover-preload, which caused the styles
+  to drop out (collapsing the layout). As a body-level component-owned node,
+  Svelte adds/removes it reliably with the page.
+-->
+<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+{@html `<style>
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
   :root{
     --bg:#0a0c10;--bg2:#0e1117;--bg3:#141821;--line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.12);
@@ -200,7 +254,7 @@
     --acc:#c7f463;--acc-d:#9bd136;--acc-soft:rgba(199,244,99,.12);--acc-text:#0a0c10;
     --warn:#ffb74a;--pos:#7eddb5;--bad:#ff7a8a;--info:#7ab8ff;--purple:#b48cff;
     --r1:8px;--r2:12px;--r3:16px;--r4:22px;--r5:999px;
-    --f:'Inter',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
+    --f:'Inter','Inter Fallback',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace;
     --ease:cubic-bezier(.2,.7,.2,1);--max:1280px;
   }
   html{scroll-behavior:smooth;background:var(--bg)}
@@ -245,7 +299,7 @@
   /* HERO */
   .hero{padding:120px 0 40px;position:relative;overflow:hidden}
   .hero::before{content:"";position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:1100px;height:480px;background:radial-gradient(closest-side,var(--acc-soft),transparent 70%);filter:blur(60px);pointer-events:none;opacity:.55}
-  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;position:relative;z-index:1}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:start;position:relative;z-index:1}
   .hero-grid>*{min-width:0}
   .hero-eb{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;color:var(--t2);letter-spacing:.18em;text-transform:uppercase;margin-bottom:24px}
   .hero-eb .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
@@ -254,25 +308,51 @@
   .hero h1 em{font-style:normal;color:var(--acc)}
   .hero .lead{font-size:17px;color:var(--t2);max-width:480px;line-height:1.55}
 
-  .dc-card{background:linear-gradient(160deg,rgba(199,244,99,.06),var(--bg2));border:1px solid var(--line2);border-radius:var(--r3);padding:24px 26px;box-shadow:0 30px 60px rgba(0,0,0,.4)}
-  .dc-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
-  .dc-h .l{color:var(--acc-d);display:inline-flex;align-items:center;gap:8px}
-  .dc-h .l svg{color:var(--acc)}
-  .dc-h .r{color:var(--bad);display:inline-flex;align-items:center;gap:6px}
-  .dc-h .r .dot{width:6px;height:6px;border-radius:50%;background:var(--bad)}
-  .dc-title{font-size:22px;font-weight:600;letter-spacing:-.015em;margin-bottom:8px}
-  .dc-meta{font-family:var(--mono);font-size:12px;color:var(--t3);margin-bottom:20px}
-  .dc-meta em{font-style:normal;color:var(--t1);font-weight:500}
-  .dc-foot{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--line);gap:12px}
-  .dc-bonus{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--acc);letter-spacing:-.01em}
-  .dc-bonus em{font-style:normal;font-size:12px;color:var(--t3);margin-left:6px;letter-spacing:.1em;text-transform:uppercase}
+  /* TODAY'S GAME card */
+  .tg-card{background:linear-gradient(160deg,rgba(199,244,99,.06),var(--bg2));border:1px solid rgba(199,244,99,.45);border-radius:var(--r4);padding:22px 24px;box-shadow:0 30px 70px rgba(0,0,0,.45),0 0 0 1px rgba(199,244,99,.06);animation:tg-float 6s ease-in-out infinite,tg-glow 4.5s ease-in-out infinite;transition:transform .25s var(--ease),box-shadow .25s var(--ease);will-change:transform,box-shadow}
+  .tg-card:hover{animation-play-state:paused;transform:translateY(-6px) scale(1.005);box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 0 1px rgba(199,244,99,.25),0 0 48px -6px rgba(199,244,99,.32)}
+  @keyframes tg-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes tg-glow{0%,100%{box-shadow:0 30px 70px rgba(0,0,0,.45),0 0 0 1px rgba(199,244,99,.06),0 0 0 0 rgba(199,244,99,0)}50%{box-shadow:0 30px 70px rgba(0,0,0,.45),0 0 0 1px rgba(199,244,99,.14),0 0 36px -4px rgba(199,244,99,.22)}}
+  .tg-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+  .tg-h .l{color:var(--acc-d);display:inline-flex;align-items:center;gap:8px}
+  .tg-h .l svg{color:var(--acc)}
+  .tg-h .r{color:var(--t3);display:inline-flex;align-items:center;gap:6px}
+  .tg-h .r .dot{width:6px;height:6px;border-radius:50%;background:var(--bad);animation:tg-blink 1.6s ease-in-out infinite}
+  @keyframes tg-blink{0%,100%{opacity:1}50%{opacity:.35}}
+  .tg-h .r em{font-style:normal;color:var(--warn);font-weight:500}
+  .tg-preview{position:relative;width:100%;aspect-ratio:16/11;border-radius:var(--r2);overflow:hidden;background:#06080d;border:1px solid var(--line2);margin-bottom:18px;display:block}
+  .tg-frame{width:100%;height:100%;border:0;pointer-events:none;background:#06080d;object-fit:cover;display:block}
+  .tg-overlay{position:absolute;inset:0;width:100%;height:100%;background:transparent;cursor:pointer;transition:.2s}
+  .tg-overlay:hover{background:rgba(199,244,99,.06)}
+  .tg-live{position:absolute;top:12px;right:12px;z-index:2;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(10,12,16,.7);border:1px solid var(--line2);border-radius:var(--r5);backdrop-filter:blur(6px)}
+  .tg-live .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);animation:tg-pulse 1.4s ease-in-out infinite}
+  @keyframes tg-pulse{0%,100%{transform:scale(1);box-shadow:0 0 8px var(--acc),0 0 0 0 rgba(199,244,99,.45)}50%{transform:scale(1.25);box-shadow:0 0 12px var(--acc),0 0 0 6px rgba(199,244,99,0)}}
+  .tg-corner{position:absolute;width:14px;height:14px;z-index:2;pointer-events:none;border-color:rgba(199,244,99,.55);border-style:solid;border-width:0;animation:tg-scan 3s ease-in-out infinite}
+  @keyframes tg-scan{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+  .tg-corner.tl{top:8px;left:8px;border-top-width:2px;border-left-width:2px;transform-origin:top left}
+  .tg-corner.tr{top:8px;right:8px;border-top-width:2px;border-right-width:2px;transform-origin:top right;animation-delay:.4s}
+  .tg-corner.bl{bottom:8px;left:8px;border-bottom-width:2px;border-left-width:2px;transform-origin:bottom left;animation-delay:.8s}
+  .tg-corner.br{bottom:8px;right:8px;border-bottom-width:2px;border-right-width:2px;transform-origin:bottom right;animation-delay:1.2s}
+  .tg-title{font-size:26px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px}
+  .tg-meta{font-family:var(--mono);font-size:12px;color:var(--t3);margin-bottom:20px}
+  .tg-meta em{font-style:normal;color:var(--t2);font-weight:500}
+  .tg-foot{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--line);gap:12px}
+  .tg-bonus{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--acc);letter-spacing:-.01em}
+  .tg-bonus em{font-style:normal;font-size:12px;color:var(--t3);margin-left:8px;letter-spacing:.1em;text-transform:uppercase}
 
-  .live-cup{margin-top:14px;display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2)}
-  .live-cup .pill{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;background:rgba(255,122,138,.1);border:1px solid rgba(255,122,138,.25);color:var(--bad);border-radius:var(--r5)}
-  .live-cup .info{flex:1;min-width:0}
-  .live-cup .t{font-size:14px;font-weight:600}
-  .live-cup .s{font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px}
-  .live-cup .v{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--pos)}
+  /* LATEST CASHOUTS */
+  .cashouts{margin-top:28px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r3);padding:8px 8px 10px;max-width:480px}
+  .cashouts-h{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 8px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .cashouts-h .l{color:var(--acc-d);display:inline-flex;align-items:center;gap:8px}
+  .cashouts-h .l .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+  .cashouts-h .r{color:var(--t3)}
+  .cashout{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r2);transition:.2s}
+  .cashout:hover{background:rgba(255,255,255,.03)}
+  .cashout .avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:12px;font-weight:700;color:#0a0c10;letter-spacing:-.01em}
+  .cashout .info{flex:1;min-width:0}
+  .cashout .info .n{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cashout .info .s{font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px}
+  .cashout .v{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--pos)}
 
   /* STATS */
   .stats{padding:48px 0 0}
@@ -347,7 +427,7 @@
   .gtag.easy{background:rgba(126,221,181,.1);color:var(--pos);border-color:rgba(126,221,181,.25)}
   .gtag.medium{background:rgba(255,183,74,.1);color:var(--warn);border-color:rgba(255,183,74,.25)}
   .gtag.hard{background:rgba(255,122,138,.1);color:var(--bad);border-color:rgba(255,122,138,.25)}
-  .game-foot{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-top:1px solid var(--line);background:rgba(0,0,0,.18);gap:10px}
+  .game-foot{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-top:1px solid var(--line);background:rgba(0,0,0,.18);gap:10px;flex-wrap:wrap}
   .game-foot .rw{font-family:var(--mono);font-size:12px;color:var(--acc);font-weight:600;display:inline-flex;align-items:center;gap:6px}
   .game-foot .rw::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--acc)}
   .play-btn{padding:7px 16px;background:var(--acc);color:var(--acc-text);border-radius:var(--r5);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:.2s}
@@ -478,8 +558,16 @@
     .game-thumb{height:200px}
   }
   </style>`}
-</svelte:head>
 
+<!--
+  This standalone page injects its own GLOBAL stylesheet whose generic
+  selectors (nav, .hero, .game-thumb, ...) collide with other routes' global
+  CSS — notably the landing page's home.css. Preloading another route from
+  here (e.g. hovering the logo, which points to "/") would inject that route's
+  CSS and override this page's layout. Disabling preload on the whole page
+  prevents that. display:contents keeps the wrapper layout-neutral.
+-->
+<div style="display:contents" data-sveltekit-preload-data="off" data-sveltekit-preload-code="off">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.09 12.97a.5.5 0 0 0 .41.8H11l-1 8.23a.5.5 0 0 0 .9.34L19.91 11.03a.5.5 0 0 0-.41-.8H13l1-8.23a.5.5 0 0 0-1-0Z"/></symbol>
@@ -528,27 +616,47 @@
       <span class="hero-eb"><span class="dot"></span>Play &amp; Earn <span class="sep">·</span> 91 games live</span>
       <h1>Real games.<br /><em>Real rewards.</em></h1>
       <p class="lead">HTML5 games, instant load, real money on the line. Tap, play, cash out — no downloads, no nonsense.</p>
+
+      <div class="cashouts">
+        <div class="cashouts-h">
+          <span class="l"><span class="dot"></span>Latest cashouts</span>
+          <span class="r">just now</span>
+        </div>
+        {#each CASHOUTS as c (c.name)}
+          <div class="cashout">
+            <span class="avatar" style="background:{c.color}">{c.initials}</span>
+            <div class="info">
+              <div class="n">{c.name}</div>
+              <div class="s">{c.sub}</div>
+            </div>
+            <span class="v">{c.pts}</span>
+          </div>
+        {/each}
+      </div>
     </div>
     <div>
-      <div class="dc-card">
-        <div class="dc-h">
-          <span class="l"><svg class="i" viewBox="0 0 24 24"><use href="#i-bolt"/></svg> Daily challenge</span>
-          <span class="r"><span class="dot"></span>Ends in 4h 12m</span>
+      <div class="tg-card">
+        <div class="tg-h">
+          <span class="l"><svg class="i" viewBox="0 0 24 24"><use href="#i-bolt"/></svg> Today's game</span>
+          <span class="r"><span class="dot"></span>Resets in <em>{resetCountdown}</em></span>
         </div>
-        <div class="dc-title">Beat 12,000 in Flappy Bird</div>
-        <div class="dc-meta">Game: <em>Flappy Bird</em>  ·  2,341 players today</div>
-        <div class="dc-foot">
-          <div class="dc-bonus">+750<em>pts bonus</em></div>
-          <button class="btn btn-pri" onclick={() => { const g = GAMES.find(x => x.id === 'flappy-bird'); if (g) openGame = g; }}>Start <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></button>
+        <div class="tg-preview">
+          <span class="tg-live"><span class="dot"></span>Live</span>
+          {#if dailyPick.thumb}
+            <img class="tg-frame" src={dailyPick.thumb} alt="{dailyPick.name} cover" />
+          {:else}
+            <iframe class="tg-frame" src={dailyPick.path} title="{dailyPick.name} preview" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+          {/if}
+          <button class="tg-overlay" onclick={() => (openGame = dailyPick)} aria-label="Play {dailyPick.name}"></button>
+          <span class="tg-corner tl"></span><span class="tg-corner tr"></span>
+          <span class="tg-corner bl"></span><span class="tg-corner br"></span>
         </div>
-      </div>
-      <div class="live-cup">
-        <span class="pill">Live now</span>
-        <div class="info">
-          <div class="t">Weekend Solitaire Cup</div>
-          <div class="s">14,832 entrants · 2d 6h left</div>
+        <div class="tg-title">{dailyPickTitle}</div>
+        <div class="tg-meta">{todayLabel} · <em>admin-curated</em> · 3,184 players today</div>
+        <div class="tg-foot">
+          <div class="tg-bonus">+500<em>pts bonus</em></div>
+          <button class="btn btn-pri" onclick={() => (openGame = dailyPick)}>Play <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></button>
         </div>
-        <span class="v">$2,500</span>
       </div>
     </div>
   </div>
@@ -849,7 +957,9 @@
         class="game-iframe"
         src={openGame.path}
         title={openGame.name}
+        use:persistState={`games:${openGame.id}`}
       ></iframe>
     </div>
   </div>
 {/if}
+</div>

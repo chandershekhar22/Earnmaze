@@ -45,8 +45,10 @@ export function canAccessRoute(userType: string, pathname: string): boolean {
 	}
 
 	// Panelist routes (dashboard, surveys, profile, etc.)
-	if (pathname.startsWith('/dashboard') || 
-	    pathname.startsWith('/surveys') || 
+	if (pathname.startsWith('/dashboard') ||
+	    pathname.startsWith('/discover') ||
+	    pathname.startsWith('/welcome') ||
+	    pathname.startsWith('/surveys') ||
 	    pathname.startsWith('/profile') ||
 	    pathname.startsWith('/points') ||
 	    pathname.startsWith('/history') ||

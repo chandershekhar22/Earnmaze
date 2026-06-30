@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Logger } from '$lib/utils/app-logger';
-	import { Gift, ClipboardList, AlertTriangle, Loader2, Lightbulb, Check, Coins, Lock, Rocket, X, Clock, CircleCheckBig, CircleX, ChevronDown, ChevronUp, Shield } from '@lucide/svelte';
+	import { Gift, ClipboardList, AlertTriangle, Loader2, Lightbulb, Check, Coins, Lock, Rocket, X, Clock, CircleCheckBig, CircleX, Shield } from '@lucide/svelte';
 	import InfoBanner from '$lib/components/InfoBanner.svelte';
 	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages';
@@ -151,18 +151,20 @@
 	<title>{m.rwd_meta_title()}</title>
 </svelte:head>
 
-<div class="space-y-6 animate-fade-in">
+<div class="space-y-[22px] animate-fade-in">
 	<InfoBanner id="rewards-how" message={m.rwd_info()} color="emerald" />
 
-	<!-- Balance Bar -->
-	<div class="flex items-center justify-between bg-surface-100 border border-white/[0.06] rounded-2xl px-5 py-4">
-		<div class="flex items-center gap-3">
-			<div class="p-2 bg-emerald-500/10 rounded-xl">
-				<Coins class="w-5 h-5 text-emerald-400" />
-			</div>
+	<!-- Balance Strip -->
+	<div class="flex items-center justify-between gap-5 px-6 py-5 rounded-2xl bg-surface-50 border border-white/[0.07] flex-wrap">
+		<div class="flex items-center gap-3.5">
+			<span class="w-[42px] h-[42px] rounded-[11px] bg-primary-400/12 border border-primary-400/20 text-primary-500 grid place-items-center">
+				<Coins class="w-5 h-5" />
+			</span>
 			<div>
-				<div class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">{m.rwd_your_balance()}</div>
-				<div class="text-xl font-black text-white">{userPoints.toLocaleString()} <span class="text-sm font-medium text-neutral-600">{m.rwd_pts()}</span></div>
+				<div class="font-mono text-[10px] font-semibold text-neutral-500 uppercase tracking-[0.14em]">{m.rwd_your_balance()}</div>
+				<div class="text-[30px] font-bold text-white tracking-tight leading-none mt-1">
+					{userPoints.toLocaleString()} <span class="text-sm font-medium text-neutral-500">{m.rwd_pts()}</span>
+				</div>
 			</div>
 		</div>
 		<div class="flex items-center gap-2">
@@ -171,17 +173,17 @@
 					{showRedemptions ? m.rwd_hide_redemptions() : m.rwd_show_redemptions()} ({redemptions.length})
 				</button>
 			{/if}
-			<a href={localizeHref('/surveys')} class="btn-primary !text-xs !py-2">
-				<Rocket class="w-3.5 h-3.5" /> {m.rwd_earn_more()}
+			<a href={localizeHref('/surveys')} class="btn-primary">
+				<Rocket class="w-4 h-4" /> {m.rwd_earn_more()}
 			</a>
 		</div>
 	</div>
 
 	<!-- Redemptions Tracker -->
 	{#if showRedemptions && redemptions.length > 0}
-		<div class="card !p-0 overflow-hidden animate-scale-in">
-			<div class="px-5 py-3 border-b border-white/[0.06]">
-				<h2 class="text-sm font-bold text-white">{m.rwd_my_redemptions_title()}</h2>
+		<div class="em-panel animate-scale-in">
+			<div class="em-panel-h">
+				<span class="em-panel-title">{m.rwd_my_redemptions_title()}</span>
 			</div>
 			<div class="divide-y divide-white/[0.04] max-h-64 overflow-y-auto">
 				{#each redemptions as r}
@@ -192,18 +194,18 @@
 						</div>
 						<div class="flex-1 min-w-0">
 							<div class="text-sm font-medium text-white truncate">{r.rewardName}</div>
-							<div class="text-[10px] text-neutral-600">{formatDate(r.createdAt)}</div>
+							<div class="font-mono text-[10px] text-neutral-500">{formatDate(r.createdAt)}</div>
 						</div>
 						<div class="text-end flex-shrink-0 flex items-center gap-2">
 							<div>
-								<div class="text-xs font-bold text-white">{r.amount.toLocaleString()} {m.rwd_pts()}</div>
+								<div class="font-mono text-xs font-bold text-white">{r.amount.toLocaleString()} {m.rwd_pts()}</div>
 								<span class="badge {ss.class} text-[9px]">{statusLabel(r.status)}</span>
 							</div>
 							{#if r.status === 'pending'}
 								<button
 									onclick={() => cancelRedemption(r.id, r.amount)}
 									disabled={cancellingId === r.id}
-									class="p-1.5 rounded-lg text-neutral-600 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+									class="p-1.5 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
 									title={m.rwd_cancel_title()}
 								>
 									{#if cancellingId === r.id}
@@ -222,40 +224,40 @@
 
 	<!-- Rewards Grid -->
 	{#if rewards.length === 0}
-		<div class="card text-center py-20">
-			<div class="w-16 h-16 bg-white/[0.04] rounded-2xl flex items-center justify-center mx-auto mb-4">
-				<Gift class="w-8 h-8 text-neutral-600" />
+		<div class="em-panel">
+			<div class="em-empty">
+				<span class="em-empty-icon"><Gift class="w-[30px] h-[30px]" /></span>
+				<h4 class="text-[17px] font-semibold text-white tracking-tight">{m.rwd_no_rewards_title()}</h4>
+				<p class="text-[13.5px] text-neutral-400 mb-4">{m.rwd_no_rewards_desc()}</p>
+				<a href={localizeHref('/surveys')} class="btn-primary"><ClipboardList class="w-4 h-4" /> {m.rwd_earn_points_btn()}</a>
 			</div>
-			<h3 class="text-lg font-bold text-white mb-2">{m.rwd_no_rewards_title()}</h3>
-			<p class="text-neutral-500 mb-6 max-w-xs mx-auto text-sm">{m.rwd_no_rewards_desc()}</p>
-			<a href={localizeHref('/surveys')} class="btn-primary"><ClipboardList class="w-4 h-4" /> {m.rwd_earn_points_btn()}</a>
 		</div>
 	{:else}
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 			{#each rewards as reward, index}
-				<div class="group bg-surface-100 border border-white/[0.06] rounded-2xl overflow-hidden hover:border-white/10 hover:shadow-xl transition-all duration-300 animate-slide-up" style="animation-delay: {index * 50}ms">
+				<div class="group bg-surface-50 border border-white/[0.07] rounded-2xl overflow-hidden hover:border-white/[0.13] hover:-translate-y-0.5 transition-all duration-300 animate-slide-up" style="animation-delay: {index * 50}ms">
 					{#if reward.imageUrl}
 						<img src={reward.imageUrl} alt={reward.title} class="w-full h-44 object-cover" loading="lazy" decoding="async" />
 					{:else}
-						<div class="w-full h-44 bg-gradient-to-br from-primary-500/10 via-fuchsia-500/5 to-surface-200 flex items-center justify-center">
+						<div class="w-full h-44 bg-gradient-to-br from-primary-400/15 via-fuchsia-500/8 to-surface-100 flex items-center justify-center">
 							<div class="w-16 h-16 rounded-2xl bg-white/5 backdrop-blur flex items-center justify-center">
-								<Gift class="w-8 h-8 text-primary-400/60" />
+								<Gift class="w-8 h-8 text-primary-400/70" />
 							</div>
 						</div>
 					{/if}
 
 					<div class="p-5">
 						<div class="flex items-start justify-between gap-2 mb-2">
-							<h3 class="text-base font-bold text-white">{reward.title}</h3>
+							<h3 class="text-base font-semibold text-white tracking-tight">{reward.title}</h3>
 							{#if !canAfford(reward.pointsCost)}
 								<div class="p-1 bg-rose-500/10 rounded-lg flex-shrink-0"><Lock class="w-3.5 h-3.5 text-rose-400" /></div>
 							{/if}
 						</div>
-						<p class="text-neutral-500 text-sm mb-4 line-clamp-2">{reward.description}</p>
+						<p class="text-neutral-400 text-sm mb-4 line-clamp-2">{reward.description}</p>
 						<div class="flex items-center justify-between mb-4">
 							<div class="flex items-baseline gap-1.5">
-								<span class="text-xl font-black text-primary-400">{reward.pointsCost.toLocaleString()}</span>
-								<span class="text-xs text-neutral-600 font-medium">{m.rwd_pts()}</span>
+								<span class="font-mono text-xl font-bold text-primary-400">{reward.pointsCost.toLocaleString()}</span>
+								<span class="text-xs text-neutral-500 font-medium">{m.rwd_pts()}</span>
 							</div>
 							{#if reward.originalPrice}
 								<span class="badge-neutral text-[10px]">{m.rwd_value_label({ price: reward.originalPrice })}</span>
@@ -269,7 +271,7 @@
 						<button
 							onclick={() => openConfirm(reward)}
 							disabled={!canAfford(reward.pointsCost) || redeeming === reward.id || (reward.stock !== undefined && reward.stock <= 0)}
-							class="w-full {canAfford(reward.pointsCost) && reward.stock !== 0 ? 'btn-primary' : 'btn bg-white/[0.04] text-neutral-600 border-white/[0.04] cursor-not-allowed'}"
+							class="w-full {canAfford(reward.pointsCost) && reward.stock !== 0 ? 'btn-primary' : 'btn bg-white/[0.04] text-neutral-500 border-white/[0.04] cursor-not-allowed'}"
 						>
 							{#if redeeming === reward.id}
 								<Loader2 class="w-4 h-4 animate-spin" /> {m.rwd_processing_btn()}
@@ -288,18 +290,20 @@
 	{/if}
 
 	<!-- Tips -->
-	<div class="relative overflow-hidden bg-surface-100 border border-primary-500/10 rounded-2xl p-5 md:p-6">
-		<div class="absolute -top-16 -end-16 w-40 h-40 bg-primary-500/5 rounded-full blur-3xl"></div>
-		<div class="relative flex items-start gap-4">
-			<div class="p-2.5 bg-primary-500/10 rounded-xl flex-shrink-0"><Lightbulb class="w-5 h-5 text-primary-400" /></div>
+	<div class="rounded-2xl bg-surface-50 border border-white/[0.07] p-6">
+		<div class="flex items-center gap-3.5 mb-5">
+			<span class="w-10 h-10 rounded-[11px] bg-amber-400/12 text-amber-400 grid place-items-center">
+				<Lightbulb class="w-5 h-5" />
+			</span>
 			<div>
-				<h2 class="text-sm font-bold text-white mb-3">{m.rwd_tips_title()}</h2>
-				<ul class="text-sm text-neutral-500 space-y-2">
-					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> {m.rwd_tip_1()}</li>
-					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> {m.rwd_tip_2()}</li>
-					<li class="flex items-start gap-2"><Check class="w-4 h-4 text-primary-500/60 mt-0.5 flex-shrink-0" /> {m.rwd_tip_3()}</li>
-				</ul>
+				<h3 class="text-[15px] font-semibold text-white tracking-tight">{m.rwd_tips_title()}</h3>
+				<p class="text-[12.5px] text-neutral-400">Maximize your points</p>
 			</div>
+		</div>
+		<div class="flex flex-col gap-3">
+			<div class="flex items-center gap-3 text-[13.5px] text-neutral-400"><Check class="w-4 h-4 text-primary-500 flex-shrink-0" /> {m.rwd_tip_1()}</div>
+			<div class="flex items-center gap-3 text-[13.5px] text-neutral-400"><Check class="w-4 h-4 text-primary-500 flex-shrink-0" /> {m.rwd_tip_2()}</div>
+			<div class="flex items-center gap-3 text-[13.5px] text-neutral-400"><Check class="w-4 h-4 text-primary-500 flex-shrink-0" /> {m.rwd_tip_3()}</div>
 		</div>
 	</div>
 </div>
