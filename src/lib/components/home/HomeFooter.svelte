@@ -6,9 +6,9 @@
 	const stores = ['App Store', 'Google Play'];
 
 	const socials = [
-		{ href: '/', label: 'X', icon: 'x' },
-		{ href: '/', label: 'Instagram', icon: 'ig' },
-		{ href: '/', label: 'Facebook', icon: 'fb' }
+		{ href: '/', label: 'X', icon: 'x', external: false },
+		{ href: 'https://www.instagram.com/earnmaze.official/', label: 'Instagram', icon: 'ig', external: true },
+		{ href: 'https://www.facebook.com/earnmazeofficial/', label: 'Facebook', icon: 'fb', external: true }
 	];
 
 	type FooterLink = { href: string; label: string; reload?: boolean };
@@ -20,7 +20,7 @@
 				{ href: '/quizzes', label: 'Quizzes', reload: true },
 				{ href: '/artifacts', label: 'Artifacts', reload: true },
 				{ href: '/games', label: 'Play', reload: true },
-				{ href: '/exclusive-deals', label: 'Deals', reload: true },
+				{ href: '/paid-surveys', label: 'Surveys', reload: true },
 				{ href: '/weekly-challenges', label: 'Challenges', reload: true }
 			]
 		},
@@ -92,7 +92,7 @@
 				</div>
 				<div class="foot-social">
 					{#each socials as social (social.label)}
-						<a href={social.href} aria-label={social.label}><Icon name={social.icon} /></a>
+						<a href={social.href} aria-label={social.label} target={social.external ? '_blank' : undefined} rel={social.external ? 'noopener noreferrer' : undefined}><Icon name={social.icon} /></a>
 					{/each}
 				</div>
 			</div>

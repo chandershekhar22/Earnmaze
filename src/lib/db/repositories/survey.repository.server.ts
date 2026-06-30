@@ -625,6 +625,8 @@ export type SurveyCreateInput = {
 	link: string;
 	isActive?: boolean;
 	priority?: 'low' | 'medium' | 'high';
+	thumbnailUrl?: string | null;
+	isTodaySurvey?: boolean;
 };
 
 export type SurveyUpdateInput = Partial<SurveyCreateInput>;
@@ -652,6 +654,9 @@ export async function getAllSurveysAdmin() {
  * Create a new survey
  */
 export async function createSurveyAdmin(data: SurveyCreateInput, adminId: string) {
+	if (data.isTodaySurvey) {
+		await db.update(survey).set({ isTodaySurvey: false }).where(eq(survey.isDeleted, false));
+	}
 	const [created] = await db
 		.insert(survey)
 		.values({
@@ -664,9 +669,20 @@ export async function createSurveyAdmin(data: SurveyCreateInput, adminId: string
 			isActive: data.isActive ?? true,
 			priority: data.priority ?? 'medium',
 			createdBy: adminId,
+			thumbnailUrl: data.thumbnailUrl ?? null,
+			isTodaySurvey: data.isTodaySurvey ?? false,
 		})
 		.returning();
 	return created;
+}
+
+export async function getTodaySurvey() {
+	const [found] = await db
+		.select()
+		.from(survey)
+		.where(and(eq(survey.isTodaySurvey, true), eq(survey.isActive, true), eq(survey.isDeleted, false)))
+		.limit(1);
+	return found ?? null;
 }
 
 /**
@@ -677,6 +693,9 @@ export async function updateSurveyAdmin(
 	data: SurveyUpdateInput,
 	adminId: string
 ) {
+	if (data.isTodaySurvey === true) {
+		await db.update(survey).set({ isTodaySurvey: false }).where(eq(survey.isDeleted, false));
+	}
 	const [updated] = await db
 		.update(survey)
 		.set({
@@ -737,6 +756,8 @@ export async function getAdminSurveys(filters: AdminSurveysFilter = {}) {
 			priority: survey.priority,
 			createdAt: survey.createdAt,
 			updatedAt: survey.updatedAt,
+			thumbnailUrl: survey.thumbnailUrl,
+			isTodaySurvey: survey.isTodaySurvey,
 		})
 		.from(survey)
 		.where(whereClause)

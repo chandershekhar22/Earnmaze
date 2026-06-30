@@ -15,7 +15,9 @@ const surveySchema = z.object({
 	quotaFullPoints: z.number().int().min(0).optional().default(0),
 	link: z.string().url('Must be a valid URL'),
 	isActive: z.boolean().optional().default(true),
-	priority: z.enum(['low', 'medium', 'high']).optional().default('medium')
+	priority: z.enum(['low', 'medium', 'high']).optional().default('medium'),
+	thumbnailUrl: z.string().optional().nullable(),
+	isTodaySurvey: z.boolean().optional().default(false)
 });
 
 // GET - List all surveys (with optional filters)
@@ -58,6 +60,8 @@ export const POST: RequestHandler = async (event) => {
 				link: validated.link,
 				isActive: validated.isActive,
 				priority: validated.priority,
+				thumbnailUrl: validated.thumbnailUrl ?? null,
+				isTodaySurvey: validated.isTodaySurvey ?? false,
 			},
 			admin.id
 		);

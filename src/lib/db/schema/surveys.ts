@@ -27,6 +27,8 @@ export const survey = pgTable("surveys", {
     updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
     deletedAt: timestamp("deleted_at"),
     archivedAt: timestamp("archived_at"),
+    thumbnailUrl: text("thumbnail_url"),
+    isTodaySurvey: boolean("is_today_survey").default(false),
 }, (table) => [
     index("idx_survey_is_active").on(table.isActive),
     index("idx_survey_created_at").on(table.createdAt),
