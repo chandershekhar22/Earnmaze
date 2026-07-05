@@ -517,16 +517,21 @@ export const handle: Handle = sequence(handleLocaleRedirect, handleParaglide, ha
 // Unhandled-error hook — logs via Loki AND fires a Telegram alert (best-effort).
 export const handleError: HandleServerError = ({ error, event, status }) => {
   const correlationId = (event.locals as { correlationId?: string })?.correlationId;
-  Logger.root.error(
-    {
-      context: 'errors',
-      pathname: event.url.pathname,
-      status,
-      correlationId,
-      error,
-    },
-    'Unhandled server error'
-  );
+  const logPayload = {
+    context: 'errors',
+    pathname: event.url.pathname,
+    status,
+    correlationId,
+    error,
+  };
+  // 4xx are client/user errors (missing assets, bad URLs, bots) — log at warn so
+  // they don't drown out real failures in the error dashboards. 5xx (and unknown
+  // status) stay at error level.
+  if (status !== undefined && status >= 400 && status < 500) {
+    Logger.root.warn(logPayload, 'Client request error');
+  } else {
+    Logger.root.error(logPayload, 'Unhandled server error');
+  }
 
   // Skip alerts for 4xx (user errors). Only fire for genuine server failures.
   if (status === undefined || status >= 500) {
