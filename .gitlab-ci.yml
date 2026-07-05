@@ -1,0 +1,43 @@
+# CI/CD for em-panel — dev branch auto-deploy.
+#
+# Runs on the self-hosted shell-executor runner installed on qi-vps-02
+# (registered by em-deploy/08_gitlab_runner.yaml, runner tag: em-dev).
+#
+# On every push to `dev`, the runner rebuilds the image locally with podman,
+# tags it :dev, and restarts the em-panel-dev container. It never touches the
+# prod instance (:3000 / earnmaze DB) — this is a separate container on :3010
+# backed by the earnmaze_dev database and exposed only via Cloudflare Tunnel.
+
+stages:
+  - deploy
+
+deploy_dev:
+  stage: deploy
+  tags:
+    - em-dev
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+  variables:
+    IMAGE: "registry.gitlab.com/earnmaze/em-panel:dev"
+    SERVICE: "em-panel-dev-container"
+    HEALTH_URL: "http://localhost:3010/"
+    GIT_DEPTH: "1"
+  environment:
+    name: dev
+    url: https://dev.earnmaze.com
+  script:
+    - echo ">>> Building $IMAGE ($CI_COMMIT_SHORT_SHA)"
+    - sudo podman build -t "$IMAGE" -t "registry.gitlab.com/earnmaze/em-panel:dev-$CI_COMMIT_SHORT_SHA" .
+    - echo ">>> Restarting $SERVICE"
+    - sudo systemctl restart "$SERVICE"
+    - echo ">>> Waiting for health check on $HEALTH_URL"
+    - |
+      for i in $(seq 1 30); do
+        if curl -sf "$HEALTH_URL" > /dev/null 2>&1; then
+          echo ">>> em-panel-dev is healthy"
+          exit 0
+        fi
+        sleep 2
+      done
+      echo ">>> ERROR: em-panel-dev health check timed out after 60s"
+      exit 1
