@@ -12,7 +12,9 @@ const pool = new pg.Pool({
 	keepAlive: true,
 	keepAliveInitialDelayMillis: 10_000,
 	application_name: 'em-panel', // Helpful for debugging
-	ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+	// Opt-in SSL: only when DATABASE_SSL=true (e.g. a managed/external DB).
+	// The internal postgres container has SSL disabled, so default to off.
+	ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
 // Handle pool errors to prevent unhandled rejection crashes

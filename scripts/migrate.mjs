@@ -16,9 +16,10 @@ if (!connectionString) {
 }
 
 // Mirror src/lib/db/index.ts so we connect exactly like the app does.
+// Opt-in SSL: only when DATABASE_SSL=true; the internal postgres has SSL off.
 const pool = new pg.Pool({
 	connectionString,
-	ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+	ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false
 });
 
 try {
