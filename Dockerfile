@@ -49,4 +49,5 @@ EXPOSE 3000
 ENV HOST=0.0.0.0
 ENV PORT=3000
 USER 1001
-CMD ["node", "build/index.js"]
+# Entrypoint optionally runs migrations (RUN_MIGRATIONS=true) then starts the server.
+CMD ["sh", "scripts/docker-entrypoint.sh"]
