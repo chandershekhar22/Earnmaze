@@ -19,8 +19,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN mkdir -p ./logs
 RUN npm run build
-# Fix ownership so runner (uid 1001) can write to static/ (e.g. games-uploaded)
-RUN chown -R 1001:0 /app/static /app/build && chmod -R g=u /app/static /app/build
 
 # Stage 3: Production dependencies only
 FROM base AS prod-deps
@@ -31,8 +29,8 @@ RUN npm ci --omit=dev
 
 # Stage 4: Production server
 FROM base AS runner
+USER root
 WORKDIR /app
-RUN mkdir -p logs && chmod 777 logs
 ENV NODE_ENV=production
 
 # Only copy what's needed at runtime
@@ -43,6 +41,7 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=builder /app/scripts ./scripts
+RUN mkdir -p logs static/games-uploaded && chmod 777 logs static/games-uploaded
 
 EXPOSE 3000
 ENV HOST=0.0.0.0
