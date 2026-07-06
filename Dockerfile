@@ -9,6 +9,10 @@ RUN npm ci
 # Stage 2: Build the application
 FROM base AS builder
 WORKDIR /app
+# Install git (needed to clone games repo)
+RUN dnf install -y git --nodocs && dnf clean all
+# Clone games first so this layer is cached — only re-runs when em-games repo changes
+RUN git clone --depth=1 https://gitlab.com/joshichitransh49/em-games.git static/games-repo
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN mkdir -p ./logs
