@@ -19,6 +19,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN mkdir -p ./logs
 RUN npm run build
+# Fix ownership so runner (uid 1001) can write to static/ (e.g. games-uploaded)
+RUN chown -R 1001:0 /app/static /app/build && chmod -R g=u /app/static /app/build
 
 # Stage 3: Production dependencies only
 FROM base AS prod-deps
