@@ -2,12 +2,14 @@ FROM registry.access.redhat.com/ubi9/nodejs-22:latest AS base
 
 # Stage 1: Install ALL dependencies (for build)
 FROM base AS deps
+USER root
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
 # Stage 2: Build the application
 FROM base AS builder
+USER root
 WORKDIR /app
 # Install git (needed to clone games repo)
 RUN dnf install -y git --nodocs && dnf clean all
@@ -20,6 +22,7 @@ RUN npm run build
 
 # Stage 3: Production dependencies only
 FROM base AS prod-deps
+USER root
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
