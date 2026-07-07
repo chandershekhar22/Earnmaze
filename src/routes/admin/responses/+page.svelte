@@ -76,7 +76,7 @@
 	</div>
 
 	<!-- Status Summary -->
-	<div class="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-5">
+	<div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-5">
 		{#each [
 			{ key: 'completed', label: 'Completed', color: 'emerald' },
 			{ key: 'started', label: 'Started', color: 'violet' },

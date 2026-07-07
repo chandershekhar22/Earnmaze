@@ -62,10 +62,12 @@
 	type="button"
 	onclick={openModal}
 	aria-label="Send feedback"
-	class="fixed right-0 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2.5 px-3 py-5 bg-primary-400 text-surface font-semibold text-sm rounded-l-2xl shadow-2xl shadow-primary-500/30 transition-all hover:bg-primary-500 hover:pr-4"
+	class="fixed z-40 flex flex-col items-center gap-2.5 bg-primary-400 text-surface font-semibold text-sm shadow-2xl shadow-primary-500/30 transition-all hover:bg-primary-500
+		bottom-5 left-4 p-3.5 rounded-full
+		sm:bottom-auto sm:left-auto sm:right-0 sm:top-1/2 sm:-translate-y-1/2 sm:px-3 sm:py-5 sm:rounded-l-2xl sm:rounded-r-none sm:hover:pr-4"
 >
 	<MessageCircle class="w-[18px] h-[18px]" />
-	<span class="[writing-mode:vertical-rl]">Feedback</span>
+	<span class="hidden sm:inline [writing-mode:vertical-rl]">Feedback</span>
 </button>
 
 {#if open}

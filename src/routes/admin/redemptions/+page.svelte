@@ -57,12 +57,12 @@
 </svelte:head>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-	<div class="flex items-center justify-between mb-6">
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
 		<div>
 			<h1 class="text-2xl font-bold text-white">Redemptions</h1>
 			<p class="text-sm text-neutral-500 mt-1">{data.pagination.total} total requests</p>
 		</div>
-		<select bind:value={statusFilter} onchange={applyFilter} class="select !py-2 !text-xs !w-auto">
+		<select bind:value={statusFilter} onchange={applyFilter} class="select !py-2 !text-xs w-full sm:!w-auto">
 			<option value="all">All ({data.statusCounts.all ?? 0})</option>
 			<option value="pending">Pending ({data.statusCounts.pending ?? 0})</option>
 			<option value="processing">Processing ({data.statusCounts.processing ?? 0})</option>
@@ -74,7 +74,7 @@
 	</div>
 
 	<!-- Status summary -->
-	<div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-5">
+	<div class="grid grid-cols-2 sm:grid-cols-6 gap-2 mb-5">
 		{#each [
 			{ key: 'pending', label: 'Pending', color: 'amber' },
 			{ key: 'processing', label: 'Processing', color: 'violet' },

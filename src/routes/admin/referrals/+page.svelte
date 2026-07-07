@@ -34,12 +34,12 @@
 </svelte:head>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-	<div class="flex items-center justify-between mb-6">
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
 		<div>
 			<h1 class="text-2xl font-bold text-white">Referrals</h1>
 			<p class="text-sm text-neutral-500 mt-1">{data.pagination.total} total referrals</p>
 		</div>
-		<select bind:value={statusFilter} onchange={applyFilter} class="select !py-2 !text-xs !w-auto">
+		<select bind:value={statusFilter} onchange={applyFilter} class="select !py-2 !text-xs w-full sm:!w-auto">
 			<option value="all">All ({data.statusCounts.all ?? 0})</option>
 			<option value="pending">Pending ({data.statusCounts.pending ?? 0})</option>
 			<option value="qualified">Qualified ({data.statusCounts.qualified ?? 0})</option>

@@ -13,6 +13,14 @@
 	import { Check, ArrowRight, Sparkles, Shield, Zap } from '@lucide/svelte';
 	import { localizeHref } from '$lib/paraglide/runtime';
 
+	// Static class strings so Tailwind's build-time scanner can see them —
+	// interpolated `bg-{color}-500/10` classes are never generated.
+	const stepColors = {
+		violet: { border: 'hover:border-violet-500/20', iconBg: 'bg-violet-500/10', iconText: 'text-violet-400' },
+		fuchsia: { border: 'hover:border-fuchsia-500/20', iconBg: 'bg-fuchsia-500/10', iconText: 'text-fuchsia-400' },
+		amber: { border: 'hover:border-amber-500/20', iconBg: 'bg-amber-500/10', iconText: 'text-amber-400' }
+	} as const;
+
 	let showEmailModal = $state(false);
 	let email = $state('');
 	// Optional marketing opt-in. Required acknowledgements (age 18+, ToS,
@@ -214,8 +222,9 @@
 				{ n: '2', title: 'Take quick surveys', desc: 'Answer fun questions matched to your interests. Most take just 5 minutes.', color: 'fuchsia' },
 				{ n: '3', title: 'Redeem gift cards', desc: 'Exchange your points for gift cards from Amazon and more.', color: 'amber' },
 			] as step}
-				<div class="group bg-surface-100 border border-white/[0.06] rounded-2xl p-5 hover:border-{step.color}-500/20 transition-all duration-200 hover:-translate-y-1">
-					<div class="w-9 h-9 rounded-xl bg-{step.color}-500/10 flex items-center justify-center text-base font-black text-{step.color}-400 mb-4 group-hover:scale-110 transition-transform">{step.n}</div>
+				{@const c = stepColors[step.color as keyof typeof stepColors]}
+				<div class="group bg-surface-100 border border-white/[0.06] rounded-2xl p-5 {c.border} transition-all duration-200 hover:-translate-y-1">
+					<div class="w-9 h-9 rounded-xl {c.iconBg} flex items-center justify-center text-base font-black {c.iconText} mb-4 group-hover:scale-110 transition-transform">{step.n}</div>
 					<h3 class="text-sm font-bold text-white mb-1.5">{step.title}</h3>
 					<p class="text-sm text-neutral-500 leading-relaxed">{step.desc}</p>
 				</div>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { HelpCircle, MessageSquare, Clock, ChevronDown, ChevronUp, Send, Loader, Inbox, Plus, Trash2, BookOpen, Eye, EyeOff, Coins, CircleCheckBig, XCircle, UserCheck, StickyNote, ClipboardList, ArrowLeftRight, Zap, Pencil, X } from '@lucide/svelte';
+	import { HelpCircle, MessageSquare, Clock, ChevronDown, ChevronUp, ChevronLeft, Send, Loader, Inbox, Plus, Trash2, BookOpen, Eye, EyeOff, Coins, CircleCheckBig, XCircle, UserCheck, StickyNote, ClipboardList, ArrowLeftRight, Zap, Pencil, X } from '@lucide/svelte';
 	import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -394,16 +394,16 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 	<!-- Header -->
-	<div class="flex items-center justify-between mb-6">
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
 		<div>
 			<h1 class="text-2xl font-bold text-white">Support</h1>
 			<p class="text-neutral-500 text-sm mt-1">Manage tickets and FAQs</p>
 		</div>
-		<div class="tab-group">
-			<button onclick={() => activeTab = 'tickets'} class={activeTab === 'tickets' ? 'tab-active' : 'tab'}>
+		<div class="tab-group w-full sm:w-auto">
+			<button onclick={() => activeTab = 'tickets'} class="flex-1 justify-center sm:flex-none {activeTab === 'tickets' ? 'tab-active' : 'tab'}">
 				<MessageSquare class="w-3.5 h-3.5 me-1 inline" /> Tickets <span class="ms-1 text-[10px] opacity-60">({ticketCounts.all})</span>
 			</button>
-			<button onclick={() => activeTab = 'faqs'} class={activeTab === 'faqs' ? 'tab-active' : 'tab'}>
+			<button onclick={() => activeTab = 'faqs'} class="flex-1 justify-center sm:flex-none {activeTab === 'faqs' ? 'tab-active' : 'tab'}">
 				<BookOpen class="w-3.5 h-3.5 me-1 inline" /> FAQs <span class="ms-1 text-[10px] opacity-60">({faqs.length})</span>
 			</button>
 		</div>
@@ -556,10 +556,10 @@
 			<p class="text-sm font-semibold text-white/30">No {statusFilter === 'all' ? '' : formatStatus(statusFilter).toLowerCase() + ' '}tickets</p>
 		</div>
 	{:else}
-		<div class="flex gap-0 border border-white/[0.06] rounded-2xl overflow-hidden bg-surface-100" style="height: calc(100vh - 220px)">
+		<div class="flex flex-col md:flex-row gap-0 border border-white/[0.06] rounded-2xl overflow-hidden bg-surface-100 h-[calc(100vh-160px)] md:h-[calc(100vh-220px)]">
 
 			<!-- LEFT: Ticket List -->
-			<div class="w-[340px] flex-shrink-0 border-e border-white/[0.06] overflow-y-auto">
+			<div class="w-full flex-1 md:w-[340px] md:flex-none border-e border-white/[0.06] overflow-y-auto {expandedTicket ? 'hidden md:block' : 'block'}">
 				{#each filteredTickets as ticket (ticket.id)}
 					<button
 						type="button"
@@ -582,12 +582,19 @@
 			</div>
 
 			<!-- RIGHT: Ticket Detail -->
-			<div class="flex-1 flex flex-col overflow-hidden">
+			<div class="flex-1 flex-col overflow-hidden {expandedTicket ? 'flex' : 'hidden md:flex'}">
 				{#if selectedTicket}
 					{@const ticket = selectedTicket}
 
 					<!-- Detail Header -->
 					<div class="px-5 py-3 border-b border-white/[0.06] flex-shrink-0">
+						<button
+							type="button"
+							onclick={() => (expandedTicket = null)}
+							class="md:hidden mb-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-neutral-500 hover:text-white transition-colors"
+						>
+							<ChevronLeft class="w-3.5 h-3.5" /> Back to tickets
+						</button>
 						<div class="flex items-center justify-between">
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2 flex-wrap">
