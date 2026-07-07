@@ -660,7 +660,7 @@
 			></button>
 
 			<!-- Modal -->
-			<div class="relative bg-surface-100 rounded-2xl border border-white/[0.06] shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+			<div class="relative bg-surface-100 rounded-2xl border border-white/[0.06] shadow-xl w-full max-w-2xl p-6 overflow-y-auto" style="max-height: 90vh; max-height: 90dvh;">
 				<div class="flex items-center justify-between mb-6">
 					<h2 class="text-xl font-bold text-white">
 						{modalMode === 'create' ? 'Create New Reward' : 'Edit Reward'}

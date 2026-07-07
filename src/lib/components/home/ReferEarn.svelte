@@ -428,6 +428,7 @@
 		width: 460px;
 		max-width: 100%;
 		max-height: 90vh;
+		max-height: 90dvh;
 		overflow-y: auto;
 		background: var(--bg2);
 		border: 1px solid var(--line);

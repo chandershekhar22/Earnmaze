@@ -281,7 +281,7 @@
   /* NAV */
   nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:rgba(10,12,16,.7);border-bottom:1px solid transparent;transition:.3s}
   nav.scrolled{border-bottom-color:var(--line);background:rgba(10,12,16,.85)}
-  .nav-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+  .nav-row{display:flex;flex-wrap:wrap;row-gap:8px;align-items:center;justify-content:space-between;padding:14px 0}
   .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em}
   .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--acc);display:grid;place-items:center;color:var(--acc-text)}
   .nav-links{display:flex;align-items:center;gap:4px}
@@ -322,6 +322,8 @@
   .tg-h .r em{font-style:normal;color:var(--warn);font-weight:500}
   .tg-preview{position:relative;width:100%;aspect-ratio:16/11;border-radius:var(--r2);overflow:hidden;background:#06080d;border:1px solid var(--line2);margin-bottom:18px;display:block}
   .tg-frame{width:100%;height:100%;border:0;pointer-events:none;background:#06080d;object-fit:cover;display:block}
+  .tg-frame-fallback{width:100%;height:100%;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--t2);background:linear-gradient(160deg,rgba(199,244,99,.08),var(--bg2))}
+  .tg-frame-fallback span{font-size:13px;font-weight:600;color:var(--t1)}
   .tg-overlay{position:absolute;inset:0;width:100%;height:100%;background:transparent;cursor:pointer;transition:.2s}
   .tg-overlay:hover{background:rgba(199,244,99,.06)}
   .tg-live{position:absolute;top:12px;right:12px;z-index:2;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(10,12,16,.7);border:1px solid var(--line2);border-radius:var(--r5);backdrop-filter:blur(6px)}
@@ -556,6 +558,11 @@
     .grid{grid-template-columns:1fr}
     .how-grid{grid-template-columns:1fr}
     .game-thumb{height:200px}
+    .tg-frame-embed{display:none}
+    .tg-frame-fallback{display:flex}
+  }
+  @media(max-width:400px){
+    .btn-ghost{display:none}
   }
   </style>`}
 
@@ -645,7 +652,11 @@
           {#if dailyPick.thumb}
             <img class="tg-frame" src={dailyPick.thumb} alt="{dailyPick.name} cover" />
           {:else}
-            <iframe class="tg-frame" src={dailyPick.path} title="{dailyPick.name} preview" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+            <iframe class="tg-frame tg-frame-embed" src={dailyPick.path} title="{dailyPick.name} preview" loading="lazy" scrolling="no" tabindex="-1"></iframe>
+            <div class="tg-frame-fallback" aria-hidden="true">
+              <svg class="i-lg" viewBox="0 0 24 24"><use href="#i-game"/></svg>
+              <span>{dailyPick.name}</span>
+            </div>
           {/if}
           <button class="tg-overlay" onclick={() => (openGame = dailyPick)} aria-label="Play {dailyPick.name}"></button>
           <span class="tg-corner tl"></span><span class="tg-corner tr"></span>

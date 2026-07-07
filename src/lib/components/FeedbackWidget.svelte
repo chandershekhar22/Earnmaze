@@ -79,7 +79,8 @@
 	>
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
-			class="bg-surface-100 rounded-2xl border border-white/[0.07] shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto animate-scale-in"
+			class="bg-surface-100 rounded-2xl border border-white/[0.07] shadow-2xl max-w-md w-full p-6 overflow-y-auto animate-scale-in"
+			style="max-height: 90vh; max-height: 90dvh;"
 			role="dialog"
 			aria-modal="true"
 			aria-label="Send feedback"
