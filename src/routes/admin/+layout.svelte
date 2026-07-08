@@ -46,7 +46,7 @@
      cookie set from earlier visits to public pages. -->
 <div class="min-h-screen bg-surface" dir="ltr">
 	<!-- Admin Header -->
-	<header class="bg-surface-50/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-40">
+	<header class="bg-surface-50/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-40" style="transform: translateZ(0);">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 			<div class="flex justify-between items-center h-14">
 				<div class="flex items-center gap-6">

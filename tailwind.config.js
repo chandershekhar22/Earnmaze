@@ -6,7 +6,7 @@ export default {
 	// cannot see them. Keep this list in sync with the colors used.
 	safelist: [
 		{
-			pattern: /(bg|text|border|from|to)-(violet|fuchsia|emerald|cyan|amber|sky|rose|primary|lime)-(300|400|500)(\/(?:10|15|20|25|30|40))?/,
+			pattern: /(bg|text|border|from|to)-(violet|fuchsia|emerald|cyan|amber|sky|rose|primary|lime|blue|pink|indigo|teal|orange|purple|yellow|green|neutral)-(300|400|500)(\/(?:10|15|20|25|30|40))?/,
 			variants: ['hover', 'group-hover']
 		}
 	],

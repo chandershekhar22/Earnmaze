@@ -601,12 +601,12 @@
       EarnMaze
     </a>
     <div class="nav-links">
-      <a href="/">Home</a>
-      <a href="/#earn">Earn</a>
+      <a href="/#how" data-sveltekit-reload>How it works</a>
+      <a href="/#earn" data-sveltekit-reload>Earn</a>
       <a href="/games" class="active">Play</a>
+      <a href="/paid-surveys" data-sveltekit-reload>Surveys</a>
       <a href="/quizzes" data-sveltekit-reload>Quizzes</a>
-      <a href="/streaks" data-sveltekit-reload>Streaks</a>
-      <a href="/artifacts" data-sveltekit-reload>Refer</a>
+      <a href="/#faq" data-sveltekit-reload>FAQ</a>
     </div>
     <div class="nav-actions">
       <span class="coin-pill"><span class="dot"></span>2,480 pts</span>

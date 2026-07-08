@@ -401,6 +401,7 @@
 		-webkit-backdrop-filter: blur(3px);
 		z-index: 2100;
 		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		place-items: center;
 		padding: 20px;
 		opacity: 0;

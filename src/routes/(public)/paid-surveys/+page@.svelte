@@ -244,12 +244,12 @@
       EarnMaze
     </a>
     <div class="nav-links">
-      <a href="/" data-sveltekit-reload>Home</a>
-      <a href="/streaks" data-sveltekit-reload>Streaks</a>
-      <a href="/quizzes" data-sveltekit-reload>Quizzes</a>
-      <a href="/weekly-challenges" data-sveltekit-reload>Challenges</a>
+      <a href="/#how" data-sveltekit-reload>How it works</a>
+      <a href="/#earn" data-sveltekit-reload>Earn</a>
+      <a href="/games" data-sveltekit-reload>Play</a>
       <a href="/paid-surveys" data-sveltekit-reload class="active">Surveys</a>
-      <a href="/artifacts" data-sveltekit-reload>Artifacts</a>
+      <a href="/quizzes" data-sveltekit-reload>Quizzes</a>
+      <a href="/#faq" data-sveltekit-reload>FAQ</a>
     </div>
     <div class="nav-actions">
       <span class="coin-pill"><span class="dot"></span>2,480 pts</span>

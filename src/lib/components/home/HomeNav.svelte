@@ -11,7 +11,7 @@
 		{ href: '#how', label: 'How it works' },
 		{ href: '#earn', label: 'Earn' },
 		{ href: '/games', label: 'Play', reload: true },
-		{ href: '/streaks', label: 'Streaks', reload: true },
+		{ href: '/paid-surveys', label: 'Surveys', reload: true },
 		{ href: '/quizzes', label: 'Quizzes', reload: true },
 		{ href: '#faq', label: 'FAQ' }
 	];
