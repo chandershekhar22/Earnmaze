@@ -606,6 +606,7 @@
       <a href="/games" class="active">Play</a>
       <a href="/paid-surveys" data-sveltekit-reload>Surveys</a>
       <a href="/quizzes" data-sveltekit-reload>Quizzes</a>
+      <a href="/artifacts" data-sveltekit-reload>Artifacts</a>
       <a href="/#faq" data-sveltekit-reload>FAQ</a>
     </div>
     <div class="nav-actions">

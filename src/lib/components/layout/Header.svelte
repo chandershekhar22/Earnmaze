@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { Menu, Copy, Check, Bell } from '@lucide/svelte';
+	import { goto } from '$app/navigation';
+	import { Menu, Copy, Check, Bell, LogOut } from '@lucide/svelte';
 	import * as m from '$lib/paraglide/messages';
 
 	let { onMenuClick }: { onMenuClick?: () => void } = $props();
@@ -10,12 +11,19 @@
 	let userId = $derived(authStore.state.user?.id || '');
 	let shortId = $derived(userId ? userId.slice(0, 8) : '');
 	let copied = $state(false);
+	let showLogoutConfirm = $state(false);
 
 	function copyId() {
 		if (!userId) return;
 		navigator.clipboard.writeText(userId);
 		copied = true;
 		setTimeout(() => copied = false, 2000);
+	}
+
+	async function handleLogout() {
+		showLogoutConfirm = false;
+		await authStore.logout();
+		goto('/');
 	}
 
 	function getPageInfo(routeId: string | null): { title: string; description: string } {
@@ -80,6 +88,36 @@
 				<Bell class="w-[15px] h-[15px]" />
 				<span class="absolute top-[8px] right-[9px] w-[7px] h-[7px] rounded-full bg-rose-400 ring-2 ring-surface"></span>
 			</button>
+
+			<button
+				onclick={() => showLogoutConfirm = true}
+				class="w-[38px] h-[38px] rounded-full bg-white/[0.03] border border-white/[0.07] grid place-items-center text-neutral-400 hover:text-rose-400 hover:border-rose-400/20 hover:bg-rose-500/10 transition-all"
+				title={m.sb_logout_aria()}
+				aria-label={m.sb_logout_aria()}
+			>
+				<LogOut class="w-[15px] h-[15px]" />
+			</button>
 		</div>
 	</div>
+
+	{#if showLogoutConfirm}
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick={() => showLogoutConfirm = false} onkeydown={(e) => e.key === 'Escape' && (showLogoutConfirm = false)}>
+			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+			<div class="bg-surface-100 rounded-2xl border border-white/[0.07] shadow-2xl max-w-xs w-full p-5 animate-scale-in" onclick={(e) => e.stopPropagation()}>
+				<div class="text-center">
+					<div class="w-12 h-12 bg-rose-500/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+						<LogOut class="w-6 h-6 text-rose-400" />
+					</div>
+					<h3 class="text-base font-bold text-white mb-1">{m.sb_logout_title()}</h3>
+					<p class="text-xs text-neutral-500 mb-5">{m.sb_logout_body()}</p>
+					<div class="flex gap-2">
+						<button onclick={() => showLogoutConfirm = false} class="btn-secondary flex-1 !text-xs">{m.common_cancel()}</button>
+						<button onclick={handleLogout} class="btn-danger flex-1 !text-xs">{m.sb_logout_button()}</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
 </header>
