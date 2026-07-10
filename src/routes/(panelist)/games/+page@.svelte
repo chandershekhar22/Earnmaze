@@ -1,9 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { persistState } from '$lib/utils/iframe-state';
+  import { authStore } from '$lib/stores/auth.svelte';
 
   type UploadedGame = { id: string; title: string; file: string; thumb?: string };
-  let { data } = $props<{ data: { todaysGame: UploadedGame | null } }>();
+  let { data } = $props<{ data: { todaysGame: UploadedGame | null; isLoggedIn: boolean } }>();
+
+  // data.isLoggedIn is known server-side, so the nav renders correctly from
+  // the very first paint. authStore.state.user then keeps it in sync with
+  // client-side login/logout without waiting on the async checkAuth() call.
+  const showAuthButtons = $derived(!data.isLoggedIn && !authStore.state.user);
 
   // The modal only needs name/path/reward; allow both catalog games and the uploaded pick.
   type PlayableGame = { id: string; name: string; path: string; reward: string; thumb?: string | null };
@@ -612,8 +618,10 @@
     <div class="nav-actions">
       <span class="coin-pill"><span class="dot"></span>2,480 pts</span>
       <button class="bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg><span class="pip"></span></button>
-      <a href="/login" class="btn-ghost">Log in</a>
-      <a href="/register" class="btn btn-pri">Sign up free</a>
+      {#if showAuthButtons}
+        <a href="/login" class="btn-ghost">Log in</a>
+        <a href="/register" class="btn btn-pri">Sign up free</a>
+      {/if}
     </div>
   </div>
 </nav>

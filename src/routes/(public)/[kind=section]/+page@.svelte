@@ -1,10 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import SocialButtons from '$lib/components/SocialButtons.svelte';
+  import { authStore } from '$lib/stores/auth.svelte';
 
-  let { data } = $props<{ data: { items: any[]; kind: string; kindLabel: string; kindSingular: string; accent: string; featured: any | null } }>();
+  let { data } = $props<{ data: { items: any[]; kind: string; kindLabel: string; kindSingular: string; accent: string; featured: any | null; isLoggedIn: boolean } }>();
   let activeFilter = $state('all');
   let searchQ = $state('');
+
+  // data.isLoggedIn is known server-side, so the nav renders correctly from
+  // the very first paint. authStore.state.user then keeps it in sync with
+  // client-side login/logout without waiting on the async checkAuth() call.
+  const showAuthButtons = $derived(!data.isLoggedIn && !authStore.state.user);
 
   const ITEMS = $derived(data.items as any[]);
 
@@ -417,8 +423,10 @@
     <div class="nav-actions">
       <span class="coin-pill"><span class="dot"></span>2,480 pts</span>
       <button class="bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg><span class="pip"></span></button>
-      <a href="/login" class="btn-ghost">Log in</a>
-      <a href="/register" class="btn btn-pri">Sign up free</a>
+      {#if showAuthButtons}
+        <a href="/login" class="btn-ghost">Log in</a>
+        <a href="/register" class="btn btn-pri">Sign up free</a>
+      {/if}
     </div>
   </div>
 </nav>

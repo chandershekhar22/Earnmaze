@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 import { isUploadKind, readUploads, KIND_META } from '$lib/server/uploads-store';
 import { getKindStats } from '$lib/server/engagement-store';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!isUploadKind(params.kind)) throw error(404, 'Not found');
 	const [items, stats] = await Promise.all([
 		readUploads(params.kind),
@@ -22,5 +22,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		kindSingular: KIND_META[params.kind].singular,
 		accent: KIND_META[params.kind].accent,
 		featured,
+		// Server-known auth state, so the nav can hide Log in/Sign up on the
+		// very first render instead of waiting for the client checkAuth() call.
+		isLoggedIn: !!locals.user,
 	};
 };

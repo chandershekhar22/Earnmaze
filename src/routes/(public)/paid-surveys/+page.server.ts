@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { getAllAvailableSurveys, getTodaySurvey } from '$lib/db/repositories/survey.repository.server';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
 	const [surveys, todaySurvey] = await Promise.all([
 		getAllAvailableSurveys(),
 		getTodaySurvey(),
@@ -19,5 +19,8 @@ export const load: PageServerLoad = async () => {
 			createdAt: s.createdAt.toISOString(),
 		})),
 		todaySurveyId: todaySurvey?.id ?? null,
+		// Server-known auth state, so the nav can hide Log in/Sign up on the
+		// very first render instead of waiting for the client checkAuth() call.
+		isLoggedIn: !!locals.user,
 	};
 };
