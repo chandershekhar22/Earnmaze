@@ -28,7 +28,12 @@
 	let notifOpen = $state(false);
 
 	onMount(() => {
-		const cleanupFns: Array<() => void> = [];
+		// Smooth in-page anchor scrolling (#how, #faq, ...) is homepage-only.
+		// Scoped here rather than left as a global `html` rule so it can't leak
+		// onto other pages during SPA navigation and fight SvelteKit's
+		// scroll-to-top reset there.
+		document.documentElement.classList.add('home-smooth-scroll');
+		const cleanupFns: Array<() => void> = [() => document.documentElement.classList.remove('home-smooth-scroll')];
 
 		// Reveal-on-scroll: applied to `.reveal` elements across every section.
 		const rObs = new IntersectionObserver(

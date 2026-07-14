@@ -43,7 +43,7 @@
 	});
 </script>
 
-<nav bind:this={navEl}>
+<nav class="home-nav" bind:this={navEl}>
 	<div class="wrap nav-row">
 		<a href="/" class="brand">
 			<span class="brand-mark">
