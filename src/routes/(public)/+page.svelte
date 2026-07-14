@@ -7,7 +7,6 @@
 	import FeedbackWidget from '$lib/components/home/FeedbackWidget.svelte';
 	import ReferEarn from '$lib/components/home/ReferEarn.svelte';
 	import HeroSection from '$lib/components/home/HeroSection.svelte';
-	import PressSection from '$lib/components/home/PressSection.svelte';
 	import StatsSection from '$lib/components/home/StatsSection.svelte';
 	import HowItWorksSection from '$lib/components/home/HowItWorksSection.svelte';
 	import WaysToEarnSection from '$lib/components/home/WaysToEarnSection.svelte';
@@ -15,11 +14,9 @@
 	import GamesSection from '$lib/components/home/GamesSection.svelte';
 	import StreaksSection from '$lib/components/home/StreaksSection.svelte';
 	import QuizzesSection from '$lib/components/home/QuizzesSection.svelte';
-	import SurveyDemoSection from '$lib/components/home/SurveyDemoSection.svelte';
 	import ReferralSection from '$lib/components/home/ReferralSection.svelte';
 	import WhySection from '$lib/components/home/WhySection.svelte';
 	import ReviewsSection from '$lib/components/home/ReviewsSection.svelte';
-	import FaqSection from '$lib/components/home/FaqSection.svelte';
 	import CtaSection from '$lib/components/home/CtaSection.svelte';
 	import HomeFooter from '$lib/components/home/HomeFooter.svelte';
 	import LiveToasts from '$lib/components/home/LiveToasts.svelte';
@@ -28,7 +25,7 @@
 	let notifOpen = $state(false);
 
 	onMount(() => {
-		// Smooth in-page anchor scrolling (#how, #faq, ...) is homepage-only.
+		// Smooth in-page anchor scrolling (#how, #earn, ...) is homepage-only.
 		// Scoped here rather than left as a global `html` rule so it can't leak
 		// onto other pages during SPA navigation and fight SvelteKit's
 		// scroll-to-top reset there.
@@ -104,7 +101,6 @@
 <HomeNav onOpenNotif={() => (notifOpen = true)} />
 
 <HeroSection />
-<PressSection />
 <StatsSection />
 <HowItWorksSection />
 <WaysToEarnSection />
@@ -112,11 +108,9 @@
 <GamesSection />
 <StreaksSection />
 <QuizzesSection />
-<SurveyDemoSection />
 <ReferralSection />
 <WhySection />
 <ReviewsSection />
-<FaqSection />
 <CtaSection />
 <HomeFooter />
 

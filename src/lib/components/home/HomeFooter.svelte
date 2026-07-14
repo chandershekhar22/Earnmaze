@@ -1,8 +1,6 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
 
-	const year = new Date().getFullYear();
-
 	const stores = ['App Store', 'Google Play'];
 
 	const socials = [
@@ -42,13 +40,6 @@
 				{ href: '/terms-of-service', label: 'Terms' }
 			]
 		}
-	];
-
-	const trust = [
-		{ icon: 'lock', label: '256-bit SSL' },
-		{ icon: 'shield', label: 'SOC 2 Type II' },
-		{ icon: 'check', label: 'GDPR / CCPA' },
-		{ icon: 'globe', label: 'US-based' }
 	];
 
 	let subscribed = $state(false);
@@ -113,16 +104,6 @@
 					<button type="submit">{subscribed ? '✓ Subscribed' : 'Subscribe'}</button>
 				</form>
 			</div>
-		</div>
-		<div class="foot-trust">
-			{#each trust as item (item.label)}
-				<span><Icon name={item.icon} /> {item.label}</span>
-			{/each}
-		</div>
-		<div class="foot-bot">
-			<span>© {year} EarnMaze, Inc.</span>
-			<span style="font-style:italic">Give your free time a raise.</span>
-			<span>Available in the United States</span>
 		</div>
 	</div>
 </footer>

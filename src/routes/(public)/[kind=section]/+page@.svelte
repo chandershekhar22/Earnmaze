@@ -418,7 +418,7 @@
       <a href="/paid-surveys" data-sveltekit-reload>Surveys</a>
       <a href="/quizzes" data-sveltekit-reload class:active={data.kind === 'quizzes'}>Quizzes</a>
       <a href="/artifacts" data-sveltekit-reload class:active={data.kind === 'artifacts'}>Artifacts</a>
-      <a href="/#faq" data-sveltekit-reload>FAQ</a>
+      <a href="/faq" data-sveltekit-reload>FAQ</a>
     </div>
     <div class="nav-actions">
       <span class="coin-pill"><span class="dot"></span>2,480 pts</span>

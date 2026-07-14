@@ -14,7 +14,7 @@
 		{ href: '/paid-surveys', label: 'Surveys', reload: true },
 		{ href: '/quizzes', label: 'Quizzes', reload: true },
 		{ href: '/artifacts', label: 'Artifacts', reload: true },
-		{ href: '#faq', label: 'FAQ' }
+		{ href: '/faq', label: 'FAQ', reload: true }
 	];
 
 	function triggerCoinBurst() {

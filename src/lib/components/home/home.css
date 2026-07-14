@@ -1771,7 +1771,6 @@ img {
 	padding: 96px 0;
 	background: var(--bg2);
 	border-top: 1px solid var(--line);
-	border-bottom: 1px solid var(--line);
 }
 .quiz-grid {
 	display: grid;
@@ -2470,14 +2469,13 @@ img {
 }
 
 footer.home-footer {
-	padding: 80px 0 32px;
+	padding: 80px 0;
 	border-top: 1px solid var(--line);
 }
 .foot-top {
 	display: grid;
 	grid-template-columns: 2fr 1fr 1fr 1fr 1.4fr;
 	gap: 40px;
-	margin-bottom: 64px;
 }
 .foot-brand p {
 	font-size: 14px;
@@ -2555,37 +2553,6 @@ footer.home-footer {
 	border-radius: var(--r2);
 	font-weight: 600;
 	font-size: 13px;
-}
-.foot-trust {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 32px;
-	padding: 24px 0;
-	border-top: 1px solid var(--line);
-	border-bottom: 1px solid var(--line);
-	margin-bottom: 24px;
-	font-family: var(--mono);
-	font-size: 11px;
-	color: var(--t3);
-	letter-spacing: 0.04em;
-}
-.foot-trust span {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-}
-.foot-trust .i {
-	color: var(--t2);
-}
-.foot-bot {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	font-family: var(--mono);
-	font-size: 11px;
-	color: var(--t3);
-	flex-wrap: wrap;
-	gap: 14px;
 }
 .foot-social {
 	display: flex;
