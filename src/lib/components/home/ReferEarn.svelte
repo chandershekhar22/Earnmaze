@@ -2,6 +2,8 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import Turnstile from '$lib/components/Turnstile.svelte';
 	import Icon from './Icon.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	let modalOpen = $state(false);
 	let mode = $state<'signin' | 'signup'>('signin');
@@ -13,7 +15,7 @@
 	let turnstileToken = $state<string | null>(null);
 	let turnstileRef: { reset: () => void } | undefined = $state();
 	let referralCode = $state('');
-	let copyLabel = $state('Copy');
+	let copyLabel = $state(m.home_refer_copy());
 
 	// Whether the visitor is authenticated decides which modal view shows.
 	let signedIn = $derived(!!authStore.state.user);
@@ -102,8 +104,8 @@
 	function copyLink() {
 		if (!referralLink || !navigator.clipboard) return;
 		navigator.clipboard.writeText(referralLink);
-		copyLabel = 'Copied';
-		setTimeout(() => (copyLabel = 'Copy'), 1800);
+		copyLabel = m.home_refer_copied();
+		setTimeout(() => (copyLabel = m.home_refer_copy()), 1800);
 	}
 
 	function shareX() {
@@ -134,16 +136,16 @@
 <svelte:window onkeydown={(e) => modalOpen && e.key === 'Escape' && closeModal()} />
 
 <!-- Floating Refer & Earn button -->
-<button class="re-fab" onclick={openModal} aria-label="Refer and earn">
+<button class="re-fab" onclick={openModal} aria-label={m.home_refearn_aria()}>
 	<span class="re-fab-ico"><Icon name="gift" class="i-lg i" /></span>
-	<span class="re-fab-label">Refer<br />&amp; Earn</span>
+	<span class="re-fab-label">{m.home_refearn_fab_refer()}<br />&amp; {m.home_refearn_fab_earn()}</span>
 </button>
 
 <!-- Modal -->
 <div class="re-overlay" class:open={modalOpen}>
-	<button type="button" class="re-backdrop" aria-label="Close" onclick={closeModal}></button>
-	<div class="re-modal" role="dialog" aria-modal="true" aria-label="Refer and earn">
-		<button class="re-close" onclick={closeModal} aria-label="Close">
+	<button type="button" class="re-backdrop" aria-label={m.home_refearn_close()} onclick={closeModal}></button>
+	<div class="re-modal" role="dialog" aria-modal="true" aria-label={m.home_refearn_aria()}>
+		<button class="re-close" onclick={closeModal} aria-label={m.home_refearn_close()}>
 			<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 				><path d="M6 6l12 12M18 6L6 18" /></svg
 			>
@@ -151,51 +153,51 @@
 
 		{#if signedIn}
 			<!-- Invite view -->
-			<span class="re-eyebrow"><span class="re-dot"></span>Your invite link</span>
-			<h3 class="re-title">Share Earnmaze, get paid</h3>
-			<p class="re-sub">Both of you earn when your friend joins and reaches their first payout.</p>
+			<span class="re-eyebrow"><span class="re-dot"></span>{m.home_refearn_invite_eyebrow()}</span>
+			<h3 class="re-title">{m.home_refearn_invite_title()}</h3>
+			<p class="re-sub">{m.home_refearn_invite_sub()}</p>
 
 			<div class="re-account">
 				<span class="re-avatar">{initials}</span>
 				<div class="re-account-info">
-					<strong>Signed in</strong>
+					<strong>{m.home_refearn_signed_in()}</strong>
 					<span>{authStore.state.user?.email}</span>
 				</div>
-				<button type="button" class="re-signout" onclick={signOut}>Sign out</button>
+				<button type="button" class="re-signout" onclick={signOut}>{m.common_signout()}</button>
 			</div>
 
-			<span class="re-label">Your referral link</span>
+			<span class="re-label">{m.home_refearn_link_label()}</span>
 			<div class="re-link-row">
-				<input class="re-link" value={referralLink} readonly aria-label="Your referral link" />
+				<input class="re-link" value={referralLink} readonly aria-label={m.home_refer_link_aria()} />
 				<button type="button" class="re-copy" onclick={copyLink}>{copyLabel}</button>
 			</div>
 
-			<span class="re-label">Share via</span>
+			<span class="re-label">{m.home_refearn_share_via()}</span>
 			<div class="re-share">
 				<button type="button" class="re-share-btn" onclick={shareX}><Icon name="x" /> X</button>
 				<button type="button" class="re-share-btn" onclick={shareNative}
-					><Icon name="ig" /> Story</button
+					><Icon name="ig" /> {m.home_refearn_share_story()}</button
 				>
 				<button type="button" class="re-share-btn" onclick={shareNative}
-					><Icon name="globe" /> Link</button
+					><Icon name="globe" /> {m.home_refearn_share_link()}</button
 				>
 			</div>
 
 			<div class="re-reward">
 				<span class="re-reward-ico"><Icon name="gift" class="i-lg i" /></span>
 				<div>
-					<strong>Earn 5,000 pts per friend</strong>
-					<span>They get 1,000 pts to start. No limit on invites.</span>
+					<strong>{m.home_refearn_reward_title()}</strong>
+					<span>{m.home_refearn_reward_desc()}</span>
 				</div>
 			</div>
 		{:else}
 			<!-- Auth gate view -->
-			<span class="re-eyebrow"><span class="re-dot"></span>Invite &amp; earn</span>
+			<span class="re-eyebrow"><span class="re-dot"></span>{m.home_refer_eyebrow()}</span>
 			<h3 class="re-title">
-				{mode === 'signin' ? 'Sign in to refer friends' : 'Sign up to refer friends'}
+				{mode === 'signin' ? m.home_refearn_auth_title_signin() : m.home_refearn_auth_title_signup()}
 			</h3>
 			<p class="re-sub">
-				You'll need an account to send invites and collect your referral rewards.
+				{m.home_refearn_auth_sub()}
 			</p>
 
 			<div class="re-tabs">
@@ -203,13 +205,13 @@
 					type="button"
 					class="re-tab"
 					class:active={mode === 'signin'}
-					onclick={() => switchMode('signin')}>Sign in</button
+					onclick={() => switchMode('signin')}>{m.common_signin()}</button
 				>
 				<button
 					type="button"
 					class="re-tab"
 					class:active={mode === 'signup'}
-					onclick={() => switchMode('signup')}>Sign up</button
+					onclick={() => switchMode('signup')}>{m.common_signup()}</button
 				>
 			</div>
 
@@ -219,37 +221,37 @@
 				{/if}
 
 				{#if mode === 'signup'}
-					<span class="re-label">Name</span>
+					<span class="re-label">{m.home_refearn_name_label()}</span>
 					<input
 						class="re-field"
 						type="text"
 						bind:value={name}
-						placeholder="Your name"
+						placeholder={m.home_refearn_name_placeholder()}
 						autocomplete="name"
-						aria-label="Name"
+						aria-label={m.home_refearn_name_label()}
 						required
 					/>
 				{/if}
 
-				<span class="re-label">Email</span>
+				<span class="re-label">{m.home_refearn_email_label()}</span>
 				<input
 					class="re-field"
 					type="email"
 					bind:value={email}
-					placeholder="you@email.com"
+					placeholder={m.home_footer_news_placeholder()}
 					autocomplete="email"
-					aria-label="Email"
+					aria-label={m.home_refearn_email_label()}
 					required
 				/>
 
-				<span class="re-label">Password</span>
+				<span class="re-label">{m.common_password()}</span>
 				<input
 					class="re-field"
 					type="password"
 					bind:value={password}
 					placeholder="••••••••"
 					autocomplete={mode === 'signin' ? 'current-password' : 'new-password'}
-					aria-label="Password"
+					aria-label={m.common_password()}
 					required
 				/>
 
@@ -257,9 +259,9 @@
 					<label class="re-consent">
 						<input type="checkbox" bind:checked={agreedTerms} required />
 						<span>
-							I am 18 or older and agree to the
-							<a href="/terms" target="_blank" rel="noopener">Terms</a> and
-							<a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+							{m.home_refearn_consent_prefix()}
+							<a href={localizeHref('/terms-of-service')} target="_blank" rel="noopener">{m.home_refearn_terms_link()}</a> {m.auth_register_terms_and()}
+							<a href={localizeHref('/privacy-policy')} target="_blank" rel="noopener">{m.footer_privacy()}</a>.
 						</span>
 					</label>
 				{/if}
@@ -284,11 +286,11 @@
 						!turnstileToken ||
 						(mode === 'signup' && (!name || !agreedTerms))}
 				>
-					{submitting ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
+					{submitting ? m.home_refearn_please_wait() : mode === 'signin' ? m.common_signin() : m.auth_register_button()}
 					{#if !submitting}<Icon name="arrow" />{/if}
 				</button>
 			</form>
-			<p class="re-note">Free forever. No credit card. US members only.</p>
+			<p class="re-note">{m.home_refearn_note()}</p>
 		{/if}
 	</div>
 </div>

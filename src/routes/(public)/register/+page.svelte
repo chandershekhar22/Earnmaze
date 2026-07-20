@@ -136,8 +136,8 @@
 </script>
 
 <svelte:head>
-	<title>Sign Up — EarnMaze</title>
-	<meta name="description" content="Create your EarnMaze account and start earning rewards through daily streaks, quizzes, polls, games and deals." />
+	<title>{m.auth_register_meta_title()}</title>
+	<meta name="description" content={m.auth_register_meta_description()} />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -304,13 +304,13 @@
 
 	<nav class="rg-nav">
 		<div class="rg-nav-row">
-			<a href="/" class="rg-logo">
+			<a href={localizeHref('/')} class="rg-logo">
 				<span class="rg-logo-mark"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 11-13h-7l1-7z"/></svg></span>
 				Earnmaze
 			</a>
-			<a href="/" class="rg-back">
+			<a href={localizeHref('/')} class="rg-back">
 				<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-				HOME
+				{m.nav_home()}
 			</a>
 			<span class="rg-nav-spacer"></span>
 		</div>
@@ -318,28 +318,28 @@
 
 	<div class="rg-grid">
 		<section class="rg-hero">
-			<div class="rg-chip"><span class="rg-chip-dot"></span> Free forever · No credit card</div>
-			<h1 class="rg-h1">Join 4.2M+ members <span class="grad">earning daily.</span></h1>
-			<p class="rg-sub">Take 30 seconds to create your free account and pick up a 250-point welcome bonus. No subscription. No commitment.</p>
+			<div class="rg-chip"><span class="rg-chip-dot"></span> {m.auth_register_chip()}</div>
+			<h1 class="rg-h1">{m.auth_register_hero_title_line1()} <span class="grad">{m.auth_register_hero_title_line2()}</span></h1>
+			<p class="rg-sub">{m.auth_register_hero_subtitle()}</p>
 
 			<div class="rg-stats">
-				<div class="rg-stat"><div class="rg-stat-v c1">$3.1M+</div><div class="rg-stat-l">Paid Last Month</div></div>
-				<div class="rg-stat"><div class="rg-stat-v c2">850K+</div><div class="rg-stat-l">Daily Streaks</div></div>
-				<div class="rg-stat"><div class="rg-stat-v c3">1–3 d</div><div class="rg-stat-l">Avg Payout</div></div>
+				<div class="rg-stat"><div class="rg-stat-v c1">{m.auth_register_stat_paid_value()}</div><div class="rg-stat-l">{m.auth_register_stat_paid_label()}</div></div>
+				<div class="rg-stat"><div class="rg-stat-v c2">{m.auth_register_stat_streaks_value()}</div><div class="rg-stat-l">{m.auth_register_stat_streaks_label()}</div></div>
+				<div class="rg-stat"><div class="rg-stat-v c3">{m.auth_register_stat_payout_value()}</div><div class="rg-stat-l">{m.auth_register_stat_payout_label()}</div></div>
 			</div>
 
 			<div class="rg-feat">
 				<div class="rg-feat-item">
 					<span class="rg-feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-					Cash out via PayPal or gift cards from just $10
+					{m.auth_register_feat_cashout()}
 				</div>
 				<div class="rg-feat-item">
 					<span class="rg-feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-					Streak multipliers stack up to 5×
+					{m.auth_register_feat_streak()}
 				</div>
 				<div class="rg-feat-item">
 					<span class="rg-feat-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-					Data encrypted &amp; never sold — privacy first
+					{m.auth_register_feat_privacy()}
 				</div>
 			</div>
 		</section>
@@ -349,8 +349,8 @@
 				<div class="rg-card-icon">
 					<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
 				</div>
-				<div class="rg-card-title">Create your account</div>
-				<div class="rg-card-sub">Get a <b>250-point welcome bonus</b> on signup.</div>
+				<div class="rg-card-title">{m.auth_register_heading()}</div>
+				<div class="rg-card-sub">{m.auth_register_card_sub_before()} <b>{m.auth_register_bonus_highlight()}</b> {m.auth_register_card_sub_after()}</div>
 
 				<form onsubmit={handleFormSubmit} class="rg-form">
 					{#if authStore.state.error}
@@ -361,7 +361,7 @@
 					{/if}
 
 					<div class="rg-field">
-						<label class="rg-label" for="email">Email address</label>
+						<label class="rg-label" for="email">{m.common_email()}</label>
 						<div class="rg-input-wrap">
 							<span class="rg-input-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
 							<input
@@ -370,14 +370,14 @@
 								bind:value={email}
 								required
 								class="rg-input"
-								placeholder="you@example.com"
+								placeholder={m.auth_email_placeholder()}
 								autocomplete="email"
 							/>
 						</div>
 					</div>
 
 					<div class="rg-field">
-						<label class="rg-label" for="name">Full name<span class="opt">optional</span></label>
+						<label class="rg-label" for="name">{m.auth_full_name_label()}<span class="opt">{m.auth_optional()}</span></label>
 						<div class="rg-input-wrap">
 							<span class="rg-input-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
 							<input
@@ -385,14 +385,14 @@
 								type="text"
 								bind:value={name}
 								class="rg-input"
-								placeholder="John Doe"
+								placeholder={m.auth_full_name_placeholder()}
 								autocomplete="name"
 							/>
 						</div>
 					</div>
 
 					<div class="rg-field">
-						<label class="rg-label" for="password">Password<span class="hint">8+ characters</span></label>
+						<label class="rg-label" for="password">{m.common_password()}<span class="hint">{m.auth_register_password_hint()}</span></label>
 						<div class="rg-input-wrap">
 							<span class="rg-input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
 							<input
@@ -401,10 +401,10 @@
 								bind:value={password}
 								required
 								class="rg-input {password.length > 0 ? (allRulesMet ? 'good' : 'warn') : ''}"
-								placeholder="Create a strong password"
+								placeholder={m.auth_password_placeholder_create()}
 								autocomplete="new-password"
 							/>
-							<button type="button" class="rg-eye" aria-label="Toggle password visibility" onclick={() => (showPassword = !showPassword)}>
+							<button type="button" class="rg-eye" aria-label={m.auth_toggle_password_visibility()} onclick={() => (showPassword = !showPassword)}>
 								{#if showPassword}
 									<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
 								{:else}
@@ -420,7 +420,7 @@
 					</div>
 
 					<div class="rg-field">
-						<label class="rg-label" for="confirmPassword">Confirm password</label>
+						<label class="rg-label" for="confirmPassword">{m.common_confirm_password()}</label>
 						<div class="rg-input-wrap">
 							<span class="rg-input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
 							<input
@@ -429,12 +429,12 @@
 								bind:value={confirmPassword}
 								required
 								class="rg-input {passwordMismatch ? 'bad' : ''}"
-								placeholder="Confirm your password"
+								placeholder={m.auth_confirm_password_placeholder()}
 								autocomplete="new-password"
 							/>
 						</div>
 						{#if passwordMismatch}
-							<div class="rg-mismatch">⚠ Passwords do not match</div>
+							<div class="rg-mismatch">⚠ {m.auth_passwords_no_match()}</div>
 						{/if}
 					</div>
 
@@ -442,9 +442,9 @@
 						<div class="rg-ref-icon"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
 						<div class="rg-ref-txt">
 							{#if referralCode}
-								Referral code <b>{referralCode}</b> applied — earn <b>+500 bonus pts</b> once you both reach $5.
+								{m.auth_register_ref_applied_prefix()} <b>{referralCode}</b> {m.auth_register_ref_applied_earn()} <b>{m.auth_register_ref_bonus_pts()}</b> {m.auth_register_ref_applied_suffix()}
 							{:else}
-								Have a referral code? <b>+500 bonus pts</b> when both of you earn first $5.
+								{m.auth_register_ref_prompt()} <b>{m.auth_register_ref_bonus_pts()}</b> {m.auth_register_ref_when()}
 							{/if}
 						</div>
 					</div>
@@ -452,7 +452,7 @@
 					<label class="rg-terms">
 						<input type="checkbox" bind:checked={agreedTerms} required />
 						<span class="rg-terms-txt">
-							I agree to the <a href="/terms-of-service">Terms of Service</a> and <a href="/privacy-policy">Privacy Policy</a>, and confirm I'm 18+ and a US resident.
+							{m.auth_register_terms_prefix()} <a href={localizeHref('/terms-of-service')}>{m.footer_terms()}</a> {m.auth_register_terms_and()} <a href={localizeHref('/privacy-policy')}>{m.footer_privacy()}</a>{m.auth_register_terms_suffix()}
 						</span>
 					</label>
 
@@ -473,20 +473,20 @@
 						class="rg-submit"
 					>
 						{#if isLoading}
-							<span class="rg-spin"></span> Creating account…
+							<span class="rg-spin"></span> {m.auth_register_button_loading()}
 						{:else}
-							Create account
+							{m.auth_register_button()}
 							<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 						{/if}
 					</button>
 				</form>
 
 				<div class="rg-alt">
-					Already have an account?<a href="/login{redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}">Sign in here →</a>
+					{m.auth_have_account()}<a href={localizeHref(`/login${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`)}>{m.auth_signin_link()}</a>
 				</div>
 				<div class="rg-legal">
-					<a href="/privacy-policy">Privacy Policy</a>
-					<a href="/terms-of-service">Terms of Service</a>
+					<a href={localizeHref('/privacy-policy')}>{m.footer_privacy()}</a>
+					<a href={localizeHref('/terms-of-service')}>{m.footer_terms()}</a>
 				</div>
 			</div>
 		</section>
@@ -499,9 +499,9 @@
 					<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
 				{/each}
 			</span>
-			<span>4.7 · 3,200+ reviews</span>
+			<span>{m.auth_login_trust_reviews()}</span>
 		</div>
-		<div class="rg-footer-copy">© Earnmaze 2026</div>
+		<div class="rg-footer-copy">{m.auth_register_footer_copyright()}</div>
 		<span class="rg-footer-spacer"></span>
 	</footer>
 </div>

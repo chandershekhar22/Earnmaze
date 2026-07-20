@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import * as m from '$lib/paraglide/messages';
 
 	const names = [
 		'Priya',
@@ -17,15 +18,15 @@
 		'Tom'
 	];
 	const acts = [
-		'completed a survey · +$1.50',
-		"finished today's quiz · +50 pts",
-		'claimed a 7-day bonus · +100 pts',
-		'cashed out $25 to PayPal',
-		'won 200 coins in Trivia',
-		'started a new streak',
-		'reached Lvl 30',
-		'earned 150 pts on Quiz Sprint',
-		'unlocked Streak Shield'
+		m.home_toast_act1(),
+		m.home_toast_act2(),
+		m.home_toast_act3(),
+		m.home_toast_act4(),
+		m.home_toast_act5(),
+		m.home_toast_act6(),
+		m.home_toast_act7(),
+		m.home_toast_act8(),
+		m.home_toast_act9()
 	];
 
 	type Toast = { id: number; name: string; act: string };

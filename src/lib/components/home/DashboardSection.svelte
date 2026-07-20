@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import * as m from '$lib/paraglide/messages';
 
 	const donutLegend = [
-		{ color: 'var(--acc)', label: 'Surveys', pct: '42%' },
-		{ color: '#7ab8ff', label: 'Quizzes', pct: '26%' },
-		{ color: '#ffb74a', label: 'Play & deals', pct: '17%' }
+		{ color: 'var(--acc)', label: m.nav_surveys(), pct: '42%' },
+		{ color: '#7ab8ff', label: m.home_nav_link_quizzes(), pct: '26%' },
+		{ color: '#ffb74a', label: m.home_dash_legend_play_deals(), pct: '17%' }
 	];
 
 	const summary = [
-		{ prefix: '$', value: '142.50', label: 'Total earned' },
-		{ value: '47', label: 'Surveys done' },
-		{ value: '14', label: 'Current streak' },
-		{ value: '23', label: 'Quizzes aced' }
+		{ prefix: '$', value: '142.50', label: m.home_dash_summary_total() },
+		{ value: '47', label: m.home_dash_summary_surveys() },
+		{ value: '14', label: m.home_dash_summary_streak() },
+		{ value: '23', label: m.home_dash_summary_quizzes() }
 	];
 
 	// Weekly-earnings bars. Each grows from 0 to its target once mounted; the
@@ -36,12 +37,11 @@
 	<div class="wrap">
 		<div class="section-head">
 			<div>
-				<span class="eyebrow acc"><span class="dot"></span>Dashboard</span>
-				<h2 class="h1 reveal" style="margin-top:18px">Your earnings, at a glance.</h2>
+				<span class="eyebrow acc"><span class="dot"></span>{m.home_dash_eyebrow()}</span>
+				<h2 class="h1 reveal" style="margin-top:18px">{m.home_dash_title()}</h2>
 			</div>
 			<p class="body-lg reveal d1">
-				A real-time view of progress, streaks, and where your rewards come from. One screen, no
-				noise.
+				{m.home_dash_lead()}
 			</p>
 		</div>
 		<div class="dash-frame reveal">
@@ -52,8 +52,8 @@
 			<div class="dash-body">
 				<div class="dw">
 					<div class="dw-h">
-						<h4>Weekly earnings</h4>
-						<span>Last 7 days</span>
+						<h4>{m.home_dash_weekly_earnings()}</h4>
+						<span>{m.home_dash_last_7_days()}</span>
 					</div>
 					<div class="chart">
 						{#each barValues as v, i (i)}
@@ -71,8 +71,8 @@
 				</div>
 				<div class="dw">
 					<div class="dw-h">
-						<h4>Reward sources</h4>
-						<span>This month</span>
+						<h4>{m.home_dash_reward_sources()}</h4>
+						<span>{m.home_dash_this_month()}</span>
 					</div>
 					<div class="donut">
 						<svg width="140" height="140" viewBox="0 0 140 140">
@@ -129,7 +129,7 @@
 				</div>
 				<div class="dw">
 					<div class="dw-h">
-						<h4>Streak heatmap</h4>
+						<h4>{m.home_dash_streak_heatmap()}</h4>
 						<span>Apr 2026</span>
 					</div>
 					<div class="heat">
@@ -138,7 +138,7 @@
 						{/each}
 					</div>
 					<div class="heat-foot">
-						<span>Less</span><span style="display:flex;gap:3px"
+						<span>{m.home_dash_less()}</span><span style="display:flex;gap:3px"
 							><span class="hc l1" style="width:10px;height:10px"></span><span
 								class="hc l2"
 								style="width:10px;height:10px"
@@ -146,7 +146,7 @@
 								class="hc l4"
 								style="width:10px;height:10px"
 							></span></span
-						><span>More</span>
+						><span>{m.home_dash_more()}</span>
 					</div>
 				</div>
 			</div>

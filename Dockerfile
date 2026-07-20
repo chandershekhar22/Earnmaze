@@ -41,7 +41,20 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 COPY --from=builder /app/scripts ./scripts
-RUN mkdir -p logs static/games-uploaded && chmod 777 logs static/games-uploaded
+RUN mkdir -p logs \
+    static/games-uploaded \
+    static/artifacts-uploaded \
+    static/streaks-uploaded \
+    static/quizzes-uploaded \
+    static/weekly-challenges-uploaded \
+    static/exclusive-deals-uploaded \
+    static/surveys-uploaded \
+    && chmod 777 logs static/games-uploaded static/artifacts-uploaded static/streaks-uploaded \
+       static/quizzes-uploaded static/weekly-challenges-uploaded static/exclusive-deals-uploaded static/surveys-uploaded
+# NOTE: these directories only hold their own content when the deploy config
+# (em-deploy) bind-mounts a host path over each one — see docs/setup or ask
+# infra. Without that mount, every redeploy wipes uploaded artifacts/thumbnails
+# because this stage always starts from an empty static/ tree.
 
 EXPOSE 3000
 ENV HOST=0.0.0.0

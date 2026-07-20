@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	const stores = ['App Store', 'Google Play'];
 
@@ -12,32 +14,32 @@
 	type FooterLink = { href: string; label: string; reload?: boolean };
 	const columns: { title: string; links: FooterLink[] }[] = [
 		{
-			title: 'Earn',
+			title: m.home_nav_link_earn(),
 			links: [
-				{ href: '/streaks', label: 'Daily streaks', reload: true },
-				{ href: '/quizzes', label: 'Quizzes', reload: true },
-				{ href: '/artifacts', label: 'Artifacts', reload: true },
-				{ href: '/games', label: 'Play', reload: true },
-				{ href: '/paid-surveys', label: 'Surveys', reload: true },
-				{ href: '/weekly-challenges', label: 'Challenges', reload: true }
+				{ href: '/streaks', label: m.home_footer_link_streaks(), reload: true },
+				{ href: '/quizzes', label: m.home_nav_link_quizzes(), reload: true },
+				{ href: '/artifacts', label: m.home_nav_link_artifacts(), reload: true },
+				{ href: '/games', label: m.home_nav_link_play(), reload: true },
+				{ href: '/paid-surveys', label: m.nav_surveys(), reload: true },
+				{ href: '/weekly-challenges', label: m.home_footer_link_challenges(), reload: true }
 			]
 		},
 		{
-			title: 'Learn',
+			title: m.home_footer_col_learn(),
 			links: [
-				{ href: '#how', label: 'How it works' },
-				{ href: '/about', label: 'About' },
-				{ href: '#streaks', label: 'Streak tips' },
-				{ href: '#quizzes', label: 'Quiz categories' }
+				{ href: '#how', label: m.home_nav_link_how() },
+				{ href: '/about', label: m.nav_about() },
+				{ href: '#streaks', label: m.home_footer_link_streak_tips() },
+				{ href: '#quizzes', label: m.home_footer_link_quiz_categories() }
 			]
 		},
 		{
-			title: 'Company',
+			title: m.home_footer_col_company(),
 			links: [
-				{ href: '/about', label: 'About' },
-				{ href: '/help', label: 'Help' },
-				{ href: '/privacy-policy', label: 'Privacy' },
-				{ href: '/terms-of-service', label: 'Terms' }
+				{ href: '/about', label: m.nav_about() },
+				{ href: '/help', label: m.nav_help() },
+				{ href: '/privacy-policy', label: m.home_footer_link_privacy() },
+				{ href: '/terms-of-service', label: m.home_footer_link_terms() }
 			]
 		}
 	];
@@ -55,7 +57,7 @@
 	<div class="wrap">
 		<div class="foot-top">
 			<div class="foot-brand">
-				<a href="/" class="brand">
+				<a href={localizeHref('/')} class="brand">
 					<span class="brand-mark">
 						<svg
 							class="i"
@@ -73,17 +75,16 @@
 					EarnMaze
 				</a>
 				<p>
-					Turning everyday moments into real rewards. Streaks, quizzes, surveys, games, and deals —
-					all in one wallet.
+					{m.home_footer_tagline()}
 				</p>
 				<div class="foot-stores">
 					{#each stores as store (store)}
-						<a href="/" class="fs">{store}</a>
+						<a href={localizeHref('/')} class="fs">{store}</a>
 					{/each}
 				</div>
 				<div class="foot-social">
 					{#each socials as social (social.label)}
-						<a href={social.href} aria-label={social.label} target={social.external ? '_blank' : undefined} rel={social.external ? 'noopener noreferrer' : undefined}><Icon name={social.icon} /></a>
+						<a href={social.external ? social.href : localizeHref(social.href)} aria-label={social.label} target={social.external ? '_blank' : undefined} rel={social.external ? 'noopener noreferrer' : undefined}><Icon name={social.icon} /></a>
 					{/each}
 				</div>
 			</div>
@@ -91,17 +92,17 @@
 				<div class="foot-col">
 					<h5>{col.title}</h5>
 					{#each col.links as link (link.href)}<a
-							href={link.href}
+							href={link.href.startsWith('#') ? link.href : localizeHref(link.href)}
 							data-sveltekit-reload={link.reload ? '' : undefined}>{link.label}</a
 						>{/each}
 				</div>
 			{/each}
 			<div class="foot-news">
-				<h5>Stay updated</h5>
-				<p>Tips, new features, and earning hacks. Twice a month, never more.</p>
+				<h5>{m.home_footer_news_title()}</h5>
+				<p>{m.home_footer_news_desc()}</p>
 				<form class="news-form" onsubmit={subscribe}>
-					<input type="email" placeholder="you@email.com" required />
-					<button type="submit">{subscribed ? '✓ Subscribed' : 'Subscribe'}</button>
+					<input type="email" placeholder={m.home_footer_news_placeholder()} required />
+					<button type="submit">{subscribed ? m.home_footer_subscribed() : m.home_footer_subscribe()}</button>
 				</form>
 			</div>
 		</div>

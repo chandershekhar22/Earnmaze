@@ -1,73 +1,75 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from './Icon.svelte';
+	import * as i18n from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	const games = [
 		{
 			icon: 'brain',
-			title: 'Trivia Quiz',
-			desc: 'Knowledge across 12+ categories',
+			title: i18n.home_games_g1_title(),
+			desc: i18n.home_games_g1_desc(),
 			badges: [
-				{ cls: 'easy', label: 'Easy' },
-				{ cls: 'hot', label: 'Hot' }
+				{ cls: 'easy', label: i18n.home_games_badge_easy() },
+				{ cls: 'hot', label: i18n.home_games_badge_hot() }
 			],
-			players: '1.2K playing',
+			players: `1.2K ${i18n.home_games_playing_suffix()}`,
 			reward: '+50 pts',
-			cta: 'Play'
+			cta: i18n.home_games_cta_play()
 		},
 		{
 			icon: 'grid',
-			title: 'Word Scramble',
-			desc: 'Unscramble against the clock',
+			title: i18n.home_games_g2_title(),
+			desc: i18n.home_games_g2_desc(),
 			badges: [
-				{ cls: 'med', label: 'Medium' },
-				{ cls: 'new', label: 'New' }
+				{ cls: 'med', label: i18n.home_games_badge_medium() },
+				{ cls: 'new', label: i18n.home_games_badge_new() }
 			],
-			players: '856 playing',
+			players: `856 ${i18n.home_games_playing_suffix()}`,
 			reward: '+75 pts',
-			cta: 'Play'
+			cta: i18n.home_games_cta_play()
 		},
 		{
 			icon: 'target',
-			title: 'Spin the Wheel',
-			desc: 'Daily spin for bonus coins',
-			badges: [{ cls: 'easy', label: 'Easy' }],
-			players: '2.4K playing',
+			title: i18n.home_games_g3_title(),
+			desc: i18n.home_games_g3_desc(),
+			badges: [{ cls: 'easy', label: i18n.home_games_badge_easy() }],
+			players: `2.4K ${i18n.home_games_playing_suffix()}`,
 			reward: '+10–500 pts',
-			cta: 'Spin'
+			cta: i18n.home_games_cta_spin()
 		},
 		{
 			icon: 'coin',
-			title: 'Scratch Card',
-			desc: 'Scratch to reveal instant rewards',
+			title: i18n.home_games_g4_title(),
+			desc: i18n.home_games_g4_desc(),
 			badges: [
-				{ cls: 'easy', label: 'Easy' },
-				{ cls: 'hot', label: 'Hot' }
+				{ cls: 'easy', label: i18n.home_games_badge_easy() },
+				{ cls: 'hot', label: i18n.home_games_badge_hot() }
 			],
-			players: '3.1K playing',
+			players: `3.1K ${i18n.home_games_playing_suffix()}`,
 			reward: '+25–200 pts',
-			cta: 'Scratch'
+			cta: i18n.home_games_cta_scratch()
 		},
 		{
 			icon: 'bolt',
-			title: 'Quiz Sprint',
-			desc: 'Match pairs for multipliers',
-			badges: [{ cls: 'hard', label: 'Hard' }],
-			players: '634 playing',
+			title: i18n.home_games_g5_title(),
+			desc: i18n.home_games_g5_desc(),
+			badges: [{ cls: 'hard', label: i18n.home_games_badge_hard() }],
+			players: `634 ${i18n.home_games_playing_suffix()}`,
 			reward: '+100 pts',
-			cta: 'Play'
+			cta: i18n.home_games_cta_play()
 		},
 		{
 			icon: 'trophy',
-			title: 'Daily Challenge',
-			desc: 'New challenge every day',
+			title: i18n.home_games_g6_title(),
+			desc: i18n.home_games_g6_desc(),
 			badges: [
-				{ cls: 'med', label: 'Medium' },
-				{ cls: 'new', label: 'New' }
+				{ cls: 'med', label: i18n.home_games_badge_medium() },
+				{ cls: 'new', label: i18n.home_games_badge_new() }
 			],
-			players: '1.8K playing',
+			players: `1.8K ${i18n.home_games_playing_suffix()}`,
 			reward: '+150 pts',
-			cta: 'Accept'
+			cta: i18n.home_games_cta_accept()
 		}
 	];
 
@@ -110,11 +112,11 @@
 	<div class="wrap">
 		<div class="section-head">
 			<div>
-				<span class="eyebrow acc"><span class="dot"></span>Play &amp; earn</span>
-				<h2 class="h1 reveal" style="margin-top:18px">Casual games. Real rewards.</h2>
+				<span class="eyebrow acc"><span class="dot"></span>{i18n.home_games_eyebrow()}</span>
+				<h2 class="h1 reveal" style="margin-top:18px">{i18n.home_games_title()}</h2>
 			</div>
 			<p class="body-lg reveal d1">
-				Trivia, scratchers, daily spins. Climb the leaderboard, claim the weekly bonus pool.
+				{i18n.home_games_lead()}
 			</p>
 		</div>
 
@@ -122,8 +124,8 @@
 			<div class="bonus-l">
 				<span class="bonus-ico"><Icon name="gift" class="i-lg i" /></span>
 				<div>
-					<h4>Daily bonus resets in</h4>
-					<p>Claim your free spin and bonus coins</p>
+					<h4>{i18n.home_games_bonus_title()}</h4>
+					<p>{i18n.home_games_bonus_desc()}</p>
 				</div>
 			</div>
 			<div class="timer">
@@ -131,7 +133,7 @@
 					>:</span
 				><span class="u">{s}</span>
 			</div>
-			<a href="/register" class="btn btn-pri">Claim bonus</a>
+			<a href={localizeHref('/register')} class="btn btn-pri">{i18n.home_games_bonus_cta()}</a>
 		</div>
 
 		<div class="game-grid">
@@ -160,8 +162,8 @@
 
 		<div class="leaderboard reveal">
 			<div class="lb-h">
-				<h4>Top players this week</h4>
-				<span>Resets Monday</span>
+				<h4>{i18n.home_games_leaderboard_title()}</h4>
+				<span>{i18n.home_games_leaderboard_resets()}</span>
 			</div>
 			{#each leaderboard as row (row.rank)}
 				<div class="lb-row" class:top={row.top}>

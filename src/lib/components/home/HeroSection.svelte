@@ -1,10 +1,12 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	const heroMeta = [
-		{ value: '0', count: '4.2', suffix: 'M+', label: 'Active members' },
-		{ value: '$0', count: '3.1', prefix: '$', suffix: 'M+', label: 'Paid out last month' },
-		{ value: '24h', label: 'Avg payout time' }
+		{ value: '0', count: '4.2', suffix: 'M+', label: m.home_hero_stat_members() },
+		{ value: '$0', count: '3.1', prefix: '$', suffix: 'M+', label: m.home_hero_stat_paid() },
+		{ value: '24h', label: m.home_hero_stat_payout() }
 	];
 </script>
 
@@ -13,16 +15,15 @@
 	<div class="wrap hero-grid">
 		<div>
 			<span class="hero-tag"
-				><span class="hero-tag-chip">NEW</span> Weekly Trivia League — $5,000 pool</span
+				><span class="hero-tag-chip">{m.home_hero_badge_new()}</span> {m.home_hero_badge_text()}</span
 			>
-			<h1 class="h-display">Show up daily.<br />Get paid <em>weekly.</em></h1>
+			<h1 class="h-display">{m.home_hero_title_daily()}<br />{m.home_hero_title_get_paid()} <em>{m.home_hero_title_weekly()}</em></h1>
 			<p class="lead">
-				EarnMaze pays you for the things you already do — quick surveys, daily quizzes, casual
-				games, and brand offers. Real cash to PayPal or gift cards. From $10.
+				{m.home_hero_lead()}
 			</p>
 			<div class="hero-ctas">
-				<a href="/register" class="btn btn-pri btn-lg">Create free account <Icon name="arrow" /></a>
-				<a href="#how" class="btn btn-sec btn-lg">How it works</a>
+				<a href={localizeHref('/register')} class="btn btn-pri btn-lg">{m.home_hero_cta_create()} <Icon name="arrow" /></a>
+				<a href="#how" class="btn btn-sec btn-lg">{m.home_hero_cta_how_it_works()}</a>
 			</div>
 			<div class="hero-meta">
 				{#each heroMeta as m (m.label)}
@@ -38,7 +39,7 @@
 
 		<div class="composition">
 			<div class="cc cc-wallet">
-				<div class="lab"><span class="live"></span> Wallet · this week</div>
+				<div class="lab"><span class="live"></span> {m.home_hero_mock_wallet_label()}</div>
 				<div class="bal"><em>$</em>42.<em>80</em></div>
 				<span class="delta">
 					<svg
@@ -49,7 +50,7 @@
 						stroke-width="2"
 						stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8" /></svg
 					>
-					+$18.40 this week
+					{m.home_hero_mock_wallet_delta()}
 				</span>
 				<svg class="cc-spark" viewBox="0 0 280 50" preserveAspectRatio="none">
 					<defs
@@ -85,7 +86,7 @@
 
 			<div class="cc cc-streak">
 				<div class="h">
-					<span class="l">Streak</span><span class="ico"><Icon name="flame" /></span>
+					<span class="l">{m.home_hero_mock_streak_label()}</span><span class="ico"><Icon name="flame" /></span>
 				</div>
 				<div class="ring-wrap">
 					<svg width="120" height="120" viewBox="0 0 120 120">
@@ -111,19 +112,19 @@
 					</svg>
 					<div class="c">
 						<div class="n">14</div>
-						<div class="u">days</div>
+						<div class="u">{m.home_hero_mock_days()}</div>
 					</div>
 				</div>
-				<div class="mult">Multiplier <em>2.5×</em> active</div>
+				<div class="mult">{m.home_hero_mock_multiplier_prefix()} <em>2.5×</em> {m.home_hero_mock_multiplier_suffix()}</div>
 			</div>
 
 			<div class="cc cc-quiz">
-				<div class="l"><Icon name="brain" class="" /> Today's quiz</div>
-				<div class="q">Which country has the most time zones?</div>
+				<div class="l"><Icon name="brain" class="" /> {m.home_hero_mock_quiz_label()}</div>
+				<div class="q">{m.home_hero_mock_quiz_question()}</div>
 				<div class="opts">
-					<div class="o"><span class="k">A</span>Russia</div>
+					<div class="o"><span class="k">A</span>{m.home_hero_mock_option_russia()}</div>
 					<div class="o right">
-						<span class="k">B</span>France <Icon
+						<span class="k">B</span>{m.home_hero_mock_option_france()} <Icon
 							name="check"
 							style="margin-left:auto;color:var(--acc)"
 						/>
@@ -135,15 +136,15 @@
 			<div class="cc cc-payout">
 				<span class="ico"><Icon name="check" /></span>
 				<div>
-					<div class="t">Payout sent</div>
-					<div class="s">PayPal · 22 hrs ago</div>
+					<div class="t">{m.home_hero_mock_payout_title()}</div>
+					<div class="s">{m.home_hero_mock_payout_meta()}</div>
 				</div>
 				<span class="v">$25.00</span>
 			</div>
 
 			<div class="cc cc-pill">
 				<span class="ico"><Icon name="bolt" /></span>
-				<span class="t">Earned today</span>
+				<span class="t">{m.home_hero_mock_earned_today()}</span>
 				<span class="v">$3.20</span>
 			</div>
 		</div>

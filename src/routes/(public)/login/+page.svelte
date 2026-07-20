@@ -98,8 +98,8 @@
 </script>
 
 <svelte:head>
-	<title>Sign In — EarnMaze</title>
-	<meta name="description" content="Sign in to your EarnMaze account to access your dashboard and start earning rewards." />
+	<title>{m.auth_login_meta_title()}</title>
+	<meta name="description" content={m.auth_login_meta_description()} />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -233,8 +233,8 @@
 	<div class="lg-redir">
 		<div class="lg-redir-inner">
 			<div class="lg-redir-mark"><div class="inner-sp"></div></div>
-			<h3>Welcome back!</h3>
-			<p>Loading your dashboard…</p>
+			<h3>{m.auth_login_redirect_title()}</h3>
+			<p>{m.auth_login_redirect_subtitle()}</p>
 		</div>
 	</div>
 {/if}
@@ -244,22 +244,22 @@
 
 	<nav class="lg-nav">
 		<div class="lg-nav-row">
-			<a href="/" class="lg-logo">
+			<a href={localizeHref('/')} class="lg-logo">
 				<span class="lg-logo-mark"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 11-13h-7l1-7z"/></svg></span>
 				Earnmaze
 			</a>
 			<div class="lg-nav-alt">
-				<span>New to Earnmaze?</span>
-				<a href="/register{redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}">Create account →</a>
+				<span>{m.auth_login_nav_new()}</span>
+				<a href={localizeHref(`/register${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`)}>{m.auth_login_nav_create_account()}</a>
 			</div>
 		</div>
 	</nav>
 
 	<div class="lg-grid">
 		<section class="lg-hero">
-			<div class="lg-chip"><span class="lg-chip-dot"></span> 14-day streak active</div>
-			<h1 class="lg-h1">Show up. <span class="grad">Get paid.</span></h1>
-			<p class="lg-sub">Sign back into your Earnmaze wallet and keep your streak alive. Every day you skip resets the multiplier.</p>
+			<div class="lg-chip"><span class="lg-chip-dot"></span> {m.auth_login_streak_chip()}</div>
+			<h1 class="lg-h1">{m.auth_login_hero_title_line1()} <span class="grad">{m.auth_login_hero_title_line2()}</span></h1>
+			<p class="lg-sub">{m.auth_login_hero_subtitle()}</p>
 
 			<div class="lg-trust">
 				<span class="lg-pill">
@@ -268,27 +268,27 @@
 							<svg viewBox="0 0 24 24" width="12" height="12"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
 						{/each}
 					</span>
-					4.7 · 3,200+ reviews
+					{m.auth_login_trust_reviews()}
 				</span>
 				<span class="lg-pill">
 					<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-					Bank-grade encryption
+					{m.auth_login_trust_encryption()}
 				</span>
 				<span class="lg-pill">
 					<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-					Payouts in 24h
+					{m.auth_login_trust_payouts()}
 				</span>
 				<span class="lg-pill">
 					<svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-					$3.1M paid last month
+					{m.auth_login_trust_paid_last_month()}
 				</span>
 			</div>
 		</section>
 
 		<section class="lg-main">
 			<div class="lg-card">
-				<div class="lg-card-title">Sign in</div>
-				<div class="lg-card-sub">Welcome back. Let's keep that streak.</div>
+				<div class="lg-card-title">{m.common_signin()}</div>
+				<div class="lg-card-sub">{m.auth_login_card_subtitle()}</div>
 
 				<form onsubmit={handleFormSubmit} class="lg-form">
 					{#if authStore.state.error}
@@ -316,8 +316,8 @@
 
 					<div class="lg-field">
 						<label class="lg-label" for="password">
-							Password
-							<a href="/forgot-password" class="lg-link">Forgot password?</a>
+							{m.common_password()}
+							<a href={localizeHref('/forgot-password')} class="lg-link">{m.auth_forgot_link()}</a>
 						</label>
 						<div class="lg-input-wrap">
 							<span class="lg-input-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
@@ -327,10 +327,10 @@
 								bind:value={password}
 								required
 								class="lg-input"
-								placeholder="Enter your password"
+								placeholder={m.auth_password_placeholder_login()}
 								autocomplete="current-password"
 							/>
-							<button type="button" class="lg-eye" aria-label="Toggle password visibility" onclick={() => (showPassword = !showPassword)}>
+							<button type="button" class="lg-eye" aria-label={m.auth_toggle_password_visibility()} onclick={() => (showPassword = !showPassword)}>
 								{#if showPassword}
 									<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
 								{:else}
@@ -342,7 +342,7 @@
 
 					<label class="lg-remember">
 						<input type="checkbox" bind:checked={rememberMe} />
-						Remember me for 30 days
+						{m.auth_login_remember_30()}
 					</label>
 
 					<div class="lg-turnstile">
@@ -362,16 +362,16 @@
 						class="lg-submit"
 					>
 						{#if isLoading}
-							<span class="lg-spin"></span> Signing in…
+							<span class="lg-spin"></span> {m.auth_login_button_loading()}
 						{:else}
-							Sign in
+							{m.common_signin()}
 							<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
 						{/if}
 					</button>
 				</form>
 
 				<div class="lg-alt">
-					Don't have an account?<a href="/register{redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}">Sign up for free →</a>
+					{m.auth_no_account()}<a href={localizeHref(`/register${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`)}>{m.auth_signup_free_link()}</a>
 				</div>
 			</div>
 		</section>

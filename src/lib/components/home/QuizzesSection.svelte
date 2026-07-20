@@ -1,28 +1,26 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
-	const features = [
-		'New quizzes daily across 12+ categories',
-		'Earn 50–200 pts per quiz, with streak bonuses',
-		'Weekly tournaments with leaderboards'
-	];
+	const features = [m.home_quiz_feat1(), m.home_quiz_feat2(), m.home_quiz_feat3()];
 
 	const categories = [
-		'Geography',
-		'Science',
-		'Sports',
-		'Movies',
-		'History',
-		'Tech',
-		'Music',
-		'Food'
+		m.home_quiz_cat_geography(),
+		m.home_quiz_cat_science(),
+		m.home_quiz_cat_sports(),
+		m.home_quiz_cat_movies(),
+		m.home_quiz_cat_history(),
+		m.home_quiz_cat_tech(),
+		m.home_quiz_cat_music(),
+		m.home_quiz_cat_food()
 	];
 
 	const options = [
-		{ l: 'A', text: 'Russia' },
-		{ l: 'B', text: 'United States' },
-		{ l: 'C', text: 'France', correct: true },
-		{ l: 'D', text: 'China' }
+		{ l: 'A', text: m.home_hero_mock_option_russia() },
+		{ l: 'B', text: m.home_quiz_mock_option_us() },
+		{ l: 'C', text: m.home_hero_mock_option_france(), correct: true },
+		{ l: 'D', text: m.home_quiz_mock_option_china() }
 	];
 
 	// Flash the picked wrong answer red briefly (the correct option is non-interactive).
@@ -37,11 +35,10 @@
 <section class="quiz" id="quizzes">
 	<div class="wrap quiz-grid">
 		<div class="quiz-info reveal">
-			<span class="eyebrow acc"><span class="dot"></span>Today's quizzes</span>
-			<h2 class="h1">Get smarter. Get paid.</h2>
+			<span class="eyebrow acc"><span class="dot"></span>{m.home_quiz_eyebrow()}</span>
+			<h2 class="h1">{m.home_quiz_title()}</h2>
 			<p>
-				Fresh quizzes every day across topics you actually care about. Answer questions, earn
-				instant points, expand your mind.
+				{m.home_quiz_lead()}
 			</p>
 			<div class="feat">
 				{#each features as f (f)}
@@ -51,7 +48,7 @@
 					</div>
 				{/each}
 			</div>
-			<a href="/register" class="btn btn-pri">Take today's quiz <Icon name="arrow" /></a>
+			<a href={localizeHref('/register')} class="btn btn-pri">{m.home_quiz_cta()} <Icon name="arrow" /></a>
 			<div class="qcats">
 				{#each categories as cat (cat)}<span class="qcat">{cat}</span>{/each}
 			</div>
@@ -59,14 +56,14 @@
 		<div class="qmock reveal d1">
 			<div class="qm-h">
 				<div class="c">Quiz · April 14</div>
-				<div class="t">World Geography Challenge</div>
+				<div class="t">{m.home_quiz_mock_title()}</div>
 				<div class="m">
-					<span>5 questions</span><span>~2 min</span><span><em>+50 pts</em></span>
+					<span>{m.home_quiz_mock_qcount()}</span><span>{m.home_quiz_mock_time()}</span><span><em>+50 pts</em></span>
 				</div>
 			</div>
 			<div class="qm-prog"><div></div></div>
 			<div class="qm-body">
-				<div class="qm-q"><em>Q3 of 5</em>Which country has the most time zones?</div>
+				<div class="qm-q"><em>{m.home_quiz_mock_qof5()}</em>{m.home_hero_mock_quiz_question()}</div>
 				<div class="qm-opts">
 					{#each options as opt (opt.l)}
 						{#if opt.correct}
@@ -81,7 +78,7 @@
 				<div class="qm-result">
 					<Icon name="check" class="i-lg i" style="color:var(--acc)" />
 					<div>
-						<strong>Correct</strong>France spans 12 time zones across its overseas territories.
+						<strong>{m.home_quiz_mock_correct()}</strong>{m.home_quiz_mock_explanation()}
 					</div>
 					<span class="v">+10</span>
 				</div>

@@ -1,46 +1,47 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import * as m from '$lib/paraglide/messages';
 
 	let { open, onClose }: { open: boolean; onClose: () => void } = $props();
 
-	const tabs = ['All', 'Rewards', 'Polls', 'System'];
-	let activeTab = $state('All');
+	const tabs = [m.home_notif_tab_all(), m.home_notif_tab_rewards(), m.home_notif_tab_polls(), m.home_notif_tab_system()];
+	let activeTab = $state(tabs[0]);
 
 	const items = [
 		{
 			icon: 'coin',
-			title: '+250 Bonus Points',
-			text: '14-day streak milestone reached. Keep going!',
+			title: m.home_notif_i1_title(),
+			text: m.home_notif_i1_text(),
 			time: '2m'
 		},
 		{
 			icon: 'doc',
-			title: 'New Polls Available',
-			text: 'Brand perception survey — 3 min, +$1.50',
+			title: m.home_notif_i2_title(),
+			text: m.home_notif_i2_text(),
 			time: '18m'
 		},
 		{
 			icon: 'flame',
-			title: 'Streak Shield Activated',
-			text: 'Your streak is protected for the next 24 hours.',
+			title: m.home_notif_i3_title(),
+			text: m.home_notif_i3_text(),
 			time: '1h'
 		},
 		{
 			icon: 'trophy',
-			title: 'Weekly Challenge Complete',
-			text: 'You earned 500 bonus points from the trivia tournament.',
+			title: m.home_notif_i4_title(),
+			text: m.home_notif_i4_text(),
 			time: '3h'
 		},
 		{
 			icon: 'wallet',
-			title: 'Payout Processed',
-			text: '$25.00 sent to your PayPal. Check your email.',
+			title: m.home_notif_i5_title(),
+			text: m.home_notif_i5_text(),
 			time: '1d'
 		},
 		{
 			icon: 'chart',
-			title: 'Quiz Results',
-			text: 'You scored 4/5 on Science Trivia. +40 pts earned.',
+			title: m.home_notif_i6_title(),
+			text: m.home_notif_i6_text(),
 			time: '1d'
 		}
 	];
@@ -48,13 +49,13 @@
 
 <svelte:window onkeydown={(e) => open && e.key === 'Escape' && onClose()} />
 
-<button class="notif-overlay" class:open onclick={onClose} aria-label="Close notifications"
+<button class="notif-overlay" class:open onclick={onClose} aria-label={m.home_notif_close()}
 ></button>
 
 <aside class="notif-drawer" class:open>
 	<div class="notif-header">
-		<h3>Notifications</h3>
-		<button class="notif-close" onclick={onClose} aria-label="Close notifications">
+		<h3>{m.home_notif_title()}</h3>
+		<button class="notif-close" onclick={onClose} aria-label={m.home_notif_close()}>
 			<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
 				><path d="M6 6l12 12M18 6L6 18" /></svg
 			>

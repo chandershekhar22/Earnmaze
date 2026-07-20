@@ -60,10 +60,10 @@
 	);
 
 	let isStandalonePage = $derived(
-		$page.url.pathname === '/' ||
-		$page.url.pathname === '/login' ||
-		$page.url.pathname === '/register' ||
-		$page.url.pathname === '/faq'
+		basePath === '/' ||
+		basePath === '/login' ||
+		basePath === '/register' ||
+		basePath === '/faq'
 	);
 
 	let isEarnMoneyPage = $derived(basePath === '/earn-points');

@@ -1,49 +1,51 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import * as m from '$lib/paraglide/messages';
+	import { localizeHref } from '$lib/paraglide/runtime';
 
 	// `tag` is split into pre/em/post so the highlighted fragment renders without {@html}.
 	const earnCards = [
 		{
 			href: '/streaks',
 			icon: 'flame',
-			title: 'Daily Streaks',
-			body: 'Show up daily, earn bonus multipliers. The longer your streak, the bigger your rewards.',
-			tag: { pre: 'Up to ', em: '5×', post: ' multiplier' }
+			title: m.home_earn_card1_title(),
+			body: m.home_earn_card1_body(),
+			tag: { pre: m.home_earn_card1_tag_pre(), em: m.home_earn_card1_tag_em(), post: m.home_earn_card1_tag_post() }
 		},
 		{
 			href: '/quizzes',
 			icon: 'brain',
-			title: 'Daily Quizzes',
-			body: 'Fun, bite-sized quizzes on trending topics — pop culture, science, history, sports.',
-			tag: { pre: '', em: '50–200 pts', post: ' per quiz' }
+			title: m.home_earn_card2_title(),
+			body: m.home_earn_card2_body(),
+			tag: { pre: '', em: m.home_earn_card2_tag_em(), post: m.home_earn_card2_tag_post() }
 		},
 		{
 			href: '/artifacts',
 			icon: 'spark',
-			title: 'Interactive Artifacts',
-			body: 'Hand-picked interactive experiences — explore, play with, and learn from curated data and lifestyle stories.',
-			tag: { pre: 'Curated · ', em: 'Live', post: '' }
+			title: m.home_earn_card3_title(),
+			body: m.home_earn_card3_body(),
+			tag: { pre: m.home_earn_card3_tag_pre(), em: m.home_earn_card3_tag_em(), post: '' }
 		},
 		{
 			href: '/games',
 			icon: 'game',
-			title: 'Play & Earn',
-			body: 'Level up in mobile games and earn real rewards. Gaming meets earning.',
-			tag: { pre: 'Earn while you play', em: '', post: '' }
+			title: m.home_earn_card4_title(),
+			body: m.home_earn_card4_body(),
+			tag: { pre: m.home_earn_card4_tag_pre(), em: '', post: '' }
 		},
 		{
 			href: '/paid-surveys',
 			icon: 'doc',
-			title: 'Paid Surveys',
-			body: 'Share opinions with major brands. Quick 2–10 minute surveys matched to your profile.',
-			tag: { pre: '', em: '$0.50–$5', post: ' per survey' }
+			title: m.home_earn_card5_title(),
+			body: m.home_earn_card5_body(),
+			tag: { pre: '', em: m.home_earn_card5_tag_em(), post: m.home_earn_card5_tag_post() }
 		},
 		{
 			href: '/weekly-challenges',
 			icon: 'trophy',
-			title: 'Weekly Challenges',
-			body: 'Limited-time challenges with bonus point pools and massive reward drops.',
-			tag: { pre: 'Bonus reward pools', em: '', post: '' }
+			title: m.home_earn_card6_title(),
+			body: m.home_earn_card6_body(),
+			tag: { pre: m.home_earn_card6_tag_pre(), em: '', post: '' }
 		}
 	];
 </script>
@@ -53,17 +55,16 @@
 	<div class="wrap">
 		<div class="section-head">
 			<div>
-				<span class="eyebrow acc"><span class="dot"></span>Ways to earn</span>
-				<h2 class="h1 reveal" style="margin-top:18px">Six paths. One wallet.</h2>
+				<span class="eyebrow acc"><span class="dot"></span>{m.home_earn_eyebrow()}</span>
+				<h2 class="h1 reveal" style="margin-top:18px">{m.home_earn_title()}</h2>
 			</div>
 			<p class="body-lg reveal d1">
-				Mix and match however you like. Every action adds real points directly to your balance — no
-				point conversions, no expiring credits.
+				{m.home_earn_lead()}
 			</p>
 		</div>
 		<div class="earn-grid">
 			{#each earnCards as card, i (card.href)}
-				<a href={card.href} data-sveltekit-reload class="earn-card reveal {i ? `d${i}` : ''}">
+				<a href={localizeHref(card.href)} data-sveltekit-reload class="earn-card reveal {i ? `d${i}` : ''}">
 					<div class="earn-ico"><Icon name={card.icon} class="i-lg i" /></div>
 					<div class="earn-arrow"><Icon name="arrow" /></div>
 					<h3>{card.title}</h3>

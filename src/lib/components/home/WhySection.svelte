@@ -1,36 +1,37 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import * as m from '$lib/paraglide/messages';
 
 	const reasons = [
 		{
 			icon: 'wallet',
-			title: '$10 minimum cashout',
-			body: 'No sky-high thresholds. Withdraw to PayPal or gift cards starting at ten dollars.'
+			title: m.home_why_r1_title(),
+			body: m.home_why_r1_body()
 		},
 		{
 			icon: 'clock',
-			title: '24-hour payouts',
-			body: 'Most withdrawals processed within a single business day. No 4-week holds.'
+			title: m.home_why_r2_title(),
+			body: m.home_why_r2_body()
 		},
 		{
 			icon: 'flame',
-			title: 'Streak multipliers',
-			body: 'The more consistent you are, the more you earn. Up to 5× bonus multipliers.'
+			title: m.home_why_r3_title(),
+			body: m.home_why_r3_body()
 		},
 		{
 			icon: 'brain',
-			title: 'Learn while you earn',
-			body: "Daily quizzes mean you're growing knowledge — not tapping mindlessly."
+			title: m.home_why_r4_title(),
+			body: m.home_why_r4_body()
 		},
 		{
 			icon: 'shield',
-			title: 'Data protected',
-			body: 'Industry-standard encryption. We never sell your data. Privacy is non-negotiable.'
+			title: m.home_why_r5_title(),
+			body: m.home_why_r5_body()
 		},
 		{
 			icon: 'target',
-			title: 'Personalized for you',
-			body: 'AI-matched surveys, quizzes tuned to interests, deals based on what you actually buy.'
+			title: m.home_why_r6_title(),
+			body: m.home_why_r6_body()
 		}
 	];
 </script>
@@ -40,12 +41,11 @@
 	<div class="wrap">
 		<div class="section-head">
 			<div>
-				<span class="eyebrow acc"><span class="dot"></span>Why EarnMaze</span>
-				<h2 class="h1 reveal" style="margin-top:18px">Built different. Pays better.</h2>
+				<span class="eyebrow acc"><span class="dot"></span>{m.home_why_eyebrow()}</span>
+				<h2 class="h1 reveal" style="margin-top:18px">{m.home_why_title()}</h2>
 			</div>
 			<p class="body-lg reveal d1">
-				A daily engagement platform — not another survey wall. We reward consistency, not
-				click-volume.
+				{m.home_why_lead()}
 			</p>
 		</div>
 		<div class="why-grid">

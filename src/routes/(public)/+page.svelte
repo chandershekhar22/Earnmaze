@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import * as m from '$lib/paraglide/messages';
 	import '$lib/components/home/home.css';
 	import IconSprite from '$lib/components/home/IconSprite.svelte';
 	import HomeNav from '$lib/components/home/HomeNav.svelte';
@@ -79,10 +80,10 @@
 </script>
 
 <svelte:head>
-	<title>EarnMaze — Earn Rewards for Your Opinions</title>
+	<title>{m.home_meta_title()}</title>
 	<meta
 		name="description"
-		content="Daily streaks, brain-boosting quizzes, paid surveys, games & exclusive deals — all rewarding you with real, redeemable points."
+		content={m.home_meta_description()}
 	/>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />

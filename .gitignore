@@ -32,6 +32,7 @@ static/streaks-uploaded/
 static/quizzes-uploaded/
 static/weekly-challenges-uploaded/
 static/exclusive-deals-uploaded/
+static/surveys-uploaded/
 
 # Anonymous like/share engagement counters (runtime data)
 static/engagement.json

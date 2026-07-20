@@ -1,39 +1,41 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
+
 	const reviews = [
 		{
 			av: 'JM',
 			name: 'Jessica M.',
 			date: 'March 2026',
-			body: 'The streak system is addictive in the best way. 47 days in and earning way more than any other rewards app — $180 this month.',
-			tag: 'Streaks'
+			body: m.home_reviews_r1_body(),
+			tag: m.home_reviews_tag_streaks()
 		},
 		{
 			av: 'DK',
 			name: 'David K.',
 			date: 'April 2026',
-			body: 'Love the daily quizzes. I look forward to opening the app every morning. Geography and science are my favorite — smarter and paid.',
-			tag: 'Quizzes'
+			body: m.home_reviews_r2_body(),
+			tag: m.home_nav_link_quizzes()
 		},
 		{
 			av: 'TR',
 			name: 'Tamika R.',
 			date: 'Feb 2026',
-			body: 'Way better than other reward apps. Surveys + streaks + quizzes keep things fresh. First $50 gift card in just two weeks.',
-			tag: 'Surveys'
+			body: m.home_reviews_r3_body(),
+			tag: m.nav_surveys()
 		},
 		{
 			av: 'MH',
 			name: 'Marcus H.',
 			date: 'March 2026',
-			body: 'Weekly trivia tournament had a 50K pool. Placed 12th, got $25 in bonus. The community vibe is real.',
-			tag: 'Challenges'
+			body: m.home_reviews_r4_body(),
+			tag: m.home_reviews_tag_challenges()
 		},
 		{
 			av: 'AP',
 			name: 'Alyssa P.',
 			date: 'April 2026',
-			body: 'Perfect for a stay-at-home mom. Quizzes during nap time, surveys after dinner. Streak Shield saved me twice. $320 total so far.',
-			tag: 'Streaks'
+			body: m.home_reviews_r5_body(),
+			tag: m.home_reviews_tag_streaks()
 		}
 	];
 </script>
@@ -43,11 +45,11 @@
 	<div class="wrap">
 		<div class="rev-head">
 			<div>
-				<span class="eyebrow acc"><span class="dot"></span>What members say</span>
-				<h2 class="h1 reveal" style="margin-top:18px">Real people. Real rewards.</h2>
+				<span class="eyebrow acc"><span class="dot"></span>{m.home_reviews_eyebrow()}</span>
+				<h2 class="h1 reveal" style="margin-top:18px">{m.home_reviews_title()}</h2>
 			</div>
 			<div class="rev-badge reveal d1">
-				<span class="rev-stars">★★★★★</span> <strong>4.7</strong> · 3,200+ reviews
+				<span class="rev-stars">★★★★★</span> {m.auth_login_trust_reviews()}
 			</div>
 		</div>
 	</div>

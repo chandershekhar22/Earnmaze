@@ -1,24 +1,25 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import * as m from '$lib/paraglide/messages';
 
 	const steps = [
 		{
-			n: '01 — SIGN UP',
+			n: m.home_how_step1_n(),
 			icon: 'spark',
-			title: 'Create your account',
-			body: "30 seconds. No credit card. Tell us your interests and we'll personalize your dashboard."
+			title: m.home_how_step1_title(),
+			body: m.home_how_step1_body()
 		},
 		{
-			n: '02 — EARN',
+			n: m.home_how_step2_n(),
 			icon: 'bolt',
-			title: 'Earn every day',
-			body: 'Surveys, quizzes, games, deals, and streaks. Each action stacks into points and a streak bonus.'
+			title: m.home_how_step2_title(),
+			body: m.home_how_step2_body()
 		},
 		{
-			n: '03 — CASH OUT',
+			n: m.home_how_step3_n(),
 			icon: 'wallet',
-			title: 'Cash out from $10',
-			body: 'PayPal or gift cards. Most payouts land within 24 hours. No fees, no hidden minimums.'
+			title: m.home_how_step3_title(),
+			body: m.home_how_step3_body()
 		}
 	];
 </script>
@@ -28,12 +29,11 @@
 	<div class="wrap">
 		<div class="section-head">
 			<div>
-				<span class="eyebrow acc"><span class="dot"></span>How it works</span>
-				<h2 class="h1 reveal" style="margin-top:18px">Three moves. That's the whole thing.</h2>
+				<span class="eyebrow acc"><span class="dot"></span>{m.home_nav_link_how()}</span>
+				<h2 class="h1 reveal" style="margin-top:18px">{m.home_how_title()}</h2>
 			</div>
 			<p class="body-lg reveal d1">
-				No courses, no subscriptions, no funnels. Quick actions that put real points in your wallet
-				— every single day.
+				{m.home_how_lead()}
 			</p>
 		</div>
 		<div class="how-grid">
