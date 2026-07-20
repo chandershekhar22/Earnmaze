@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import SocialButtons from '$lib/components/SocialButtons.svelte';
   import { authStore } from '$lib/stores/auth.svelte';
+  import * as m from '$lib/paraglide/messages';
+  import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 
   let { data } = $props<{ data: { items: any[]; kind: string; kindLabel: string; kindSingular: string; accent: string; featured: any | null; isLoggedIn: boolean } }>();
   let activeFilter = $state('all');
@@ -13,42 +15,54 @@
   const showAuthButtons = $derived(!data.isLoggedIn && !authStore.state.user);
 
   const ITEMS = $derived(data.items as any[]);
+  const categoryCount = $derived(new Set(ITEMS.map((a: any) => a.cat)).size || 1);
 
   // Per-kind hero/CTA copy — the visual structure is shared across all 5
   // sections, but wording needs to make sense for each (a quiz "plays",
-  // a deal gets "claimed").
-  const KIND_COPY: Record<string, {
-    title1: string; title2: string; lead: string; browse: string;
+  // a deal gets "claimed"). Built from paraglide messages so it re-renders
+  // in the active locale instead of the (English) label/singular the server
+  // computed from KIND_META.
+  const KIND_COPY = $derived<Record<string, {
+    label: string; singular: string; title1: string; title2: string; lead: string; browse: string;
     startCta: string; playCta: string; playingVerb: string; statNoun: string;
-  }> = {
+  }>>({
     quizzes: {
-      title1: 'Learn fast.', title2: 'Earn faster.',
-      lead: 'Bite-sized trivia across {n}+ categories. Answer, build a streak, cash out — no downloads, no nonsense.',
-      browse: 'Browse all quizzes', startCta: 'Start quiz', playCta: 'Play', playingVerb: 'playing', statNoun: 'Quizzes available',
+      label: m.sec_kind_quizzes_label(), singular: m.sec_kind_quizzes_singular(),
+      title1: m.sec_kind_quizzes_title1(), title2: m.sec_kind_quizzes_title2(),
+      lead: m.sec_kind_quizzes_lead({ n: categoryCount }), browse: m.sec_kind_quizzes_browse(),
+      startCta: m.sec_kind_quizzes_start_cta(), playCta: m.sec_kind_quizzes_play_cta(),
+      playingVerb: m.sec_kind_quizzes_playing_verb(), statNoun: m.sec_kind_quizzes_stat_noun(),
     },
     streaks: {
-      title1: 'Show up daily.', title2: 'Get rewarded.',
-      lead: 'Keep your streak alive across {n}+ daily check-ins and unlock bigger payouts the longer you stay consistent.',
-      browse: 'Browse all streaks', startCta: 'Continue streak', playCta: 'View', playingVerb: 'active', statNoun: 'Streaks available',
+      label: m.sec_kind_streaks_label(), singular: m.sec_kind_streaks_singular(),
+      title1: m.sec_kind_streaks_title1(), title2: m.sec_kind_streaks_title2(),
+      lead: m.sec_kind_streaks_lead({ n: categoryCount }), browse: m.sec_kind_streaks_browse(),
+      startCta: m.sec_kind_streaks_start_cta(), playCta: m.sec_kind_streaks_play_cta(),
+      playingVerb: m.sec_kind_streaks_playing_verb(), statNoun: m.sec_kind_streaks_stat_noun(),
     },
     'weekly-challenges': {
-      title1: 'Take on the week.', title2: 'Win bigger.',
-      lead: 'Fresh challenges across {n}+ categories every week — complete them for outsized point rewards.',
-      browse: 'Browse all challenges', startCta: 'Start challenge', playCta: 'Join', playingVerb: 'joined', statNoun: 'Challenges available',
+      label: m.sec_kind_weekly_challenges_label(), singular: m.sec_kind_weekly_challenges_singular(),
+      title1: m.sec_kind_weekly_challenges_title1(), title2: m.sec_kind_weekly_challenges_title2(),
+      lead: m.sec_kind_weekly_challenges_lead({ n: categoryCount }), browse: m.sec_kind_weekly_challenges_browse(),
+      startCta: m.sec_kind_weekly_challenges_start_cta(), playCta: m.sec_kind_weekly_challenges_play_cta(),
+      playingVerb: m.sec_kind_weekly_challenges_playing_verb(), statNoun: m.sec_kind_weekly_challenges_stat_noun(),
     },
     'exclusive-deals': {
-      title1: 'Shop smart.', title2: 'Save more.',
-      lead: 'Hand-picked deals and cashback offers across {n}+ categories — curated and updated regularly.',
-      browse: 'Browse all deals', startCta: 'Get deal', playCta: 'Claim', playingVerb: 'claimed', statNoun: 'Deals available',
+      label: m.sec_kind_exclusive_deals_label(), singular: m.sec_kind_exclusive_deals_singular(),
+      title1: m.sec_kind_exclusive_deals_title1(), title2: m.sec_kind_exclusive_deals_title2(),
+      lead: m.sec_kind_exclusive_deals_lead({ n: categoryCount }), browse: m.sec_kind_exclusive_deals_browse(),
+      startCta: m.sec_kind_exclusive_deals_start_cta(), playCta: m.sec_kind_exclusive_deals_play_cta(),
+      playingVerb: m.sec_kind_exclusive_deals_playing_verb(), statNoun: m.sec_kind_exclusive_deals_stat_noun(),
     },
     artifacts: {
-      title1: 'Explore, play.', title2: 'Earn from it.',
-      lead: 'Interactive experiences across {n}+ categories — explore, engage, and earn points for every one.',
-      browse: 'Browse all artifacts', startCta: 'Open artifact', playCta: 'Open', playingVerb: 'exploring', statNoun: 'Artifacts available',
+      label: m.sec_kind_artifacts_label(), singular: m.sec_kind_artifacts_singular(),
+      title1: m.sec_kind_artifacts_title1(), title2: m.sec_kind_artifacts_title2(),
+      lead: m.sec_kind_artifacts_lead({ n: categoryCount }), browse: m.sec_kind_artifacts_browse(),
+      startCta: m.sec_kind_artifacts_start_cta(), playCta: m.sec_kind_artifacts_play_cta(),
+      playingVerb: m.sec_kind_artifacts_playing_verb(), statNoun: m.sec_kind_artifacts_stat_noun(),
     },
-  };
+  });
   const copy = $derived(KIND_COPY[data.kind] ?? KIND_COPY.quizzes);
-  const categoryCount = $derived(new Set(ITEMS.map((a: any) => a.cat)).size || 1);
 
   // Deterministic decorative numbers (stable per item id, not real telemetry).
   function hashOf(id: string) {
@@ -76,11 +90,11 @@
   }
 
   const FILTERS = $derived([
-    { cat: 'all', label: 'All', count: ITEMS.length },
-    { cat: 'trending', label: 'Trending', count: ITEMS.filter(a => a.tags?.includes('TRENDING')).length },
-    { cat: 'new', label: 'New', count: ITEMS.filter(a => a.tags?.includes('NEW')).length },
-    { cat: 'data', label: 'Data', count: ITEMS.filter(a => a.cat === 'data').length },
-    { cat: 'lifestyle', label: 'Lifestyle', count: ITEMS.filter(a => a.cat === 'lifestyle').length },
+    { cat: 'all', label: m.sec_filter_all(), count: ITEMS.length },
+    { cat: 'trending', label: m.sec_filter_trending(), count: ITEMS.filter(a => a.tags?.includes('TRENDING')).length },
+    { cat: 'new', label: m.sec_filter_new(), count: ITEMS.filter(a => a.tags?.includes('NEW')).length },
+    { cat: 'data', label: m.sec_filter_data(), count: ITEMS.filter(a => a.cat === 'data').length },
+    { cat: 'lifestyle', label: m.sec_filter_lifestyle(), count: ITEMS.filter(a => a.cat === 'lifestyle').length },
   ]);
 
   let filtered = $derived.by(() => {
@@ -109,8 +123,8 @@
 </script>
 
 <svelte:head>
-  <title>{data.kindLabel} — EarnMaze</title>
-  <meta name="description" content="Curated interactive experiences inside EarnMaze." />
+  <title>{copy.label} — EarnMaze</title>
+  <meta name="description" content={m.sec_meta_description()} />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -153,15 +167,16 @@
 
   nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:rgba(10,12,16,.7);border-bottom:1px solid transparent;transition:.3s}
   nav.scrolled{border-bottom-color:var(--line);background:rgba(10,12,16,.85)}
-  .nav-row{display:flex;flex-wrap:wrap;row-gap:8px;align-items:center;justify-content:space-between;padding:14px 0}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em}
-  .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--acc);display:grid;place-items:center;color:var(--acc-text)}
-  .nav-links{display:flex;align-items:center;gap:4px}
-  .nav-links a{padding:8px 14px;color:var(--t2);font-size:14px;font-weight:500;border-radius:var(--r5);transition:.2s;position:relative}
+  .nav-row{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em;flex-shrink:0;white-space:nowrap}
+  .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--acc);display:grid;place-items:center;color:var(--acc-text);flex-shrink:0}
+  .nav-links{display:flex;align-items:center;gap:4px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{padding:8px 14px;color:var(--t2);font-size:14px;font-weight:500;border-radius:var(--r5);transition:.2s;position:relative;white-space:nowrap;flex-shrink:0}
   .nav-links a:hover{color:var(--t1)}
   .nav-links a.active{color:var(--t1)}
   .nav-links a.active::after{content:"";position:absolute;left:14px;right:14px;bottom:2px;height:2px;background:var(--acc);border-radius:2px}
-  .nav-actions{display:flex;align-items:center;gap:8px}
+  .nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
   .coin-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r5);font-family:var(--mono);font-size:13px;font-weight:600;color:var(--t1)}
   .coin-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--acc)}
   .bell{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid var(--line);display:grid;place-items:center;color:var(--t2);position:relative;transition:.2s}
@@ -407,25 +422,25 @@
 
 <nav id="nav">
   <div class="wrap nav-row">
-    <a href="/" class="brand" data-sveltekit-reload>
+    <a href={localizeHref('/')} class="brand" data-sveltekit-reload>
       <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.09 12.97a.5.5 0 0 0 .41.8H11l-1 8.23a.5.5 0 0 0 .9.34L19.91 11.03a.5.5 0 0 0-.41-.8H13l1-8.23a.5.5 0 0 0-1-0Z"/></svg></span>
       EarnMaze
     </a>
     <div class="nav-links">
-      <a href="/#how" data-sveltekit-reload>How it works</a>
-      <a href="/#earn" data-sveltekit-reload>Earn</a>
-      <a href="/games" data-sveltekit-reload>Play</a>
-      <a href="/paid-surveys" data-sveltekit-reload>Surveys</a>
-      <a href="/quizzes" data-sveltekit-reload class:active={data.kind === 'quizzes'}>Quizzes</a>
-      <a href="/artifacts" data-sveltekit-reload class:active={data.kind === 'artifacts'}>Artifacts</a>
-      <a href="/faq" data-sveltekit-reload>FAQ</a>
+      <a href={localizeHref('/#how')} data-sveltekit-reload>{m.home_nav_link_how()}</a>
+      <a href={localizeHref('/#earn')} data-sveltekit-reload>{m.home_nav_link_earn()}</a>
+      <a href={localizeHref('/games')} data-sveltekit-reload>{m.home_nav_link_play()}</a>
+      <a href={localizeHref('/paid-surveys')} data-sveltekit-reload>{m.nav_surveys()}</a>
+      <a href={localizeHref('/quizzes')} data-sveltekit-reload class:active={data.kind === 'quizzes'}>{m.home_nav_link_quizzes()}</a>
+      <a href={localizeHref('/artifacts')} data-sveltekit-reload class:active={data.kind === 'artifacts'}>{m.home_nav_link_artifacts()}</a>
+      <a href={localizeHref('/faq')} data-sveltekit-reload>{m.home_nav_link_faq()}</a>
     </div>
     <div class="nav-actions">
-      <span class="coin-pill"><span class="dot"></span>2,480 pts</span>
-      <button class="bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg><span class="pip"></span></button>
+      <span class="coin-pill"><span class="dot"></span>2,480 {m.home_nav_pts()}</span>
+      <button class="bell" aria-label={m.home_nav_notifications()}><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg><span class="pip"></span></button>
       {#if showAuthButtons}
-        <a href="/login" class="btn-ghost">Log in</a>
-        <a href="/register" class="btn btn-pri">Sign up free</a>
+        <a href={localizeHref('/login')} class="btn-ghost">{m.home_nav_login()}</a>
+        <a href={localizeHref('/register')} class="btn btn-pri">{m.sec_signup_free()}</a>
       {/if}
     </div>
   </div>
@@ -434,34 +449,34 @@
 <section class="q-hero">
   <div class="wrap qh-grid" class:solo={!data.featured}>
     <div class="reveal qh-col">
-      <div class="qh-tag"><span class="dot"></span>{data.kindLabel} · {ITEMS.length} live</div>
+      <div class="qh-tag"><span class="dot"></span>{copy.label} · {ITEMS.length} {m.sec_kind_live_suffix()}</div>
       <h1>{copy.title1}<br><em>{copy.title2}</em></h1>
-      <p class="lead">{copy.lead.replace('{n}', String(categoryCount))}</p>
+      <p class="lead">{copy.lead}</p>
       <a href="#section-grid" class="btn btn-pri">{copy.browse} <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
     </div>
 
     {#if data.featured}
       <div class="feat reveal d1">
         <div class="feat-top">
-          <span class="l"><svg viewBox="0 0 24 24"><use href="#i-bolt-f"/></svg>Today's {data.kindSingular}</span>
-          <span class="clk"><span class="d"></span>Resets in <b>{countdown}</b></span>
+          <span class="l"><svg viewBox="0 0 24 24"><use href="#i-bolt-f"/></svg>{m.sec_today_kind({ kind: copy.singular })}</span>
+          <span class="clk"><span class="d"></span>{m.sec_resets_in()} <b>{countdown}</b></span>
         </div>
         <div class="feat-prev">
           <span class="corner c1"></span><span class="corner c2"></span>
-          <span class="live"><span class="d"></span>LIVE</span>
+          <span class="live"><span class="d"></span>{m.sec_live_badge()}</span>
           {#if data.featured.thumb}
             <img src={data.featured.thumb} alt={data.featured.title} />
           {:else}
-            <div class="ph">Thumbnail · uploaded at creation</div>
+            <div class="ph">{m.sec_thumbnail_placeholder()}</div>
           {/if}
         </div>
         <div class="feat-info">
           <h2>{data.featured.title}</h2>
-          <div class="sub">{new Date(data.featured.createdAt).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })} · <b>admin-curated</b></div>
+          <div class="sub">{new Date(data.featured.createdAt).toLocaleDateString(getLocale(), { weekday: 'long', month: 'short', day: 'numeric' })} · <b>{m.sec_admin_curated()}</b></div>
         </div>
         <div class="feat-foot">
-          <div class="bonus">+250<span>pts max</span></div>
-          <a href="/{data.kind}/{data.featured.id}" data-sveltekit-reload class="btn btn-pri">{copy.startCta} <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></a>
+          <div class="bonus">+250<span>{m.sec_pts_max()}</span></div>
+          <a href={localizeHref(`/${data.kind}/${data.featured.id}`)} data-sveltekit-reload class="btn btn-pri">{copy.startCta} <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></a>
         </div>
       </div>
     {/if}
@@ -474,23 +489,23 @@
       <div class="ico"><svg viewBox="0 0 24 24"><use href="#i-brain"/></svg></div>
       <svg class="spark" width="56" height="28" viewBox="0 0 56 28" fill="none"><polyline points="0,22 10,18 20,20 30,12 40,14 56,4" stroke="var(--acc)" stroke-width="1.5"/></svg>
       <div class="v">{ITEMS.length}</div><div class="l">{copy.statNoun}</div>
-      <div class="d"><em>Live</em> on the platform now</div>
+      <div class="d">{m.sec_stat_live_now()}</div>
     </div>
     <div class="stat-tile t2 reveal d1">
       <div class="ico"><svg viewBox="0 0 24 24"><use href="#i-coins"/></svg></div>
       <svg class="spark" width="56" height="28" viewBox="0 0 56 28" fill="none"><polyline points="0,24 12,20 24,22 36,12 48,14 56,8" stroke="var(--info)" stroke-width="1.5"/></svg>
-      <div class="v">1,840</div><div class="l">Points earned today</div>
-      <div class="d"><em>+340</em> in last hour</div>
+      <div class="v">1,840</div><div class="l">{m.sec_stat_points_today()}</div>
+      <div class="d">{m.sec_stat_points_delta({ amount: '+340' })}</div>
     </div>
     <div class="stat-tile t3 reveal d2">
       <div class="ico"><svg viewBox="0 0 24 24"><use href="#i-fire"/></svg></div>
-      <div class="v">7</div><div class="l">Day streak</div>
+      <div class="v">7</div><div class="l">{m.sec_stat_day_streak()}</div>
       <div class="streakbars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
     </div>
     <div class="stat-tile t4 reveal d3">
       <div class="ico"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></div>
-      <div class="v">#842</div><div class="l">Weekly rank</div>
-      <div class="d"><em>↑ 124</em> since yesterday</div>
+      <div class="v">#842</div><div class="l">{m.sec_stat_weekly_rank()}</div>
+      <div class="d">{m.sec_stat_rank_delta({ delta: '↑ 124' })}</div>
     </div>
   </div>
 </section>
@@ -507,7 +522,7 @@
     <div class="tb-right">
       <div class="search">
         <span class="sico"><svg class="i" viewBox="0 0 24 24"><use href="#i-search"/></svg></span>
-        <input type="text" placeholder="Search…" bind:value={searchQ} />
+        <input type="text" placeholder={m.sec_search_placeholder()} bind:value={searchQ} />
       </div>
     </div>
   </div>
@@ -519,8 +534,8 @@
       {#if filtered.length === 0}
         <div class="empty">
           <div class="empty-ico"><svg class="i-lg i" viewBox="0 0 24 24"><use href="#i-spark"/></svg></div>
-          <div class="empty-t">No items yet</div>
-          <div class="empty-s">Curated experiences will appear here as soon as they're published.</div>
+          <div class="empty-t">{m.sec_empty_title()}</div>
+          <div class="empty-s">{m.sec_empty_desc()}</div>
         </div>
       {:else}
         {#each filtered as a (a.id)}
@@ -545,9 +560,9 @@
               {/if}
               <span class="qc-playing"><span class="d"></span>{playingCount(a.id)} {copy.playingVerb}</span>
               {#if (a.tags || []).includes('TRENDING')}
-                <span class="qc-flag hot">Hot</span>
+                <span class="qc-flag hot">{m.sec_flag_hot()}</span>
               {:else if (a.tags || []).includes('NEW')}
-                <span class="qc-flag new">New</span>
+                <span class="qc-flag new">{m.sec_flag_new()}</span>
               {/if}
             </div>
             <div class="qc-body">
@@ -563,7 +578,7 @@
             </div>
             <div class="qc-foot">
               <SocialButtons kind={data.kind} id={a.id} title={a.title} likes={a.likes} shares={a.shares} variant="card" />
-              <a href="/{data.kind}/{a.id}" data-sveltekit-reload class="qc-play">{copy.playCta} <svg viewBox="0 0 24 24"><use href="#i-play"/></svg></a>
+              <a href={localizeHref(`/${data.kind}/${a.id}`)} data-sveltekit-reload class="qc-play">{copy.playCta} <svg viewBox="0 0 24 24"><use href="#i-play"/></svg></a>
             </div>
           </article>
         {/each}
@@ -574,19 +589,19 @@
 
 <section class="cta">
   <div class="wrap cta-inner">
-    <span class="eyebrow acc reveal"><span class="dot"></span>Earn while you learn</span>
-    <h2 class="reveal d1">Explore, engage, <em>earn.</em></h2>
-    <p class="reveal d2">Every item you open earns points. New ones drop every week.</p>
+    <span class="eyebrow acc reveal"><span class="dot"></span>{m.sec_cta_eyebrow()}</span>
+    <h2 class="reveal d1">{m.sec_cta_heading_plain()} <em>{m.sec_cta_heading_em()}</em></h2>
+    <p class="reveal d2">{m.sec_cta_desc()}</p>
     <div class="cta-ctas reveal d3">
-      <a href="/" class="btn btn-pri" data-sveltekit-reload>Back to home <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
-      <a href="/#earn" class="btn btn-sec">View all categories</a>
+      <a href={localizeHref('/')} class="btn btn-pri" data-sveltekit-reload>{m.sec_cta_home()} <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
+      <a href={localizeHref('/#earn')} class="btn btn-sec">{m.sec_cta_view_categories()}</a>
     </div>
   </div>
 </section>
 
 <div class="foot-mini wrap">
-  <span>© 2026 EarnMaze, Inc.</span>
-  <span>Curated weekly · Fresh items every week</span>
-  <span>US members only</span>
+  <span>{m.sec_footer_copyright()}</span>
+  <span>{m.sec_footer_curated()}</span>
+  <span>{m.sec_footer_us_only()}</span>
 </div>
 </div>

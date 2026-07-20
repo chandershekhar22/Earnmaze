@@ -9,6 +9,7 @@
 	import FeedbackWidget from '$lib/components/FeedbackWidget.svelte';
 	import { page } from '$app/stores';
 	import { afterNavigate } from '$app/navigation';
+	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import type { Snippet } from 'svelte';
 
 	let { children, data }: { children: Snippet; data: { dashboardView: 'surveys' | 'discover' } } = $props();
@@ -18,19 +19,26 @@
 	let isSidebarOpen = $state(false);
 	let mainEl: HTMLElement;
 
+	// $page.url keeps the locale prefix (e.g. `/pt/dashboard`) — the reroute
+	// hook only delocalizes for route MATCHING, not for `$page.url` itself.
+	// Delocalize here too, otherwise every check below silently fails for any
+	// non-English locale and both the sidebar variant and the view toggle
+	// break.
+	let basePath = $derived(deLocalizeUrl($page.url).pathname);
+
 	// Discover dashboard gets a different sidebar; both dashboards show the
 	// quick view toggle so users can flip between them. On shared pages
 	// (points, rewards, …) fall back to the saved preference so the sidebar
 	// stays in the view the user is browsing in.
 	let dashboardView = $derived<'surveys' | 'discover'>(
-		$page.url.pathname.startsWith('/discover')
+		basePath.startsWith('/discover')
 			? 'discover'
-			: $page.url.pathname === '/dashboard'
+			: basePath === '/dashboard'
 				? 'surveys'
 				: data.dashboardView
 	);
 	let isDashboardRoute = $derived(
-		$page.url.pathname === '/dashboard' || $page.url.pathname.startsWith('/discover')
+		basePath === '/dashboard' || basePath.startsWith('/discover')
 	);
 
 	// Scroll to top on page navigation

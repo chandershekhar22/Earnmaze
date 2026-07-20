@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import { persistState } from '$lib/utils/iframe-state';
   import { authStore } from '$lib/stores/auth.svelte';
+  import * as m from '$lib/paraglide/messages';
+  import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 
   type UploadedGame = { id: string; title: string; file: string; thumb?: string };
   let { data } = $props<{ data: { todaysGame: UploadedGame | null; isLoggedIn: boolean } }>();
@@ -153,16 +155,25 @@
     { id: 'mini-rogue', name: 'Mini Rogue', desc: 'Procedural dungeon. Hunt gold. Avoid death.', cover: '/game-covers/mini-rogue.svg', cat: 'puzzle', diff: 'hard', time: '14 min', reward: '80-360', rating: 4.7, plays: '212', badge: 'new', bg: 'linear-gradient(135deg,#000,#0a0810)', path: '/games-repo/99-Mini-Rogue/index.html' },
   ];
 
-  const FILTERS = [
-    { cat: 'all', label: 'All games', count: 91 },
-    { cat: 'puzzle', label: 'Puzzle', count: 30 },
-    { cat: 'arcade', label: 'Arcade', count: 42 },
-    { cat: 'casual', label: 'Casual', count: 19 },
-  ];
+  const FILTERS = $derived([
+    { cat: 'all', label: m.games_filter_all(), count: 91 },
+    { cat: 'puzzle', label: m.games_filter_puzzle(), count: 30 },
+    { cat: 'arcade', label: m.games_filter_arcade(), count: 42 },
+    { cat: 'casual', label: m.games_filter_casual(), count: 19 },
+  ]);
 
   let filteredGames = $derived(
     activeFilter === 'all' ? GAMES : GAMES.filter((g) => g.cat === activeFilter)
   );
+
+  const CAT_LABELS: Record<string, () => string> = { puzzle: m.games_filter_puzzle, arcade: m.games_filter_arcade, casual: m.games_filter_casual };
+  const DIFF_LABELS: Record<string, () => string> = { easy: m.games_diff_easy, medium: m.games_diff_medium, hard: m.games_diff_hard };
+  function catLabel(cat: string) { return CAT_LABELS[cat]?.() ?? cat; }
+  function diffLabel(diff: string) { return DIFF_LABELS[diff]?.() ?? diff; }
+  function timeLabel(time: string) {
+    const n = parseInt(time, 10);
+    return Number.isNaN(n) ? time : m.games_time_min({ n });
+  }
 
   const CONTINUE = [
     { name: 'Candy Crush', sub: 'Lvl 14 · 62%', bg: 'linear-gradient(135deg,#ff6b8a,#ff9a6e)' },
@@ -205,12 +216,12 @@
     const g = GAMES.find((x) => x.id === 'pac-man') ?? GAMES[0];
     return { id: g.id, name: g.name, path: g.path, reward: g.reward, thumb: null };
   });
-  const dailyPickTitle = $derived(data.todaysGame ? data.todaysGame.title : "Daily Earnmaze's Pick");
-  const todayLabel = new Date().toLocaleDateString('en-US', {
+  const dailyPickTitle = $derived(data.todaysGame ? data.todaysGame.title : m.games_daily_pick_title());
+  const todayLabel = $derived(new Date().toLocaleDateString(getLocale(), {
     weekday: 'long',
     month: 'short',
     day: 'numeric',
-  });
+  }));
 
   const CASHOUTS = [
     { initials: 'JK', name: 'jules_k', sub: 'Solitaire · 14s ago', pts: '+1,240', color: '#ff5f8f' },
@@ -225,20 +236,20 @@
     { rank: '4-10', name: 'Top 10', pts: 'runners-up', prize: '$50 ea', color: '#5e6471' },
   ];
 
-  const FAQ = [
-    { q: 'Are these games actually free to play?', a: '100% free. No subscription, no in-game purchases. Every minute you play counts toward your points balance.' },
-    { q: 'How are points calculated?', a: 'Each game has a reward range. Your score, time survived, and difficulty multiplier determine the exact points awarded.' },
-    { q: 'Is there a daily limit?', a: 'No hard daily cap. We do throttle very repetitive sessions to keep the leaderboard fair, but normal play has no limit.' },
-    { q: "What's the minimum to cash out?", a: 'Cash out at 1,000 pts ($10). PayPal, gift cards, or crypto — your choice. Most payouts process within 24 hours.' },
-    { q: 'Can I play on mobile?', a: 'Yes. Every game is touch-optimized. Same balance and leaderboard across web, iOS, and Android.' },
-  ];
+  const FAQ = $derived([
+    { q: m.games_faq_q1(), a: m.games_faq_a1() },
+    { q: m.games_faq_q2(), a: m.games_faq_a2() },
+    { q: m.games_faq_q3(), a: m.games_faq_a3() },
+    { q: m.games_faq_q4(), a: m.games_faq_a4() },
+    { q: m.games_faq_q5(), a: m.games_faq_a5() },
+  ]);
 </script>
 
 <svelte:window onkeydown={onKeydown} />
 
 <svelte:head>
-  <title>Play & Earn — EarnMaze</title>
-  <meta name="description" content="Play fun HTML5 games on EarnMaze and earn real rewards." />
+  <title>{m.games_hero_eyebrow()} — EarnMaze</title>
+  <meta name="description" content={m.games_hero_lead()} />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -287,15 +298,16 @@
   /* NAV */
   nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:rgba(10,12,16,.7);border-bottom:1px solid transparent;transition:.3s}
   nav.scrolled{border-bottom-color:var(--line);background:rgba(10,12,16,.85)}
-  .nav-row{display:flex;flex-wrap:wrap;row-gap:8px;align-items:center;justify-content:space-between;padding:14px 0}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em}
-  .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--acc);display:grid;place-items:center;color:var(--acc-text)}
-  .nav-links{display:flex;align-items:center;gap:4px}
-  .nav-links a{padding:8px 14px;color:var(--t2);font-size:14px;font-weight:500;border-radius:var(--r5);transition:.2s;position:relative}
+  .nav-row{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em;flex-shrink:0;white-space:nowrap}
+  .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--acc);display:grid;place-items:center;color:var(--acc-text);flex-shrink:0}
+  .nav-links{display:flex;align-items:center;gap:4px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{padding:8px 14px;color:var(--t2);font-size:14px;font-weight:500;border-radius:var(--r5);transition:.2s;position:relative;white-space:nowrap;flex-shrink:0}
   .nav-links a:hover{color:var(--t1)}
   .nav-links a.active{color:var(--t1)}
   .nav-links a.active::after{content:"";position:absolute;left:14px;right:14px;bottom:2px;height:2px;background:var(--acc);border-radius:2px}
-  .nav-actions{display:flex;align-items:center;gap:8px}
+  .nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
   .coin-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r5);font-family:var(--mono);font-size:13px;font-weight:600;color:var(--t1)}
   .coin-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--acc)}
   .bell{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid var(--line);display:grid;place-items:center;color:var(--t2);position:relative;transition:.2s}
@@ -602,25 +614,25 @@
 
 <nav id="nav">
   <div class="wrap nav-row">
-    <a href="/" class="brand">
+    <a href={localizeHref('/')} class="brand">
       <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.09 12.97a.5.5 0 0 0 .41.8H11l-1 8.23a.5.5 0 0 0 .9.34L19.91 11.03a.5.5 0 0 0-.41-.8H13l1-8.23a.5.5 0 0 0-1-0Z"/></svg></span>
       EarnMaze
     </a>
     <div class="nav-links">
-      <a href="/#how" data-sveltekit-reload>How it works</a>
-      <a href="/#earn" data-sveltekit-reload>Earn</a>
-      <a href="/games" class="active">Play</a>
-      <a href="/paid-surveys" data-sveltekit-reload>Surveys</a>
-      <a href="/quizzes" data-sveltekit-reload>Quizzes</a>
-      <a href="/artifacts" data-sveltekit-reload>Artifacts</a>
-      <a href="/faq" data-sveltekit-reload>FAQ</a>
+      <a href={localizeHref('/#how')} data-sveltekit-reload>{m.home_nav_link_how()}</a>
+      <a href={localizeHref('/#earn')} data-sveltekit-reload>{m.home_nav_link_earn()}</a>
+      <a href={localizeHref('/games')} class="active">{m.home_nav_link_play()}</a>
+      <a href={localizeHref('/paid-surveys')} data-sveltekit-reload>{m.nav_surveys()}</a>
+      <a href={localizeHref('/quizzes')} data-sveltekit-reload>{m.home_nav_link_quizzes()}</a>
+      <a href={localizeHref('/artifacts')} data-sveltekit-reload>{m.home_nav_link_artifacts()}</a>
+      <a href={localizeHref('/faq')} data-sveltekit-reload>{m.home_nav_link_faq()}</a>
     </div>
     <div class="nav-actions">
-      <span class="coin-pill"><span class="dot"></span>2,480 pts</span>
-      <button class="bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg><span class="pip"></span></button>
+      <span class="coin-pill"><span class="dot"></span>2,480 {m.home_nav_pts()}</span>
+      <button class="bell" aria-label={m.home_nav_notifications()}><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg><span class="pip"></span></button>
       {#if showAuthButtons}
-        <a href="/login" class="btn-ghost">Log in</a>
-        <a href="/register" class="btn btn-pri">Sign up free</a>
+        <a href={localizeHref('/login')} class="btn-ghost">{m.home_nav_login()}</a>
+        <a href={localizeHref('/register')} class="btn btn-pri">{m.sec_signup_free()}</a>
       {/if}
     </div>
   </div>
@@ -629,14 +641,14 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div>
-      <span class="hero-eb"><span class="dot"></span>Play &amp; Earn <span class="sep">·</span> 91 games live</span>
-      <h1>Real games.<br /><em>Real rewards.</em></h1>
-      <p class="lead">HTML5 games, instant load, real money on the line. Tap, play, cash out — no downloads, no nonsense.</p>
+      <span class="hero-eb"><span class="dot"></span>{m.games_hero_eyebrow()} <span class="sep">·</span> {m.games_hero_live_count({ n: 91 })}</span>
+      <h1>{m.games_hero_title1()}<br /><em>{m.games_hero_title2()}</em></h1>
+      <p class="lead">{m.games_hero_lead()}</p>
 
       <div class="cashouts">
         <div class="cashouts-h">
-          <span class="l"><span class="dot"></span>Latest cashouts</span>
-          <span class="r">just now</span>
+          <span class="l"><span class="dot"></span>{m.games_cashouts_title()}</span>
+          <span class="r">{m.games_just_now()}</span>
         </div>
         {#each CASHOUTS as c (c.name)}
           <div class="cashout">
@@ -653,11 +665,11 @@
     <div>
       <div class="tg-card">
         <div class="tg-h">
-          <span class="l"><svg class="i" viewBox="0 0 24 24"><use href="#i-bolt"/></svg> Today's game</span>
-          <span class="r"><span class="dot"></span>Resets in <em>{resetCountdown}</em></span>
+          <span class="l"><svg class="i" viewBox="0 0 24 24"><use href="#i-bolt"/></svg> {m.games_today_label()}</span>
+          <span class="r"><span class="dot"></span>{m.sec_resets_in()} <em>{resetCountdown}</em></span>
         </div>
         <div class="tg-preview">
-          <span class="tg-live"><span class="dot"></span>Live</span>
+          <span class="tg-live"><span class="dot"></span>{m.sec_live_badge()}</span>
           {#if dailyPick.thumb}
             <img class="tg-frame" src={dailyPick.thumb} alt="{dailyPick.name} cover" />
           {:else}
@@ -667,15 +679,15 @@
               <span>{dailyPick.name}</span>
             </div>
           {/if}
-          <button class="tg-overlay" onclick={() => (openGame = dailyPick)} aria-label="Play {dailyPick.name}"></button>
+          <button class="tg-overlay" onclick={() => (openGame = dailyPick)} aria-label={m.games_play_aria({ name: dailyPick.name })}></button>
           <span class="tg-corner tl"></span><span class="tg-corner tr"></span>
           <span class="tg-corner bl"></span><span class="tg-corner br"></span>
         </div>
         <div class="tg-title">{dailyPickTitle}</div>
-        <div class="tg-meta">{todayLabel} · <em>admin-curated</em> · 3,184 players today</div>
+        <div class="tg-meta">{todayLabel} · <em>{m.sec_admin_curated()}</em> · {m.games_players_today({ n: 3184 })}</div>
         <div class="tg-foot">
-          <div class="tg-bonus">+500<em>pts bonus</em></div>
-          <button class="btn btn-pri" onclick={() => (openGame = dailyPick)}>Play <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></button>
+          <div class="tg-bonus">+500<em>{m.games_pts_bonus()}</em></div>
+          <button class="btn btn-pri" onclick={() => (openGame = dailyPick)}>{m.home_nav_link_play()} <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></button>
         </div>
       </div>
     </div>
@@ -691,8 +703,8 @@
           <svg class="stat-sp" viewBox="0 0 60 18"><path d="M0,12 L12,10 L24,11 L36,7 L48,8 L60,4" fill="none" stroke="#c7f463" stroke-width="1.5" stroke-linecap="round"/></svg>
         </div>
         <div class="stat-v">91</div>
-        <div class="stat-l">Games available</div>
-        <div class="stat-d up">+6 added this week</div>
+        <div class="stat-l">{m.games_stat_available()}</div>
+        <div class="stat-d up">{m.games_stat_added_this_week({ n: 6 })}</div>
       </div>
       <div class="stat">
         <div class="stat-h">
@@ -700,15 +712,15 @@
           <svg class="stat-sp" viewBox="0 0 60 18"><path d="M0,13 L12,12 L24,9 L36,10 L48,5 L60,3" fill="none" stroke="#ffb74a" stroke-width="1.5" stroke-linecap="round"/></svg>
         </div>
         <div class="stat-v">1,840</div>
-        <div class="stat-l">Points earned today</div>
-        <div class="stat-d up">+340 in last hour</div>
+        <div class="stat-l">{m.sec_stat_points_today()}</div>
+        <div class="stat-d up">{m.sec_stat_points_delta({ amount: '+340' })}</div>
       </div>
       <div class="stat">
         <div class="stat-h">
           <span class="stat-ico bad"><svg class="i" viewBox="0 0 24 24"><use href="#i-flame"/></svg></span>
         </div>
         <div class="stat-v">7</div>
-        <div class="stat-l">Day streak</div>
+        <div class="stat-l">{m.sec_stat_day_streak()}</div>
         <div class="stat-dots">
           <span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span>
         </div>
@@ -718,8 +730,8 @@
           <span class="stat-ico purple"><svg class="i" viewBox="0 0 24 24"><use href="#i-trophy"/></svg></span>
         </div>
         <div class="stat-v">#842</div>
-        <div class="stat-l">Weekly rank</div>
-        <div class="stat-d up">↑ 124 since yesterday</div>
+        <div class="stat-l">{m.sec_stat_weekly_rank()}</div>
+        <div class="stat-d up">{m.sec_stat_rank_delta({ delta: '↑ 124' })}</div>
       </div>
     </div>
   </div>
@@ -728,8 +740,8 @@
 <section class="cont">
   <div class="wrap">
     <div class="cont-head">
-      <h3>Continue playing</h3>
-      <a href="/dashboard">View all history <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
+      <h3>{m.games_continue_playing()}</h3>
+      <a href={localizeHref('/dashboard')}>{m.games_view_all_history()} <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
     </div>
     <div class="cont-grid">
       {#each CONTINUE as c, i (i)}
@@ -760,11 +772,11 @@
           {/each}
         </div>
         <div class="sort">
-          <span>Sort:</span>
+          <span>{m.games_sort_label()}</span>
           <div class="sort-pills">
-            <button class="sort-pill" class:sel={sortBy === 'popular'} onclick={() => (sortBy = 'popular')}>Popular</button>
-            <button class="sort-pill" class:sel={sortBy === 'new'} onclick={() => (sortBy = 'new')}>New</button>
-            <button class="sort-pill" class:sel={sortBy === 'reward'} onclick={() => (sortBy = 'reward')}>Top reward</button>
+            <button class="sort-pill" class:sel={sortBy === 'popular'} onclick={() => (sortBy = 'popular')}>{m.games_sort_popular()}</button>
+            <button class="sort-pill" class:sel={sortBy === 'new'} onclick={() => (sortBy = 'new')}>{m.sec_filter_new()}</button>
+            <button class="sort-pill" class:sel={sortBy === 'reward'} onclick={() => (sortBy = 'reward')}>{m.games_sort_top_reward()}</button>
           </div>
         </div>
       </div>
@@ -776,11 +788,11 @@
           <div class="game-card" onclick={() => (openGame = game)}>
             <div class="game-thumb" style="background:{game.bg}">
               <img class="game-cover" src={game.cover} alt={game.name} />
-              <span class="play-count">{game.plays} playing</span>
+              <span class="play-count">{game.plays} {m.games_playing_suffix()}</span>
               {#if game.badge === 'hot'}
-                <span class="play-badge hot"><svg class="i" viewBox="0 0 24 24"><use href="#i-flame"/></svg> Hot</span>
+                <span class="play-badge hot"><svg class="i" viewBox="0 0 24 24"><use href="#i-flame"/></svg> {m.sec_flag_hot()}</span>
               {:else if game.badge === 'new'}
-                <span class="play-badge new">New</span>
+                <span class="play-badge new">{m.sec_flag_new()}</span>
               {/if}
             </div>
             <div class="game-body">
@@ -790,14 +802,14 @@
               </div>
               <p class="game-desc">{game.desc}</p>
               <div class="game-tags">
-                <span class="gtag {game.diff}">{game.diff}</span>
-                <span class="gtag">{game.cat}</span>
-                <span class="gtag">{game.time}</span>
+                <span class="gtag {game.diff}">{diffLabel(game.diff)}</span>
+                <span class="gtag">{catLabel(game.cat)}</span>
+                <span class="gtag">{timeLabel(game.time)}</span>
               </div>
             </div>
             <div class="game-foot">
-              <span class="rw">{game.reward} pts</span>
-              <button class="play-btn" onclick={(e) => { e.stopPropagation(); openGame = game; }}>Play <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></button>
+              <span class="rw">{game.reward} {m.home_nav_pts()}</span>
+              <button class="play-btn" onclick={(e) => { e.stopPropagation(); openGame = game; }}>{m.home_nav_link_play()} <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></button>
             </div>
           </div>
         {/each}
@@ -807,8 +819,8 @@
     <aside class="side">
       <div class="side-card">
         <div class="side-h">
-          <h4><svg class="i" viewBox="0 0 24 24"><use href="#i-trophy"/></svg> This week's top</h4>
-          <span class="l">All ranks</span>
+          <h4><svg class="i" viewBox="0 0 24 24"><use href="#i-trophy"/></svg> {m.games_leaderboard_title()}</h4>
+          <span class="l">{m.games_all_ranks()}</span>
         </div>
         {#each LEADERBOARD as r (r.rank)}
           <div class="lb-row" class:me={r.me}>
@@ -822,8 +834,8 @@
 
       <div class="side-card">
         <div class="side-h">
-          <h4><svg class="i" viewBox="0 0 24 24"><use href="#i-bolt"/></svg> Just won</h4>
-          <span class="l">Live</span>
+          <h4><svg class="i" viewBox="0 0 24 24"><use href="#i-bolt"/></svg> {m.games_just_won()}</h4>
+          <span class="l">{m.sec_live_badge()}</span>
         </div>
         {#each JUST_WON as j, i (i)}
           <div class="jw-row">
@@ -839,8 +851,8 @@
 
       <div class="side-card">
         <div class="side-h">
-          <h4><svg class="i" viewBox="0 0 24 24"><use href="#i-gift"/></svg> Daily login</h4>
-          <span class="l">Day 7 / 7</span>
+          <h4><svg class="i" viewBox="0 0 24 24"><use href="#i-gift"/></svg> {m.games_daily_login()}</h4>
+          <span class="l">{m.games_day_progress({ current: 7, total: 7 })}</span>
         </div>
         <div class="dl-row">
           <div class="dl-cell"><svg class="i" viewBox="0 0 24 24"><use href="#i-check"/></svg></div>
@@ -852,8 +864,8 @@
           <div class="dl-cell bonus">+250</div>
         </div>
         <div class="dl-foot">
-          <span class="l">Today's bonus</span>
-          <span class="v">+250 pts</span>
+          <span class="l">{m.games_todays_bonus()}</span>
+          <span class="v">+250 {m.home_nav_pts()}</span>
         </div>
       </div>
     </aside>
@@ -864,16 +876,16 @@
   <div class="wrap">
     <div class="wcup-card">
       <div class="wcup-l">
-        <span class="eb"><span class="dot"></span>Weekend cup · Live</span>
-        <h2>Solitaire <em>showdown.</em></h2>
-        <p>14,832 players. One prize pool. Highest score by Sunday midnight takes it all.</p>
+        <span class="eb"><span class="dot"></span>{m.games_weekend_cup_live()}</span>
+        <h2>Solitaire <em>{m.games_weekend_showdown_word()}</em></h2>
+        <p>{m.games_weekend_desc({ n: '14,832' })}</p>
         <div class="wcup-prize">
           <span class="v">$2,500</span>
-          <span class="l">Prize pool</span>
+          <span class="l">{m.games_prize_pool_label()}</span>
         </div>
         <div style="display:flex;align-items:center;flex-wrap:wrap">
-          <button class="wcup-btn" onclick={() => { const g = GAMES.find(x => x.id === 'solitaire'); if (g) openGame = g; }}>Enter for 500 pts <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></button>
-          <span class="wcup-meta">Ends Sunday · 2d 6h 14m</span>
+          <button class="wcup-btn" onclick={() => { const g = GAMES.find(x => x.id === 'solitaire'); if (g) openGame = g; }}>{m.games_weekend_enter_cta({ n: 500 })} <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></button>
+          <span class="wcup-meta">{m.games_weekend_ends({ time: '2d 6h 14m' })}</span>
         </div>
       </div>
       <div class="wcup-r">
@@ -895,33 +907,33 @@
 <section class="how">
   <div class="wrap">
     <div class="how-head">
-      <span class="eb"><span class="dot"></span>How it works</span>
-      <h2>Tap, play, cash out.</h2>
+      <span class="eb"><span class="dot"></span>{m.home_nav_link_how()}</span>
+      <h2>{m.games_how_heading()}</h2>
     </div>
     <div class="how-grid">
       <div class="how-step">
         <div class="n">01</div>
         <div class="ico"><svg class="i-lg i" viewBox="0 0 24 24"><use href="#i-game"/></svg></div>
-        <h3>Pick a game</h3>
-        <p>91 HTML5 titles. Load in &lt;2s. Nothing to download or install.</p>
+        <h3>{m.games_how_step1_title()}</h3>
+        <p>{m.games_how_step1_desc({ n: 91 })}</p>
       </div>
       <div class="how-step">
         <div class="n">02</div>
         <div class="ico"><svg class="i-lg i" viewBox="0 0 24 24"><use href="#i-play"/></svg></div>
-        <h3>Play your round</h3>
-        <p>Standard rules. Standard fun. The longer you survive, the bigger the reward.</p>
+        <h3>{m.games_how_step2_title()}</h3>
+        <p>{m.games_how_step2_desc()}</p>
       </div>
       <div class="how-step">
         <div class="n">03</div>
         <div class="ico"><svg class="i-lg i" viewBox="0 0 24 24"><use href="#i-coin"/></svg></div>
-        <h3>Earn points live</h3>
-        <p>Score updates your balance instantly. No waiting, no minimums, no caps.</p>
+        <h3>{m.games_how_step3_title()}</h3>
+        <p>{m.games_how_step3_desc()}</p>
       </div>
       <div class="how-step">
         <div class="n">04</div>
         <div class="ico"><svg class="i-lg i" viewBox="0 0 24 24"><use href="#i-gift"/></svg></div>
-        <h3>Cash out</h3>
-        <p>Convert at 100 pts = $1. Gift cards, PayPal, crypto — same day, no fees.</p>
+        <h3>{m.games_how_step4_title()}</h3>
+        <p>{m.games_how_step4_desc()}</p>
       </div>
     </div>
   </div>
@@ -929,7 +941,7 @@
 
 <section class="faq">
   <div class="wrap">
-    <h2>Common questions.</h2>
+    <h2>{m.games_faq_heading()}</h2>
     <div class="faq-list">
       {#each FAQ as item, i (i)}
         <div class="faq-item" class:open={faqOpen === i}>
@@ -945,16 +957,16 @@
 
 <section class="cta">
   <div class="wrap cta-inner">
-    <h2>2,341 people are playing right now.</h2>
-    <p>Join in. Your first game's free, your first cash-out is in 15 minutes.</p>
+    <h2>{m.games_cta_heading({ n: '2,341' })}</h2>
+    <p>{m.games_cta_desc()}</p>
     <div class="cta-ctas">
-      <button class="btn btn-pri" onclick={() => { activeFilter = 'all'; document.querySelector('.main')?.scrollIntoView({behavior:'smooth'}); }}>Pick a game <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></button>
-      <a href="/" class="btn btn-sec">Back to home</a>
+      <button class="btn btn-pri" onclick={() => { activeFilter = 'all'; document.querySelector('.main')?.scrollIntoView({behavior:'smooth'}); }}>{m.games_pick_a_game()} <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></button>
+      <a href={localizeHref('/')} class="btn btn-sec">{m.sec_cta_home()}</a>
     </div>
   </div>
 </section>
 
-<div class="foot-mini">© 2026 EarnMaze · Play &amp; Earn</div>
+<div class="foot-mini">{m.games_footer_copyright()}</div>
 
 {#if openGame}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -966,10 +978,10 @@
           <div class="modal-ic"><svg class="i" viewBox="0 0 24 24"><use href="#i-game"/></svg></div>
           <div>
             <div class="modal-title">{openGame.name}</div>
-            <div class="modal-sub">Earn {openGame.reward} pts</div>
+            <div class="modal-sub">{m.games_modal_earn_pts({ reward: openGame.reward })}</div>
           </div>
         </div>
-        <button class="modal-close" onclick={closeModal} aria-label="Close game">
+        <button class="modal-close" onclick={closeModal} aria-label={m.games_close_game()}>
           <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>

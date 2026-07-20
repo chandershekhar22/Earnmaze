@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { authStore } from '$lib/stores/auth.svelte';
+  import * as m from '$lib/paraglide/messages';
+  import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 
   let { data } = $props<{ data: {
     surveys: { id: string; title: string; description: string | null; points: number; thumbnailUrl: string | null; isTodaySurvey: boolean | null; priority: string | null; createdAt: string }[];
@@ -51,8 +53,8 @@
 </script>
 
 <svelte:head>
-  <title>Paid Surveys — EarnMaze</title>
-  <meta name="description" content="Share opinions with major brands and earn $0.50–$5 per survey. Quick 2–10 minute surveys matched to your profile." />
+  <title>{m.ps_meta_title()} — EarnMaze</title>
+  <meta name="description" content={m.ps_meta_description()} />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -91,15 +93,16 @@
 
   nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:rgba(10,12,16,.7);border-bottom:1px solid transparent;transition:.3s}
   nav.scrolled{border-bottom-color:var(--line);background:rgba(10,12,16,.85)}
-  .nav-row{display:flex;flex-wrap:wrap;row-gap:8px;align-items:center;justify-content:space-between;padding:14px 0}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em}
-  .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--acc);display:grid;place-items:center;color:var(--acc-text)}
-  .nav-links{display:flex;align-items:center;gap:4px}
-  .nav-links a{padding:8px 14px;color:var(--t2);font-size:14px;font-weight:500;border-radius:var(--r5);transition:.2s}
+  .nav-row{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em;flex-shrink:0;white-space:nowrap}
+  .brand-mark{width:28px;height:28px;border-radius:8px;background:var(--acc);display:grid;place-items:center;color:var(--acc-text);flex-shrink:0}
+  .nav-links{display:flex;align-items:center;gap:4px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{padding:8px 14px;color:var(--t2);font-size:14px;font-weight:500;border-radius:var(--r5);transition:.2s;white-space:nowrap;flex-shrink:0}
   .nav-links a:hover,.nav-links a.active{color:var(--t1)}
   .nav-links a.active::after{content:"";position:absolute;left:14px;right:14px;bottom:2px;height:2px;background:var(--acc);border-radius:2px}
   .nav-links a{position:relative}
-  .nav-actions{display:flex;align-items:center;gap:8px}
+  .nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
   .coin-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r5);font-family:var(--mono);font-size:13px;font-weight:600}
   .coin-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--acc)}
   .bell{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid var(--line);display:grid;place-items:center;color:var(--t2);transition:.2s}
@@ -246,25 +249,25 @@
 
 <nav id="nav">
   <div class="wrap nav-row">
-    <a href="/" class="brand" data-sveltekit-reload>
+    <a href={localizeHref('/')} class="brand" data-sveltekit-reload>
       <span class="brand-mark"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.09 12.97a.5.5 0 0 0 .41.8H11l-1 8.23a.5.5 0 0 0 .9.34L19.91 11.03a.5.5 0 0 0-.41-.8H13l1-8.23a.5.5 0 0 0-1-0Z"/></svg></span>
       EarnMaze
     </a>
     <div class="nav-links">
-      <a href="/#how" data-sveltekit-reload>How it works</a>
-      <a href="/#earn" data-sveltekit-reload>Earn</a>
-      <a href="/games" data-sveltekit-reload>Play</a>
-      <a href="/paid-surveys" data-sveltekit-reload class="active">Surveys</a>
-      <a href="/quizzes" data-sveltekit-reload>Quizzes</a>
-      <a href="/artifacts" data-sveltekit-reload>Artifacts</a>
-      <a href="/faq" data-sveltekit-reload>FAQ</a>
+      <a href={localizeHref('/#how')} data-sveltekit-reload>{m.home_nav_link_how()}</a>
+      <a href={localizeHref('/#earn')} data-sveltekit-reload>{m.home_nav_link_earn()}</a>
+      <a href={localizeHref('/games')} data-sveltekit-reload>{m.home_nav_link_play()}</a>
+      <a href={localizeHref('/paid-surveys')} data-sveltekit-reload class="active">{m.nav_surveys()}</a>
+      <a href={localizeHref('/quizzes')} data-sveltekit-reload>{m.home_nav_link_quizzes()}</a>
+      <a href={localizeHref('/artifacts')} data-sveltekit-reload>{m.home_nav_link_artifacts()}</a>
+      <a href={localizeHref('/faq')} data-sveltekit-reload>{m.home_nav_link_faq()}</a>
     </div>
     <div class="nav-actions">
-      <span class="coin-pill"><span class="dot"></span>2,480 pts</span>
-      <button class="bell" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg></button>
+      <span class="coin-pill"><span class="dot"></span>2,480 {m.home_nav_pts()}</span>
+      <button class="bell" aria-label={m.home_nav_notifications()}><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg></button>
       {#if showAuthButtons}
-        <a href="/login" class="btn-ghost">Log in</a>
-        <a href="/register" class="btn btn-pri">Sign up free</a>
+        <a href={localizeHref('/login')} class="btn-ghost">{m.home_nav_login()}</a>
+        <a href={localizeHref('/register')} class="btn btn-pri">{m.sec_signup_free()}</a>
       {/if}
     </div>
   </div>
@@ -274,34 +277,34 @@
 <section class="q-hero">
   <div class="wrap qh-grid" class:solo={!todaySurvey}>
     <div class="reveal qh-col">
-      <div class="qh-tag"><span class="dot"></span>Paid Surveys · {surveys.length} live</div>
-      <h1>Share opinions.<br><em>Earn real cash.</em></h1>
-      <p class="lead">Quick 2–10 minute surveys matched to your profile — from major brands paying $0.50–$5 per survey.</p>
-      <a href="#section-grid" class="btn btn-pri">Browse all surveys <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
+      <div class="qh-tag"><span class="dot"></span>{m.ps_hero_eyebrow_label()} · {surveys.length} {m.sec_kind_live_suffix()}</div>
+      <h1>{m.ps_title1()}<br><em>{m.ps_title2()}</em></h1>
+      <p class="lead">{m.ps_lead()}</p>
+      <a href="#section-grid" class="btn btn-pri">{m.ps_browse()} <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
     </div>
 
     {#if todaySurvey}
       <div class="feat reveal d1">
         <div class="feat-top">
-          <span class="l"><svg viewBox="0 0 24 24"><use href="#i-bolt-f"/></svg>Today's Survey</span>
-          <span class="clk"><span class="d"></span>Resets in <b>{countdown}</b></span>
+          <span class="l"><svg viewBox="0 0 24 24"><use href="#i-bolt-f"/></svg>{m.ps_today_survey()}</span>
+          <span class="clk"><span class="d"></span>{m.sec_resets_in()} <b>{countdown}</b></span>
         </div>
         <div class="feat-prev">
           <span class="corner c1"></span><span class="corner c2"></span>
-          <span class="live"><span class="d"></span>LIVE</span>
+          <span class="live"><span class="d"></span>{m.sec_live_badge()}</span>
           {#if todaySurvey.thumbnailUrl}
             <img src={todaySurvey.thumbnailUrl} alt={todaySurvey.title} />
           {:else}
-            <div class="ph"><span style="color:var(--t3);font-family:var(--mono);font-size:10px">Survey thumbnail</span></div>
+            <div class="ph"><span style="color:var(--t3);font-family:var(--mono);font-size:10px">{m.ps_thumbnail_placeholder()}</span></div>
           {/if}
         </div>
         <div class="feat-info">
           <h2>{todaySurvey.title}</h2>
-          <div class="sub">{new Date(todaySurvey.createdAt).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })} · <b>admin-curated</b></div>
+          <div class="sub">{new Date(todaySurvey.createdAt).toLocaleDateString(getLocale(), { weekday: 'long', month: 'short', day: 'numeric' })} · <b>{m.sec_admin_curated()}</b></div>
         </div>
         <div class="feat-foot">
-          <div class="bonus">+{todaySurvey.points}<span>pts</span></div>
-          <a href="/start-survey?surveyId={todaySurvey.id}" data-sveltekit-reload class="btn btn-pri">Start survey <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></a>
+          <div class="bonus">+{todaySurvey.points}<span>{m.home_nav_pts()}</span></div>
+          <a href={localizeHref(`/start-survey?surveyId=${todaySurvey.id}`)} data-sveltekit-reload class="btn btn-pri">{m.ps_start_survey_cta()} <svg class="i" viewBox="0 0 24 24"><use href="#i-play"/></svg></a>
         </div>
       </div>
     {/if}
@@ -315,25 +318,25 @@
       <div class="ico"><svg viewBox="0 0 24 24"><use href="#i-doc"/></svg></div>
       <svg class="spark" width="56" height="28" viewBox="0 0 56 28" fill="none"><polyline points="0,22 10,18 20,20 30,12 40,14 56,4" stroke="var(--acc)" stroke-width="1.5"/></svg>
       <div class="v">{surveys.length}</div>
-      <div class="l">Surveys available</div>
-      <div class="d"><em>Live</em> on the platform now</div>
+      <div class="l">{m.ps_stat_available()}</div>
+      <div class="d">{m.sec_stat_live_now()}</div>
     </div>
     <div class="stat-tile t2 reveal d1">
       <div class="ico"><svg viewBox="0 0 24 24"><use href="#i-coins"/></svg></div>
       <svg class="spark" width="56" height="28" viewBox="0 0 56 28" fill="none"><polyline points="0,24 12,20 24,22 36,12 48,14 56,8" stroke="var(--info)" stroke-width="1.5"/></svg>
       <div class="v">1,840</div>
-      <div class="l">Points earned today</div>
-      <div class="d"><em>+340</em> in last hour</div>
+      <div class="l">{m.sec_stat_points_today()}</div>
+      <div class="d">{m.sec_stat_points_delta({ amount: '+340' })}</div>
     </div>
     <div class="stat-tile t3 reveal d2">
       <div class="ico"><svg viewBox="0 0 24 24"><use href="#i-fire"/></svg></div>
       <div class="v">7</div>
-      <div class="l">Day streak</div>
+      <div class="l">{m.sec_stat_day_streak()}</div>
     </div>
     <div class="stat-tile t4 reveal d3">
       <div class="ico"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></div>
       <div class="v">#842</div>
-      <div class="l">Weekly rank</div>
+      <div class="l">{m.sec_stat_weekly_rank()}</div>
     </div>
   </div>
 </section>
@@ -341,10 +344,10 @@
 <!-- Toolbar -->
 <section class="toolbar">
   <div class="wrap tb-row">
-    <span style="font-family:var(--mono);font-size:12px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase">{filtered.length} surveys</span>
+    <span style="font-family:var(--mono);font-size:12px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase">{m.ps_surveys_count({ n: filtered.length })}</span>
     <div class="search">
       <span class="sico"><svg class="i" viewBox="0 0 24 24"><use href="#i-search"/></svg></span>
-      <input type="text" placeholder="Search surveys…" bind:value={searchQ} />
+      <input type="text" placeholder={m.ps_search_placeholder()} bind:value={searchQ} />
     </div>
   </div>
 </section>
@@ -356,8 +359,8 @@
       {#if filtered.length === 0}
         <div class="empty">
           <div class="empty-ico"><svg class="i-lg i" viewBox="0 0 24 24"><use href="#i-doc"/></svg></div>
-          <div class="empty-t">{searchQ ? 'No surveys match your search' : 'No surveys available yet'}</div>
-          <div class="empty-s">{searchQ ? 'Try a different search term.' : 'New surveys are added regularly — check back soon.'}</div>
+          <div class="empty-t">{searchQ ? m.ps_empty_search_title() : m.ps_empty_title()}</div>
+          <div class="empty-s">{searchQ ? m.ps_empty_search_desc() : m.ps_empty_desc()}</div>
         </div>
       {:else}
         {#each filtered as s (s.id)}
@@ -369,16 +372,16 @@
                 <div class="ph">
                   <div class="ph-inner">
                     <div class="ph-icon"><svg viewBox="0 0 24 24"><use href="#i-doc"/></svg></div>
-                    <span style="font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.08em">Survey</span>
+                    <span style="font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.08em">{m.ps_survey_word()}</span>
                   </div>
                 </div>
               {/if}
-              <span class="qc-pts">+{s.points} pts</span>
+              <span class="qc-pts">{m.ps_pts_badge({ points: s.points })}</span>
               {#if s.isTodaySurvey}
-                <span class="qc-today">⭐ Today's pick</span>
+                <span class="qc-today">{m.ps_today_pick()}</span>
               {/if}
               {#if s.priority === 'high'}
-                <span class="qc-priority hot">Hot</span>
+                <span class="qc-priority hot">{m.sec_flag_hot()}</span>
               {/if}
             </div>
             <div class="qc-body">
@@ -386,12 +389,12 @@
               {#if s.description}
                 <p>{s.description}</p>
               {:else}
-                <p style="color:var(--t3)">Share your opinion and earn points instantly.</p>
+                <p style="color:var(--t3)">{m.ps_default_desc()}</p>
               {/if}
             </div>
             <div class="qc-foot">
-              <span class="pts"><span class="d"></span>+{s.points} pts per completion</span>
-              <a href="/start-survey?surveyId={s.id}" data-sveltekit-reload class="qc-play">Start <svg viewBox="0 0 24 24"><use href="#i-play"/></svg></a>
+              <span class="pts"><span class="d"></span>{m.ps_pts_per_completion({ points: s.points })}</span>
+              <a href={localizeHref(`/start-survey?surveyId=${s.id}`)} data-sveltekit-reload class="qc-play">{m.ps_start_cta()} <svg viewBox="0 0 24 24"><use href="#i-play"/></svg></a>
             </div>
           </article>
         {/each}
@@ -403,19 +406,19 @@
 <!-- CTA -->
 <section class="cta">
   <div class="wrap cta-inner">
-    <span class="eyebrow acc reveal"><span class="dot"></span>Earn while you share</span>
-    <h2 class="reveal d1">Your opinion <em>pays.</em></h2>
-    <p class="reveal d2">New surveys added weekly. Earn points redeemable for real rewards.</p>
+    <span class="eyebrow acc reveal"><span class="dot"></span>{m.ps_cta_eyebrow()}</span>
+    <h2 class="reveal d1">{m.ps_cta_heading_plain()} <em>{m.ps_cta_heading_em()}</em></h2>
+    <p class="reveal d2">{m.ps_cta_desc()}</p>
     <div class="cta-ctas reveal d3">
-      <a href="/" class="btn btn-pri" data-sveltekit-reload>Back to home <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
-      <a href="/register" class="btn btn-sec">Create free account</a>
+      <a href={localizeHref('/')} class="btn btn-pri" data-sveltekit-reload>{m.sec_cta_home()} <svg class="i" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
+      <a href={localizeHref('/register')} class="btn btn-sec">{m.ps_cta_create_account()}</a>
     </div>
   </div>
 </section>
 
 <div class="foot-mini wrap">
-  <span>© 2026 EarnMaze, Inc.</span>
-  <span>Surveys updated regularly · New ones every week</span>
-  <span>US members only</span>
+  <span>{m.sec_footer_copyright()}</span>
+  <span>{m.ps_footer_updated()}</span>
+  <span>{m.sec_footer_us_only()}</span>
 </div>
 </div>

@@ -2,6 +2,7 @@
 	import Icon from './Icon.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
+	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte';
 
 	const stores = ['App Store', 'Google Play'];
 
@@ -105,6 +106,11 @@
 					<button type="submit">{subscribed ? m.home_footer_subscribed() : m.home_footer_subscribe()}</button>
 				</form>
 			</div>
+		</div>
+
+		<div class="foot-bottom">
+			<span>{m.footer_copyright()}</span>
+			<LanguageSwitcher variant="public" placement="top" />
 		</div>
 	</div>
 </footer>

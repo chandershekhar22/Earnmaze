@@ -236,10 +236,10 @@ img {
 }
 .nav-row {
 	display: flex;
-	flex-wrap: wrap;
-	row-gap: 8px;
+	flex-wrap: nowrap;
 	align-items: center;
 	justify-content: space-between;
+	gap: 12px;
 	padding: 14px 0;
 }
 .brand {
@@ -249,6 +249,8 @@ img {
 	font-weight: 600;
 	font-size: 17px;
 	letter-spacing: -0.02em;
+	flex-shrink: 0;
+	white-space: nowrap;
 }
 .brand-mark {
 	width: 28px;
@@ -258,11 +260,20 @@ img {
 	display: grid;
 	place-items: center;
 	color: var(--acc-text);
+	flex-shrink: 0;
 }
 .nav-links {
 	display: flex;
 	align-items: center;
 	gap: 4px;
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow-x: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+.nav-links::-webkit-scrollbar {
+	display: none;
 }
 .nav-links a {
 	padding: 8px 14px;
@@ -271,6 +282,8 @@ img {
 	font-weight: 500;
 	border-radius: var(--r5);
 	transition: color 0.2s;
+	white-space: nowrap;
+	flex-shrink: 0;
 }
 .nav-links a:hover {
 	color: var(--t1);
@@ -279,6 +292,7 @@ img {
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	flex-shrink: 0;
 }
 .coin-pill {
 	display: inline-flex;
@@ -2573,6 +2587,18 @@ footer.home-footer {
 .foot-social a:hover {
 	color: var(--t1);
 	border-color: var(--line2);
+}
+.foot-bottom {
+	margin-top: 48px;
+	padding-top: 32px;
+	border-top: 1px solid var(--line);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 13px;
+	color: var(--t3);
 }
 
 .live {
