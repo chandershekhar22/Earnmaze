@@ -246,13 +246,14 @@ async function qualifyReferralIfFirst(panelistId: string) {
 			.set({ status: 'paid', qualifiedAt: new Date(), paidAt: new Date() })
 			.where(eq(referrals.id, pendingReferral.id));
 
-		// Award referrer bonus
+		// Award referrer bonus — survey points (counted in the "survey" bucket,
+		// since referenceType 'referral' is not in EXPLORATION_TRANSACTION_REFERENCE_TYPES).
 		const referrerBonus = pendingReferral.referrerBonus ?? 0;
 		if (referrerBonus > 0) {
 			await addPoints(
 				pendingReferral.referrerId,
 				referrerBonus,
-				`Referral bonus — referred user completed first survey`,
+				`Referral bonus — referred friend completed their first survey`,
 				'bonus',
 				'referral',
 				pendingReferral.id,
@@ -260,17 +261,20 @@ async function qualifyReferralIfFirst(panelistId: string) {
 			);
 		}
 
-		// Award referred user bonus
+		// Award referred user bonus — exploration points. referenceType
+		// 'exploration' puts this in the exploration bucket (see
+		// EXPLORATION_TRANSACTION_REFERENCE_TYPES / getPointsSummaryByBucket)
+		// so it shows on the Discover dashboard like other exploration wins.
 		const referredBonus = pendingReferral.referredBonus ?? 0;
 		if (referredBonus > 0) {
 			await addPoints(
 				panelistId,
 				referredBonus,
-				`Welcome bonus — completed first survey via referral`,
+				`Exploration bonus — signed up via referral, unlocked by first survey`,
 				'bonus',
-				'referral',
+				'exploration',
 				pendingReferral.id,
-				{ referrerId: pendingReferral.referrerId }
+				{ referrerId: pendingReferral.referrerId, source: 'referral' }
 			);
 		}
 

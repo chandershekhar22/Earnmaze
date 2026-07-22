@@ -1,50 +1,38 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import { getValidEntries, EXPLORATION_KIND_LABELS } from '$lib/utils/exploration-points';
+	import { explorationPointsDisplay } from '$lib/stores/exploration-points.svelte';
 
 	let { open, onClose }: { open: boolean; onClose: () => void } = $props();
 
 	const tabs = [m.home_notif_tab_all(), m.home_notif_tab_rewards(), m.home_notif_tab_polls(), m.home_notif_tab_system()];
 	let activeTab = $state(tabs[0]);
 
-	const items = [
-		{
-			icon: 'coin',
-			title: m.home_notif_i1_title(),
-			text: m.home_notif_i1_text(),
-			time: '2m'
-		},
-		{
-			icon: 'doc',
-			title: m.home_notif_i2_title(),
-			text: m.home_notif_i2_text(),
-			time: '18m'
-		},
-		{
-			icon: 'flame',
-			title: m.home_notif_i3_title(),
-			text: m.home_notif_i3_text(),
-			time: '1h'
-		},
-		{
-			icon: 'trophy',
-			title: m.home_notif_i4_title(),
-			text: m.home_notif_i4_text(),
-			time: '3h'
-		},
-		{
-			icon: 'wallet',
-			title: m.home_notif_i5_title(),
-			text: m.home_notif_i5_text(),
-			time: '1d'
-		},
-		{
-			icon: 'chart',
-			title: m.home_notif_i6_title(),
-			text: m.home_notif_i6_text(),
-			time: '1d'
-		}
-	];
+	function relativeTime(ms: number): string {
+		const mins = Math.floor((Date.now() - ms) / 60000);
+		if (mins < 1) return 'now';
+		if (mins < 60) return `${mins}m`;
+		return `${Math.floor(mins / 60)}h`;
+	}
+
+	// Real "you won points" entries earned from today's tile in any section
+	// (see $lib/utils/exploration-points) — same wording as the
+	// ExplorationPointsWatcher congrats toast. Re-derives whenever a win or a
+	// claim changes the shared pendingTotal.
+	const items = $derived.by(() => {
+		explorationPointsDisplay.pendingTotal;
+		return getValidEntries()
+			.slice()
+			.sort((a, b) => b.earnedAt - a.earnedAt)
+			.map((e) => ({
+				id: e.id,
+				icon: 'coin',
+				title: `Congratulations! You won ${e.points} points 🎉`,
+				text: `Completed ${EXPLORATION_KIND_LABELS[e.kind]}. Sign up or log in within 1 hour to add these to your wallet — otherwise they expire.`,
+				time: relativeTime(e.earnedAt)
+			}));
+	});
 </script>
 
 <svelte:window onkeydown={(e) => open && e.key === 'Escape' && onClose()} />
@@ -69,7 +57,10 @@
 		{/each}
 	</div>
 	<div class="notif-list">
-		{#each items as item (item.title)}
+		{#if items.length === 0}
+			<div class="notif-empty">{m.home_notif_empty()}</div>
+		{/if}
+		{#each items as item (item.id)}
 			<div class="notif-item">
 				<div class="ni-icon"><Icon name={item.icon} /></div>
 				<div class="ni-text">

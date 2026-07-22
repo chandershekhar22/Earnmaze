@@ -468,6 +468,13 @@ img {
 	white-space: nowrap;
 	font-family: var(--mono);
 }
+.notif-empty {
+	padding: 40px 8px;
+	text-align: center;
+	font-size: 13px;
+	color: var(--t3);
+	line-height: 1.5;
+}
 
 /* HERO */
 .hero {

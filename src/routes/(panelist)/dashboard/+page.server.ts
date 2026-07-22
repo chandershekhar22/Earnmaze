@@ -1,19 +1,25 @@
 import type { PageServerLoad } from './$types';
 import type { PanelistDashboardData } from '$lib/types/panelist';
 import { requirePanelist } from '$lib/server/auth/guards';
-import { db, getPanelistPoints, getPointsSummary, getRecentTransactions } from '$lib/db';
+import { db, getPointsSummaryByBucket, getPointsSummary, getRecentTransactions } from '$lib/db';
 import { getAvailableSurveysCount, getSurveyCompletionsPanelist, getAllAvailableSurveys } from '$lib/db/repositories/survey.repository.server';
 import { user as userTable } from '$lib/db/schema/auth';
 import { panelistStats } from '$lib/db/schema/panelist-stats';
 import { panelistQuality } from '$lib/db/schema/panelist-profile';
 import { eq } from 'drizzle-orm';
 import { signedTransactionPoints } from '$lib/constants/constants';
+import { EXPLORATION_TRANSACTION_REFERENCE_TYPES } from '$lib/utils/exploration-points';
+
+// Exploration points (today's-tile wins + signup bonus) belong to the
+// Discover dashboard only; keep them out of the Survey dashboard's
+// recent-activity feed too, not just its point totals.
+const EXPLORATION_REFERENCE_TYPES = new Set(EXPLORATION_TRANSACTION_REFERENCE_TYPES);
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requirePanelist(event);
 
 	const [
-		pointsData,
+		surveyPointsSummary,
 		pointsSummary,
 		availableSurveys,
 		surveysCompleted,
@@ -23,19 +29,19 @@ export const load: PageServerLoad = async (event) => {
 		topSurveys,
 		qualityData,
 	] = await Promise.all([
-		getPanelistPoints(user.id),
+		getPointsSummaryByBucket(user.id, 'survey'),
 		getPointsSummary(user.id),
 		getAvailableSurveysCount(),
 		getSurveyCompletionsPanelist(user.id),
 		db.select().from(panelistStats).where(eq(panelistStats.panelistId, user.id)).limit(1).then((r) => r[0] ?? null),
 		db.select({ referralCode: userTable.referralCode, status: userTable.status, createdAt: userTable.createdAt }).from(userTable).where(eq(userTable.id, user.id)).limit(1).then((r) => r[0] ?? null),
-		getRecentTransactions(user.id, 5),
+		getRecentTransactions(user.id, 20),
 		getAllAvailableSurveys(3),
 		db.select().from(panelistQuality).where(eq(panelistQuality.panelistId, user.id)).limit(1).then((r) => r[0] ?? null),
 	]);
 
-	const currentPoints = pointsData?.currentPoints ?? 0;
-	const lifetimePoints = pointsSummary?.lifetimePoints ?? 0;
+	const currentPoints = surveyPointsSummary?.currentPoints ?? 0;
+	const lifetimePoints = surveyPointsSummary?.lifetimePoints ?? 0;
 	const redeemedPoints = pointsSummary?.redeemedPoints ?? 0;
 
 	const dashboardData: PanelistDashboardData = {
@@ -61,15 +67,18 @@ export const load: PageServerLoad = async (event) => {
 		geography: null,
 		professional: null,
 		tags: [],
-		recentActivity: (recentTxs ?? []).map((tx) => ({
-			id: tx.id,
-			type: tx.type,
-			// DB stores `points` as positive magnitude; type encodes direction.
-			amount: signedTransactionPoints(tx.type, tx.points),
-			description: tx.description,
-			createdAt: tx.createdAt,
-			category: tx.referenceType ?? 'general',
-		})),
+		recentActivity: (recentTxs ?? [])
+			.filter((tx) => !EXPLORATION_REFERENCE_TYPES.has(tx.referenceType ?? ''))
+			.slice(0, 5)
+			.map((tx) => ({
+				id: tx.id,
+				type: tx.type,
+				// DB stores `points` as positive magnitude; type encodes direction.
+				amount: signedTransactionPoints(tx.type, tx.points),
+				description: tx.description,
+				createdAt: tx.createdAt,
+				category: tx.referenceType ?? 'general',
+			})),
 		availableSurveys: availableSurveys ?? 0,
 	};
 

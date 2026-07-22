@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import { verifyPassword, createSession, getUserByEmail, db } from '$lib/db';
 import { user as userTable, session as sessionTable } from '$lib/db/schema/auth';
 import { eq, sql, and, lt } from 'drizzle-orm';
+import { claimExplorationEntries } from '$lib/server/exploration-points.server';
 import { validateTurnstileToken } from '$lib/server/turnstile';
 import { Security, Logger } from '$lib/utils/app-logger';
 import { authRateLimit } from '$lib/server/rate-limit';
@@ -81,6 +82,18 @@ export const POST: RequestHandler = async (event) => {
 		Security.logAuthAttempt('login', user.email, true, {
 			ip: getClientIP(event)
 		});
+
+		// Collect any exploration points earned anonymously in the last hour
+		// (see $lib/utils/exploration-points) — login collects them same as
+		// signup, just without the welcome bonus.
+		try {
+			await claimExplorationEntries(user.id, body?.explorationEntries);
+		} catch (explorationErr) {
+			Logger.root.error(
+				{ context: 'points', userId: user.id, error: explorationErr },
+				'Failed to claim pending exploration points at login'
+			);
+		}
 
 		// Set session cookie
 		cookies.set('session', sessionId, {

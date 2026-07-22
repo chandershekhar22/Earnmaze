@@ -1,7 +1,10 @@
 import { createHash, timingSafeEqual } from 'crypto';
+import { and, eq } from 'drizzle-orm';
 import { redirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { Logger } from '$lib/utils/app-logger';
+import { addPoints, db } from '$lib/db';
+import { pointsTransactions } from '$lib/db/schema/panelist-points';
 import {
 	getSurveyById,
 	getSurveyTransactionByRespondentId,
@@ -9,6 +12,34 @@ import {
 } from '$lib/db/repositories/survey.repository.server';
 import { getGuestActivityByTransactionId, updateGuestSessionStats } from '$lib/db/repositories';
 import { notifyUpdate } from '$lib/utils/telegram';
+
+/**
+ * Bolts the +10 "exploration" bonus onto today's featured survey, on top of
+ * whatever real survey points it pays out. Unlike the other five sections
+ * (anonymous, held client-side pending signup), a survey completion here is
+ * already tied to a real session and already server-verified via the HMAC
+ * hash above — so it's credited immediately, with no pending/claim step.
+ * Guarded against double-credit on any retry/replay of this redirect URL.
+ */
+async function awardTodaySurveyExplorationBonus(panelistId: string, transactionId: number) {
+	const referenceId = `expl-survey:${transactionId}`;
+	const [existing] = await db
+		.select({ id: pointsTransactions.id })
+		.from(pointsTransactions)
+		.where(and(eq(pointsTransactions.referenceType, 'exploration'), eq(pointsTransactions.referenceId, referenceId)))
+		.limit(1);
+	if (existing) return;
+
+	await addPoints(
+		panelistId,
+		10,
+		"Exploration: completed today's survey",
+		'completed',
+		'exploration',
+		referenceId,
+		{ kind: 'paid-surveys', surveyTransactionId: transactionId }
+	);
+}
 
 type CompletionStatus = 'completed' | 'terminated' | 'quota_full' | 'disqualified';
 
@@ -130,6 +161,19 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		);
 		if (!completedTransaction) {
 			throw error(500, 'Failed to update survey completion');
+		}
+
+		// Today's featured survey additionally earns the flat exploration bonus,
+		// same as the other five "Ways to Earn" sections.
+		if (status === 'completed' && surveyData.isTodaySurvey) {
+			try {
+				await awardTodaySurveyExplorationBonus(transaction.panelistId, transaction.id);
+			} catch (bonusErr) {
+				Logger.root.error(
+					{ context: 'surveys', error: bonusErr, transactionId: transaction.id },
+					'Failed to award today-survey exploration bonus'
+				);
+			}
 		}
 
 		// Best-effort Telegram update — only for actual completions, not screen-outs.

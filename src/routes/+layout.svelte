@@ -6,6 +6,7 @@
 	import { themeStore } from '$lib/stores/theme.svelte';
 	import { initializeAppLogging, Logger, Features, Session } from '$lib/utils/app-logger';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import ExplorationPointsWatcher from '$lib/components/ExplorationPointsWatcher.svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import type { Snippet } from 'svelte';
 	import '../app.pcss';
@@ -126,5 +127,6 @@
 	<div class="min-h-screen">
 		{@render children()}
 		<ToastContainer />
+		<ExplorationPointsWatcher />
 	</div>
 </ErrorBoundary>

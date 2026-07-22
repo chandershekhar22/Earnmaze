@@ -1,10 +1,31 @@
 <script lang="ts">
 	import SocialButtons from '$lib/components/SocialButtons.svelte';
 	import { persistState } from '$lib/utils/iframe-state';
+	import { watchInteraction, onExit } from '$lib/utils/tile-interaction';
+	import { EXPLORATION_KINDS, recordAttempt, type ExplorationKind } from '$lib/utils/exploration-points';
 
 	let { data } = $props<{ data: { item: any; stats: { likes: number; shares: number }; kind: string; kindLabel: string } }>();
 	const a = data.item;
 	const stats = data.stats ?? { likes: 0, shares: 0 };
+
+	// Only today's featured pick in an exploration-eligible kind counts —
+	// browsing older items in the section doesn't earn points.
+	const isExplorationTile =
+		!!a.featuredToday && (EXPLORATION_KINDS as readonly string[]).includes(data.kind);
+
+	// Awards the pending point once the visitor has actually interacted with
+	// the tile (not just opened and instantly left) and then exits — the
+	// "Back" link forces a full reload, so `pagehide` is the reliable signal.
+	// The congrats toast+confetti is shown by `ExplorationPointsWatcher` on
+	// whichever page loads next.
+	function trackTile(iframe: HTMLIFrameElement) {
+		if (!isExplorationTile) return {};
+		const getInteracted = watchInteraction(iframe);
+		const cleanup = onExit(() => {
+			if (getInteracted()) recordAttempt(data.kind as ExplorationKind, a.id);
+		});
+		return { destroy: cleanup };
+	}
 </script>
 
 <svelte:head>
@@ -57,5 +78,5 @@
 	     injected. allow-same-origin lets the injected script use localStorage
 	     (see $lib/server/html-inject). use:persistState is the DOM-restore
 	     fallback for items that never call saveState. -->
-	<iframe src={`/section-content/${data.kind}/${a.id}`} title={a.title} sandbox="allow-scripts allow-same-origin allow-forms allow-popups" use:persistState={`${data.kind}:${a.id}`}></iframe>
+	<iframe src={`/section-content/${data.kind}/${a.id}`} title={a.title} sandbox="allow-scripts allow-same-origin allow-forms allow-popups" use:persistState={`${data.kind}:${a.id}`} use:trackTile></iframe>
 </div>

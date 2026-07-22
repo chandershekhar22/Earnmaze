@@ -61,7 +61,9 @@ export {
 	getTotalRedeemedPoints,
 	getTotalRejectedPoints,
 	getPointsSummary,
+	getPointsSummaryByBucket,
 	getRecentTransactions,
+	getRecentExplorationTransactions,
 } from './repositories/panelist-points-aggregations.repository.server';
 
 // Panelist Transactions repository

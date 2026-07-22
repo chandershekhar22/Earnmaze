@@ -3,11 +3,22 @@
 	import Icon from './Icon.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { localizeHref } from '$lib/paraglide/runtime';
+	import { explorationPointsDisplay } from '$lib/stores/exploration-points.svelte';
 
-	let { onOpenNotif }: { onOpenNotif: () => void } = $props();
+	let { onOpenNotif, isLoggedIn = false, guestPoints = 0 }: { onOpenNotif: () => void; isLoggedIn?: boolean; guestPoints?: number } = $props();
 
 	let navEl: HTMLElement;
-	let coinCount = $state(2480);
+	// Anyone not signed into a full account — whether a completely anonymous
+	// visitor or someone with just a guest email-capture session — sees their
+	// real (starts-at-0) balance instead of the decorative marketing number.
+	let coinCount = $state(isLoggedIn ? 2480 : guestPoints);
+	const isGuest = $derived(!isLoggedIn);
+
+	// Keeps the pill in sync with points won from today's tile in any section
+	// (see $lib/stores/exploration-points.svelte) without needing a reload.
+	$effect(() => {
+		if (isGuest) coinCount = guestPoints + explorationPointsDisplay.pendingTotal;
+	});
 
 	const navLinks: { href: string; label: string; reload?: boolean }[] = [
 		{ href: '#how', label: m.home_nav_link_how() },
@@ -35,7 +46,10 @@
 			cc.appendChild(p);
 		}
 		setTimeout(() => cc.remove(), 2000);
-		coinCount += Math.floor(Math.random() * 50 + 10);
+		// The random increment is a decorative easter egg for anonymous
+		// visitors only — a guest's pill shows a real balance, so it must not
+		// be inflated by fake clicks.
+		if (!isGuest) coinCount += Math.floor(Math.random() * 50 + 10);
 	}
 
 	onMount(() => {

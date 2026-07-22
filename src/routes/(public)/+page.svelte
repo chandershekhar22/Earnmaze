@@ -22,6 +22,8 @@
 	import HomeFooter from '$lib/components/home/HomeFooter.svelte';
 	import LiveToasts from '$lib/components/home/LiveToasts.svelte';
 
+	let { data } = $props<{ data: { isLoggedIn: boolean; guestPoints: number } }>();
+
 	// Shared between the nav (bell opens it) and the drawer/overlay (close).
 	let notifOpen = $state(false);
 
@@ -99,7 +101,7 @@
 <FeedbackWidget />
 <ReferEarn />
 
-<HomeNav onOpenNotif={() => (notifOpen = true)} />
+<HomeNav onOpenNotif={() => (notifOpen = true)} isLoggedIn={data.isLoggedIn} guestPoints={data.guestPoints} />
 
 <HeroSection />
 <StatsSection />

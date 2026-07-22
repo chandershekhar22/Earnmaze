@@ -1,12 +1,24 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
   import { persistState } from '$lib/utils/iframe-state';
+  import { watchInteraction } from '$lib/utils/tile-interaction';
+  import { recordAttempt, markNotified, clearAll as clearPendingExplorationPoints } from '$lib/utils/exploration-points';
+  import { claimPendingExplorationPoints } from '$lib/utils/claim-exploration-points';
+  import { explorationPointsDisplay } from '$lib/stores/exploration-points.svelte';
+  import { pointsStore } from '$lib/stores/points.svelte';
+  import { toastStore } from '$lib/stores/toast.svelte';
   import { authStore } from '$lib/stores/auth.svelte';
   import * as m from '$lib/paraglide/messages';
   import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 
   type UploadedGame = { id: string; title: string; file: string; thumb?: string };
-  let { data } = $props<{ data: { todaysGame: UploadedGame | null; isLoggedIn: boolean } }>();
+  let { data } = $props<{ data: { todaysGame: UploadedGame | null; isLoggedIn: boolean; guestPoints: number; explorationPoints: number } }>();
+
+  // Seed the shared wallet total from SSR data at component init — runs
+  // synchronously before any onMount in the tree, so it's set before the
+  // modal can bump it from a freshly-claimed win.
+  if (data.isLoggedIn) explorationPointsDisplay.setWalletTotal(data.explorationPoints ?? 0);
 
   // data.isLoggedIn is known server-side, so the nav renders correctly from
   // the very first paint. authStore.state.user then keeps it in sync with
@@ -54,7 +66,60 @@
     }
   });
 
-  function closeModal() { openGame = null; }
+  // Only today's admin-uploaded pick counts for exploration points — the
+  // catalog fallback (when nothing's been uploaded yet) isn't a "today" tile.
+  let getGameInteracted: (() => boolean) | null = null;
+
+  function trackGameTile(iframe: HTMLIFrameElement) {
+    getGameInteracted = null;
+    if (!data.todaysGame || openGame?.id !== data.todaysGame.id) return {};
+    getGameInteracted = watchInteraction(iframe);
+    return {
+      destroy() {
+        getGameInteracted = null;
+      }
+    };
+  }
+
+  // The modal never unloads the page, so — unlike the routed section viewer —
+  // we can award and celebrate the point right here instead of waiting on
+  // ExplorationPointsWatcher at the next page load.
+  async function closeModal() {
+    if (getGameInteracted?.() && data.todaysGame) {
+      const entry = recordAttempt('games', data.todaysGame.id);
+      if (entry) {
+        markNotified([entry.id]);
+        // The modal never unloads the page, so — unlike the routed section
+        // viewer — we claim right here instead of waiting on
+        // ExplorationPointsWatcher at the next page load.
+        const claim = await claimPendingExplorationPoints();
+        const confetti = (await import('canvas-confetti')).default;
+        confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+
+        if (claim?.authenticated) {
+          if (claim.pointsAwarded > 0) {
+            clearPendingExplorationPoints();
+            explorationPointsDisplay.refresh();
+            explorationPointsDisplay.addToWallet(claim.pointsAwarded);
+            pointsStore.fetchPoints();
+            toastStore.success(
+              `Congratulations! You won ${claim.pointsAwarded} points 🎉`,
+              'Added to your wallet.',
+              { duration: 8000 }
+            );
+          }
+        } else {
+          toastStore.success(
+            `Congratulations! You won ${entry.points} points 🎉`,
+            'Sign up or log in within 1 hour to add these to your wallet — otherwise they expire.',
+            { duration: 10000, action: { label: 'Sign up now', handler: () => goto('/register') } }
+          );
+          explorationPointsDisplay.refresh();
+        }
+      }
+    }
+    openGame = null;
+  }
   function toggleFaq(i: number) { faqOpen = faqOpen === i ? -1 : i; }
 
   function onKeydown(e: KeyboardEvent) {
@@ -628,7 +693,7 @@
       <a href={localizeHref('/faq')} data-sveltekit-reload>{m.home_nav_link_faq()}</a>
     </div>
     <div class="nav-actions">
-      <span class="coin-pill"><span class="dot"></span>2,480 {m.home_nav_pts()}</span>
+      <span class="coin-pill"><span class="dot"></span>{data.isLoggedIn ? explorationPointsDisplay.walletTotal.toLocaleString() : (data.guestPoints + explorationPointsDisplay.pendingTotal).toLocaleString()} {m.home_nav_pts()}</span>
       <button class="bell" aria-label={m.home_nav_notifications()}><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg><span class="pip"></span></button>
       {#if showAuthButtons}
         <a href={localizeHref('/login')} class="btn-ghost">{m.home_nav_login()}</a>
@@ -990,6 +1055,7 @@
         src={openGame.path}
         title={openGame.name}
         use:persistState={`games:${openGame.id}`}
+        use:trackGameTile
       ></iframe>
     </div>
   </div>

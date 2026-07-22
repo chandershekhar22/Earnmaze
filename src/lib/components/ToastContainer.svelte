@@ -39,7 +39,7 @@
 </script>
 
 {#if mounted}
-	<div class="fixed top-4 end-4 z-50 space-y-2 max-w-sm">
+	<div class="fixed top-20 end-4 z-[200] space-y-2 max-w-sm">
 		{#each toastStore.toasts as toast (toast.id)}
 			<div
 				class="flex items-start p-4 rounded-xl border bg-surface-100/90 backdrop-blur-xl shadow-2xl shadow-black/20 animate-in {getToastStyles(toast.type)}"

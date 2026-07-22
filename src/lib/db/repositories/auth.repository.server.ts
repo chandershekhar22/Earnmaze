@@ -158,7 +158,11 @@ export async function createUser(data: {
 		if (data.password) {
 			try {
 				const settings = await getAppSettings(['signup_bonus_points']);
-				const signupBonus = parseInt(settings.signup_bonus_points || '0') || 0;
+				// Defaults to 50 (the flat welcome bonus every new signup gets)
+				// only when the admin hasn't configured this setting at all —
+				// an explicit "0" must still mean "no bonus", not fall through.
+				const rawBonus = settings.signup_bonus_points;
+				const signupBonus = rawBonus === null || rawBonus === '' ? 50 : parseInt(rawBonus) || 0;
 				if (signupBonus > 0) {
 					await addBonusPoints(newUser.id, signupBonus, 'Welcome bonus for new panelist');
 				}

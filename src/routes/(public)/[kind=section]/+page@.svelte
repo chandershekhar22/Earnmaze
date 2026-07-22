@@ -2,12 +2,19 @@
   import { onMount } from 'svelte';
   import SocialButtons from '$lib/components/SocialButtons.svelte';
   import { authStore } from '$lib/stores/auth.svelte';
+  import { explorationPointsDisplay } from '$lib/stores/exploration-points.svelte';
   import * as m from '$lib/paraglide/messages';
   import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 
-  let { data } = $props<{ data: { items: any[]; kind: string; kindLabel: string; kindSingular: string; accent: string; featured: any | null; isLoggedIn: boolean } }>();
+  let { data } = $props<{ data: { items: any[]; kind: string; kindLabel: string; kindSingular: string; accent: string; featured: any | null; isLoggedIn: boolean; guestPoints: number; explorationPoints: number } }>();
   let activeFilter = $state('all');
   let searchQ = $state('');
+
+  // Seed the shared wallet total from SSR data at component init — this runs
+  // synchronously before any onMount in the tree, so it always applies before
+  // ExplorationPointsWatcher's onMount (mounted at the root layout) has a
+  // chance to bump it from a freshly-claimed tile win.
+  if (data.isLoggedIn) explorationPointsDisplay.setWalletTotal(data.explorationPoints ?? 0);
 
   // data.isLoggedIn is known server-side, so the nav renders correctly from
   // the very first paint. authStore.state.user then keeps it in sync with
@@ -436,7 +443,7 @@
       <a href={localizeHref('/faq')} data-sveltekit-reload>{m.home_nav_link_faq()}</a>
     </div>
     <div class="nav-actions">
-      <span class="coin-pill"><span class="dot"></span>2,480 {m.home_nav_pts()}</span>
+      <span class="coin-pill"><span class="dot"></span>{data.isLoggedIn ? explorationPointsDisplay.walletTotal.toLocaleString() : (data.guestPoints + explorationPointsDisplay.pendingTotal).toLocaleString()} {m.home_nav_pts()}</span>
       <button class="bell" aria-label={m.home_nav_notifications()}><svg class="i" viewBox="0 0 24 24"><use href="#i-bell"/></svg><span class="pip"></span></button>
       {#if showAuthButtons}
         <a href={localizeHref('/login')} class="btn-ghost">{m.home_nav_login()}</a>

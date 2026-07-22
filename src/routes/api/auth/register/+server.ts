@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 
 import type { RequestHandler } from './$types';
 import { createSession, createUser, getUserByEmail, db } from '$lib/db';
+import { claimExplorationEntries } from '$lib/server/exploration-points.server';
 import { validateTurnstileToken } from '$lib/server/turnstile';
 import type { RegisterResponse, AuthUserResponse } from '$lib/types/api-responses';
 import { getUserByReferralCode } from '$lib/db/repositories/auth.repository.server';
@@ -17,8 +18,8 @@ import { notifyUpdate } from '$lib/utils/telegram';
 import { maskEmail } from '$lib/utils/mask';
 import { sendWelcomeEmail } from '$lib/server/email-service';
 
-const REFERRER_BONUS = 50;
-const REFERRED_BONUS = 25;
+const REFERRER_BONUS = 50; // survey points, credited to the referrer
+const REFERRED_BONUS = 50; // exploration points, credited to the new signup
 
 export const POST: RequestHandler = async (event) => {
 	const rateLimited = await authRateLimit(event);
@@ -88,6 +89,19 @@ export const POST: RequestHandler = async (event) => {
 		const user = await getUserByEmail(email);
 		if (!user) {
 			return json({ error: 'Failed to create user' }, { status: 500 });
+		}
+
+		// Credit any exploration points earned anonymously in the last hour
+		// (see $lib/utils/exploration-points). The welcome signup bonus itself
+		// is already handled inside createUser() above (shared with the guest
+		// upgrade flow) — do not award it again here.
+		try {
+			await claimExplorationEntries(user.id, body?.explorationEntries);
+		} catch (explorationErr) {
+			Logger.root.error(
+				{ context: 'points', userId: user.id, error: explorationErr },
+				'Failed to claim pending exploration points at registration'
+			);
 		}
 
 		// Stamp age + legal acceptance + (optionally) marketing consent.

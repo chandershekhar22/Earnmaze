@@ -2,6 +2,8 @@ import type { AuthState, LoginCredentials, RegisterData } from '$lib/types/auth'
 import { Logger, API, Security } from '$lib/utils/app-logger';
 import { toastStore } from './toast.svelte';
 import { pointsStore } from './points.svelte';
+import { getValidEntries, getPendingTotal, clearAll as clearPendingExplorationPoints } from '$lib/utils/exploration-points';
+import { explorationPointsDisplay } from './exploration-points.svelte';
 
 class AuthStore {
 	// Initialize as loading so any panelist/auth-gated layout waits for the
@@ -21,12 +23,13 @@ class AuthStore {
 
 		const requestId = API.request('POST', '/api/auth/login');
 		const startTime = performance.now();
+		const pendingPoints = getPendingTotal();
 
 		try {
 			const response = await fetch('/api/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(credentials)
+				body: JSON.stringify({ ...credentials, explorationEntries: getValidEntries() })
 			});
 
 			const data = await response.json();
@@ -39,6 +42,12 @@ class AuthStore {
 				Logger.root.info({ context: 'auth', userId: data.user.id, email: credentials.email, loginMethod: 'email' }, 'Login successful');
 				this.state = { ...this.state, user: data.user, isLoading: false };
 				toastStore.success('Welcome back!', `Successfully logged in as ${data.user.name || data.user.email}`);
+
+				clearPendingExplorationPoints();
+				explorationPointsDisplay.refresh();
+				if (pendingPoints > 0) {
+					toastStore.success('Exploration points collected!', `+${pendingPoints} points added to your wallet.`);
+				}
 
 				pointsStore.fetchPoints();
 
@@ -70,12 +79,13 @@ class AuthStore {
 
 		const requestId = API.request('POST', '/api/auth/register');
 		const startTime = performance.now();
+		const pendingPoints = getPendingTotal();
 
 		try {
 			const response = await fetch('/api/auth/register', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(data)
+				body: JSON.stringify({ ...data, explorationEntries: getValidEntries() })
 			});
 
 			const result = await response.json();
@@ -88,6 +98,10 @@ class AuthStore {
 				Logger.root.info({ context: 'auth', userId: result.user.id, email: data.email, name: data.name, registrationMethod: 'email' }, 'Registration successful');
 				this.state = { ...this.state, user: result.user, isLoading: false };
 				toastStore.success('Account Created!', 'Welcome to EarnMaze! Your account has been created successfully.');
+
+				clearPendingExplorationPoints();
+				explorationPointsDisplay.refresh();
+				toastStore.success('Welcome bonus!', `+${pendingPoints + 50} points added to your wallet (${pendingPoints > 0 ? `${pendingPoints} exploration + ` : ''}50 signup bonus).`);
 
 				pointsStore.fetchPoints();
 

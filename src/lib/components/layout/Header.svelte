@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { Menu, Copy, Check, Bell, LogOut } from '@lucide/svelte';
 	import * as m from '$lib/paraglide/messages';
+	import NotificationPanel from './NotificationPanel.svelte';
 
 	let { onMenuClick }: { onMenuClick?: () => void } = $props();
 
@@ -12,6 +13,7 @@
 	let shortId = $derived(userId ? userId.slice(0, 8) : '');
 	let copied = $state(false);
 	let showLogoutConfirm = $state(false);
+	let notifOpen = $state(false);
 
 	function copyId() {
 		if (!userId) return;
@@ -80,14 +82,20 @@
 				</button>
 			{/if}
 
-			<button
-				class="relative w-[38px] h-[38px] rounded-full bg-white/[0.03] border border-white/[0.07] grid place-items-center text-neutral-400 hover:text-white hover:border-white/[0.13] transition-all"
-				title="Notifications"
-				aria-label="Notifications"
-			>
-				<Bell class="w-[15px] h-[15px]" />
-				<span class="absolute top-[8px] right-[9px] w-[7px] h-[7px] rounded-full bg-rose-400 ring-2 ring-surface"></span>
-			</button>
+			<div class="relative">
+				<button
+					onclick={() => (notifOpen = !notifOpen)}
+					class="relative w-[38px] h-[38px] rounded-full bg-white/[0.03] border border-white/[0.07] grid place-items-center text-neutral-400 hover:text-white hover:border-white/[0.13] transition-all"
+					title="Notifications"
+					aria-label="Notifications"
+					aria-haspopup="true"
+					aria-expanded={notifOpen}
+				>
+					<Bell class="w-[15px] h-[15px]" />
+					<span class="absolute top-[8px] right-[9px] w-[7px] h-[7px] rounded-full bg-rose-400 ring-2 ring-surface"></span>
+				</button>
+				<NotificationPanel open={notifOpen} onClose={() => (notifOpen = false)} />
+			</div>
 
 			<button
 				onclick={() => showLogoutConfirm = true}
