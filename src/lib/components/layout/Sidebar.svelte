@@ -65,6 +65,19 @@
 		}
 	});
 
+	// The Survey Dashboard's own hero balance is scoped to the survey-points
+	// bucket (see (panelist)/dashboard/+page.server.ts), and this sidebar
+	// widget should agree with it rather than showing the total wallet —
+	// everywhere else (Rewards, Points, etc.) still needs the real spendable
+	// total, so this only overrides on that one route.
+	let sidebarBalance = $derived.by(() => {
+		const pd = $page.data as { dashboardData?: { points?: { currentPoints?: number } } };
+		if (basePath === '/dashboard' && typeof pd?.dashboardData?.points?.currentPoints === 'number') {
+			return pd.dashboardData.points.currentPoints;
+		}
+		return pointsStore.data?.currentBalance ?? 0;
+	});
+
 	let userInitial = $derived(authStore.state.user?.name?.charAt(0)?.toUpperCase() || 'U');
 	let userName = $derived(authStore.state.user?.name || m.sb_default_name());
 	let userEmail = $derived(authStore.state.user?.email || '');
@@ -132,7 +145,7 @@
 				<span class="font-mono text-[10px] text-primary-500 uppercase tracking-[0.14em] font-semibold">{m.sb_balance()}</span>
 			</div>
 			<div class="text-[30px] font-bold text-white tracking-tight leading-none">
-				{(pointsStore.data?.currentBalance ?? 0).toLocaleString()}
+				{sidebarBalance.toLocaleString()}
 			</div>
 			<div class="font-mono text-[11px] text-neutral-500 mt-1">{m.sb_points_available()}</div>
 		</div>

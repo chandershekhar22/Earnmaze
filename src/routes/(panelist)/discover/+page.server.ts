@@ -10,9 +10,12 @@ export const load: PageServerLoad = async (event) => {
 
 	// Discover only shows points from today's-tile exploration + the signup
 	// bonus (see getPointsSummaryByBucket) — survey-earned points stay on the
-	// Survey dashboard instead.
-	const [explorationPointsSummary, pointsSummary, availableSurveys, statsData] = await Promise.all([
+	// Survey dashboard instead. We also fetch the survey bucket here (without
+	// displaying it as a stat) because redeeming exploration points requires
+	// an equal survey-points balance — see the "Redeem now" gating below.
+	const [explorationPointsSummary, surveyPointsSummary, pointsSummary, availableSurveys, statsData] = await Promise.all([
 		getPointsSummaryByBucket(user.id, 'exploration'),
+		getPointsSummaryByBucket(user.id, 'survey'),
 		getPointsSummary(user.id),
 		getAvailableSurveysCount(),
 		db
@@ -27,6 +30,7 @@ export const load: PageServerLoad = async (event) => {
 		discover: {
 			currentPoints: explorationPointsSummary?.currentPoints ?? 0,
 			lifetimePoints: explorationPointsSummary?.lifetimePoints ?? 0,
+			surveyPoints: surveyPointsSummary?.currentPoints ?? 0,
 			redeemedPoints: pointsSummary?.redeemedPoints ?? 0,
 			streakDays: statsData?.currentStreak ?? 0,
 			availableSurveys: availableSurveys ?? 0,

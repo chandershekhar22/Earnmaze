@@ -46,6 +46,14 @@ export const EXPLORATION_KIND_LABELS: Record<ExplorationKind, string> = {
  */
 export const EXPLORATION_TRANSACTION_REFERENCE_TYPES: string[] = ['exploration', 'bonus'];
 
+/**
+ * Minimum exploration-bucket balance required to redeem, AND the minimum
+ * survey-bucket balance required alongside it (see the Discover "Redeem now"
+ * button and /api/panelist/exploration-points/redeem) — both buckets must
+ * independently clear this same threshold.
+ */
+export const EXPLORATION_REDEEM_THRESHOLD = 80;
+
 export interface PendingExplorationEntry {
 	id: string;
 	kind: ExplorationKind;
